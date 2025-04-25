@@ -1,35 +1,79 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+const types = {
+  processing: 'processing',
+  types: 'types',
+  aggregations: 'aggregations',
+  modules: 'modules',
+  namespaces: 'namespaces',
+}
 
-Vue.use(Vuex)
+export default function (DiscoveryAPI) {
+  return {
+    namespaced: true,
 
-export default new Vuex.Store({
-  state: {
-    processing: false,
-    types: [],
-    aggregations: [],
-    modules: [],
-    namespaces: [],
-  },
-  mutations: {
-    updateProcessing (state, value = false) {
-      state.processing = value
+    state: {
+      processing: false,
+      types: [],
+      aggregations: [],
+      modules: [],
+      namespaces: [],
     },
 
-    updateTypes (state, types = []) {
-      state.types = types
+    getters: {
+      processing: state => state.processing,
+      types: state => state.types,
+      aggregations: state => state.aggregations,
+      modules: state => state.modules,
+      namespaces: state => state.namespaces,
     },
 
-    updateAggregations (state, aggs = []) {
-      state.aggregations = aggs
+    actions: {
+      async fetchData ({ commit }, { query, modules, namespaces, size }) {
+        commit(types.processing, true)
+
+        return DiscoveryAPI.query({ query, modules, namespaces, size }).then((response = {}) => {
+          if (response) {
+            commit(types.aggregations, response.aggregations)
+          }
+
+          return response
+        }).finally(() => {
+          commit(types.processing, false)
+        })
+      },
+
+      updateTypes ({ commit }, types) {
+        commit(types.types, types)
+      },
+
+      updateModules ({ commit }, modules) {
+        commit(types.modules, modules)
+      },
+
+      updateNamespaces ({ commit }, namespaces) {
+        commit(types.namespaces, namespaces)
+      },
     },
 
-    updateModules (state, modules = []) {
-      state.modules = modules
-    },
+    mutations: {
+      [types.processing] (state, value) {
+        state.processing = value
+      },
 
-    updateNamespaces (state, namespaces = []) {
-      state.namespaces = namespaces
+      [types.types] (state, types) {
+        state.types = types
+      },
+
+      [types.aggregations] (state, aggs) {
+        state.aggregations = aggs
+      },
+
+      [types.modules] (state, modules) {
+        state.modules = modules
+      },
+
+      [types.namespaces] (state, namespaces) {
+        state.namespaces = namespaces
+      },
     },
-  },
-})
+  }
+}

@@ -18,7 +18,7 @@
             :value="query"
             :placeholder="$t('input-placeholder')"
             :autocomplete="'off'"
-            :disabled="$store.state.processing"
+            :disabled="storeProcessing"
             submittable
             @search="onQuerySubmit"
           />
@@ -27,7 +27,7 @@
             class="d-flex align-items-center justify-content-between px-1 mt-1 text-muted"
           >
             <span
-              :class="{ 'discovering': $store.state.processing }"
+              :class="{ 'discovering': storeProcessing }"
             >
               {{ searchDescription }}
             </span>
@@ -41,7 +41,7 @@
           class="results w-100 m-0 mh-100 overflow-auto"
         >
           <div
-            v-if="$store.state.processing || !total.actual"
+            v-if="storeProcessing || !total.actual"
             class="position-absolute d-flex align-items-center justify-content-center w-100 h-100"
             style="opacity: 0.8; z-index: 1; background-color: var(--gray-200);"
           >
@@ -49,7 +49,7 @@
               class="mb-5"
             >
               <b-spinner
-                v-if="$store.state.processing"
+                v-if="storeProcessing"
                 variant="primary"
                 class="p-4"
               />
@@ -112,6 +112,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import Result from './Results'
 import DiscoveryMap from './DiscoveryMap.vue'
 import { components } from '@cortezaproject/corteza-vue'
@@ -158,8 +159,15 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      storeProcessing: 'discovery/processing',
+      storeTypes: 'discovery/types',
+      storeModules: 'discovery/modules',
+      storeNamespaces: 'discovery/namespaces',
+    }),
+
     searchDescription () {
-      if (this.$store.state.processing) {
+      if (this.storeProcessing) {
         return this.$t('discovering')
       }
 
@@ -172,13 +180,13 @@ export default {
   },
 
   watch: {
-    '$store.state.types': {
+    storeTypes: {
       handler () {
         this.getFilteredData()
       },
     },
 
-    '$store.state.modules': {
+    storeModules: {
       handler () {
         if (this.initial) return
         this.pagination.size = this.pagination.limit
@@ -186,7 +194,7 @@ export default {
       },
     },
 
-    '$store.state.namespaces': {
+    storeNamespaces: {
       handler () {
         if (this.initial) return
         this.pagination.size = this.pagination.limit
@@ -203,8 +211,8 @@ export default {
     this.query = query
     this.pagination.size = size
 
-    this.$store.commit('updateModules', Array.isArray(modules) ? modules : [modules])
-    this.$store.commit('updateNamespaces', Array.isArray(namespaces) ? namespaces : [namespaces])
+    this.updateModules(Array.isArray(modules) ? modules : [modules])
+    this.updateNamespaces(Array.isArray(namespaces) ? namespaces : [namespaces])
 
     this.getSearchData()
 
@@ -217,7 +225,7 @@ export default {
     const listElm = document.querySelector('.results')
     listElm.addEventListener('scroll', e => {
       if (listElm.scrollTop + listElm.clientHeight >= listElm.scrollHeight - 10) {
-        if (!this.$store.state.processing && this.total.actual < this.total.all) {
+        if (!this.storeProcessing && this.total.actual < this.total.all) {
           this.getSearchData({ append: true })
         }
       }
@@ -225,16 +233,20 @@ export default {
   },
 
   methods: {
-    getSearchData ({ query = this.query, append = false } = {}) {
-      this.$store.commit('updateProcessing', true)
+    ...mapActions({
+      fetchData: 'discovery/fetchData',
+      updateModules: 'discovery/updateModules',
+      updateNamespaces: 'discovery/updateNamespaces',
+    }),
 
+    getSearchData ({ query = this.query, append = false } = {}) {
       if (!append) {
         this.map.markers = []
       }
 
       // Filters
-      const modules = this.$store.state.modules
-      const namespaces = this.$store.state.namespaces
+      const modules = this.modules
+      const namespaces = this.namespaces
 
       // Pagination
       if (append) {
@@ -245,40 +257,34 @@ export default {
 
       this.updateRouteQuery({ query, modules, namespaces, size })
 
-      this.$DiscoveryAPI.query({ query, modules, namespaces, size })
-        .then((response = {}) => {
-          if (response) {
-            this.hits = (response.hits || [])
+      this.fetchData({ query, modules, namespaces, size }).then((response = {}) => {
+        if (response) {
+          this.hits = (response.hits || [])
 
-            this.total.all = response.total_results || 0
+          this.total.all = response.total_results || 0
 
-            this.getFilteredData()
+          this.getFilteredData()
 
-            this.pagination = {
-              ...this.pagination,
-              from: response.from || 0,
-              size: response.size || 0,
-            }
-
-            this.$store.commit('updateAggregations', response.aggregations)
-
-            this.getMarkers()
+          this.pagination = {
+            ...this.pagination,
+            from: response.from || 0,
+            size: response.size || 0,
           }
-        }).catch(e => {
-          this.toastErrorHandler(this.$t('notification:search.failed'))(e)
-          this.hits = []
-          this.filteredHits.splice(0, this.filteredHits.length)
-        })
-        .finally(() => {
-          this.$store.commit('updateProcessing', false)
-        })
+
+          this.getMarkers()
+        }
+      }).catch(e => {
+        this.toastErrorHandler(this.$t('notification:search.failed'))(e)
+        this.hits = []
+        this.filteredHits.splice(0, this.filteredHits.length)
+      })
     },
 
     getFilteredData () {
       let filteredHits = this.hits
 
-      if (this.$store.state.types.length > 0 && this.hits.length) {
-        filteredHits = this.hits.filter(hit => this.$store.state.types.includes(hit.type))
+      if (this.storeTypes.length > 0 && this.hits.length) {
+        filteredHits = this.hits.filter(hit => this.storeTypes.includes(hit.type))
       }
 
       this.filteredHits.splice(0, this.filteredHits.length, ...filteredHits)
@@ -286,7 +292,7 @@ export default {
     },
 
     onQuerySubmit (query) {
-      if (!this.$store.state.processing) {
+      if (!this.storeProcessing) {
         this.query = query
         this.pagination.size = 250
         this.getSearchData()

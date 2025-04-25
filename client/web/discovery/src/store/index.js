@@ -10,7 +10,7 @@ export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
 
   modules: {
-    discovery,
+    discovery: discovery(Vue.prototype.$DiscoveryAPI),
     notifications: {
       namespaced: true,
       ...cvStore.notifications({

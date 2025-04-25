@@ -7,10 +7,10 @@
       <b-form-checkbox-group
         v-model="types"
         name="types"
-        :disabled="$store.state.processing"
+        :disabled="storeProcessing"
         stacked
         class="mt-1"
-        @change="updateTypes()"
+        @change="updateTypes(types)"
       >
         <b-form-checkbox
           v-for="option in options"
@@ -67,7 +67,7 @@
         v-model="groups[agg.name]"
         stacked
         class="mt-1 ml-2"
-        :disabled="$store.state.processing"
+        :disabled="storeProcessing"
         @change="updateGroup(agg.name)"
       >
         <b-form-checkbox
@@ -95,6 +95,8 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   i18nOptions: {
     namespaces: 'filters',
@@ -111,6 +113,13 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      storeAggregations: 'discovery/aggregations',
+      storeModules: 'discovery/modules',
+      storeNamespaces: 'discovery/namespaces',
+      storeProcessing: 'discovery/processing',
+    }),
+
     options () {
       return [
         { text: this.$t('types.namespace'), value: 'compose:namespace' },
@@ -121,8 +130,8 @@ export default {
     },
 
     aggregationOptions () {
-      let namespaceOptions = this.$store.state.aggregations.find(({ resource }) => resource === 'compose:namespace') || {}
-      let moduleOptions = this.$store.state.aggregations.find(({ resource }) => resource === 'compose:module') || {}
+      let namespaceOptions = this.storeAggregations.find(({ resource }) => resource === 'compose:namespace') || {}
+      let moduleOptions = this.storeAggregations.find(({ resource }) => resource === 'compose:module') || {}
 
       namespaceOptions = {
         resource: 'compose:namespace',
@@ -150,21 +159,26 @@ export default {
   },
 
   watch: {
-    '$store.state.namespaces': {
+    storeNamespaces: {
       immediate: true,
       handler (namespace) {
         this.groups.Namespace = namespace
       },
     },
 
-    '$store.state.modules': {
+    storeModules: {
       immediate: true,
       handler (module) {
         this.groups.Module = module
       },
     },
   },
+
   methods: {
+    ...mapActions({
+      updateTypes: 'discovery/updateTypes',
+    }),
+
     getResourceDisplayName (type, { name, handle, slug }) {
       if (type === 'compose:namespace') {
         return name || slug || 'Unnamed namespace'
@@ -173,17 +187,13 @@ export default {
       }
     },
 
-    updateTypes () {
-      this.$store.commit('updateTypes', this.types)
-    },
-
     updateGroup (name) {
-      this.$store.commit(`update${name}s`, this.groups[name])
+      this.$store.dispatch(`discovery/update${name}s`, this.groups[name])
     },
 
     clearGroup (name) {
       this.groups[name] = []
-      this.$store.commit(`update${name}s`, [])
+      this.updateGroup(name)
     },
   },
 }
