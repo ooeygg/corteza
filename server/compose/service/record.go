@@ -1749,6 +1749,13 @@ func (svc record) Organize(ctx context.Context, namespaceID, moduleID, recordID 
 			return RecordErrNotAllowedToUpdate()
 		}
 
+		old := r.Clone()
+
+		// Dispatch beforeOrganize event
+		if err = svc.eventbus.WaitFor(ctx, event.RecordBeforeOrganize(r, old, m, ns, nil, nil)); err != nil {
+			return err
+		}
+
 		if posField != "" {
 			reorderingRecords = true
 
@@ -1883,6 +1890,11 @@ func (svc record) Organize(ctx context.Context, namespaceID, moduleID, recordID 
 						return err
 					}
 				}
+			}
+
+			// Dispatch afterOrganize event
+			if err = svc.eventbus.WaitFor(ctx, event.RecordAfterOrganize(r, old, m, ns, nil, nil)); err != nil {
+				return err
 			}
 
 			return nil
