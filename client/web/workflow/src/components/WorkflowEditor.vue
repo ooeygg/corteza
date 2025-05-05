@@ -151,11 +151,23 @@
       </div>
 
       <div
-        class="bg-white position-absolute m-2 zoom border border-secondary"
-        style="z-index: 1; width: fit-content;"
+        class="d-flex flex-wrap position-absolute fixed-bottom m-2 gap-2"
+        style="z-index: 1;"
       >
+        <c-button-submit
+          v-if="changeDetected && canUpdateWorkflow"
+          data-test-id="button-save-workflow"
+          variant="primary"
+          :processing="processingSave"
+          :text="$t('editor:detected-changes') + `${canUpdateWorkflow ? $t('editor:click-to-save') : ''}`"
+          :loading-text="$t('editor:saving')"
+          class="rounded py-2 px-3"
+          @submit="saveWorkflow()"
+        />
+
         <div
-          class="d-flex align-items-baseline p-2"
+          class="d-flex align-items-center bg-white border border-secondary py-2 px-3 ml-auto gap-1 rounded"
+          style="z-index: 1;"
         >
           {{ getZoomPercent }}
           <b-button
@@ -186,23 +198,6 @@
             {{ $t('editor:reset') }}
           </b-button>
         </div>
-      </div>
-
-      <div
-        class="d-flex flex-column flex-shrink position-absolute fixed-bottom m-2"
-        style="z-index: 1; width: 20vw;"
-      >
-        <c-button-submit
-          v-if="changeDetected && canUpdateWorkflow"
-          data-test-id="button-save-workflow"
-          variant="primary"
-          block
-          :processing="processingSave"
-          :text="$t('editor:detected-changes') + `${canUpdateWorkflow ? $t('editor:click-to-save') : ''}`"
-          :loading-text="$t('editor:saving')"
-          class="rounded-0 py-2 px-3"
-          @submit="saveWorkflow()"
-        />
       </div>
 
       <div
@@ -585,8 +580,6 @@ export default {
       runAsUser: undefined,
 
       toolbar: undefined,
-
-      edgeConnected: false,
 
       rendering: false,
 
@@ -975,9 +968,20 @@ export default {
               let { properties = [] } = this.eventTypes.find(et => resourceType === et.resourceType && eventType === et.eventType) || {}
 
               if (resourceType) {
-                resourceType = resourceType.split(':').map(s => {
-                  return s[0].toUpperCase() + s.slice(1).toLowerCase()
-                }).join(' ')
+                resourceType = resourceType.split(':')
+                  .map(part => part
+                    .split('-')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' '),
+                  )
+                  .join(' - ')
+              }
+
+              if (eventType) {
+                eventType = eventType.replace('on', '')
+                  .split(/(?=[A-Z])/)
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                  .join(' ')
               }
 
               values.push('<tr class="title"><td><b>Configuration</b></td><td/><td/></tr>')
@@ -1576,8 +1580,6 @@ export default {
         } else if (source.config.kind === 'iterator') {
           this.edges[node.id].node.value = `${outPaths.length === 1 ? 'Body' : 'End'}`
         }
-
-        this.edgeConnected = true
       })
 
       this.graph.addListener(mxEvent.CELL_CONNECTED, (sender, evt) => {
@@ -1691,20 +1693,24 @@ export default {
             }
           }
         },
+
         mouseUp: (sender, evt) => {
           evt.consume()
         },
-        mouseDown: (sender, evt) => {
-          // Prevent click event handling if edge was just connected
-          if (this.edgeConnected) {
-            this.edgeConnected = false
-            return
-          }
 
+        mouseDown: (sender, evt) => {
           const event = evt.evt
           const cell = evt.state?.cell
 
           if (event) {
+            // Check if clicked element is an anchor point
+            const isAnchorPoint = event.target?.href?.baseVal?.includes('connection-point')
+
+            if (isAnchorPoint) {
+              evt.consume()
+              return
+            }
+
             if (mxEvent.isControlDown(event) || (mxClient.IS_MAC && mxEvent.isMetaDown(event))) {
               // Prevent sidebar opening/closing when CTRL(CMD) is pressed while clicking
               if (cell) {
@@ -2633,11 +2639,6 @@ export default {
 .toolbar {
   background-color: var(--sidebar-bg) !important;
   width: 66px;
-}
-
-.zoom {
-  right: 0;
-  bottom: 0;
 }
 
 .component-fade-enter-active, .component-fade-leave-active {
