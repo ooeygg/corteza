@@ -2,7 +2,7 @@
   <div class="header-navigation d-flex flex-wrap align-items-center py-2 px-3 gap-2">
     <div
       class="sidebar-spacer"
-      :class="{ 'expanded': sidebarPinned }"
+      :class="{ 'expanded': sidebarExpanded }"
     />
 
     <h2 class="title mb-0">
@@ -231,7 +231,7 @@ export default {
   },
 
   props: {
-    sidebarPinned: {
+    sidebarExpanded: {
       type: Boolean,
       required: true,
       default: false,

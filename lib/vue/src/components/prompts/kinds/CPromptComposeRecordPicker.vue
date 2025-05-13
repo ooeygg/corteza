@@ -53,9 +53,6 @@ import CInputSelect from '../../input/CInputSelect.vue'
 import { compose, NoID } from '@cortezaproject/corteza-js'
 import { debounce } from 'lodash'
 
-/**
- * @type {import('vue').ComponentOptions}
- */
 export default {
   name: 'CPromptComposeRecordPicker',
 

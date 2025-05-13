@@ -5,7 +5,6 @@
     >
       <c-topbar
         hide-app-selector
-        :sidebar-pinned="pinned"
         :settings="$Settings.get('ui.topbar', {})"
         :labels="{
           appMenu: $t('appMenu'),
@@ -56,7 +55,6 @@
 import { mapActions } from 'vuex'
 import CAppSelector from '../components/CAppSelector'
 import { components } from '@cortezaproject/corteza-vue'
-
 const { CTopbar, CLoaderLogo, CPrompts, CExtendSession, CNotificationSidebar } = components
 
 export default {
@@ -76,8 +74,6 @@ export default {
   data () {
     return {
       loaded: false,
-
-      pinned: false,
     }
   },
 
@@ -127,8 +123,4 @@ export default {
     }),
   },
 }
-
 </script>
-<style lang="scss" scoped>
-
-</style>

@@ -5,7 +5,7 @@
   >
     <header>
       <c-topbar
-        :sidebar-pinned="pinned"
+        :sidebar-expanded="expanded"
         :settings="$Settings.get('ui.topbar', {})"
         :labels="{
           appMenu: $t('appMenu'),
@@ -38,7 +38,6 @@
     <aside>
       <c-sidebar
         :expanded.sync="expanded"
-        :pinned.sync="pinned"
         :icon="icon"
         :logo="logo"
         :disabled-routes="disabledRoutes"
@@ -68,7 +67,7 @@
         <div
           class="sidebar-spacer d-print-none"
           :class="{
-            'expanded': expanded && pinned,
+            'expanded': expanded,
           }"
         />
       </template>
@@ -151,9 +150,7 @@ export default {
 
   data () {
     return {
-      // Sidebar and Topbar
       expanded: false,
-      pinned: false,
 
       toasts: [],
 
@@ -359,7 +356,6 @@ export default {
 
     setDefaultValues () {
       this.expanded = false
-      this.pinned = false
       this.toasts = []
       this.disabledRoutes = []
     },

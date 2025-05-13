@@ -2,7 +2,7 @@
   <div class="d-flex flex-column w-100 vh-100 overflow-hidden">
     <header>
       <c-topbar
-        :sidebar-pinned="pinned"
+        :sidebar-expanded="expanded"
         :settings="$Settings.get('ui.topbar', {})"
         :labels="{
           appMenu: $t('navigation:appMenu'),
@@ -36,7 +36,6 @@
     <aside>
       <c-sidebar
         :expanded.sync="expanded"
-        :pinned.sync="pinned"
         :icon="icon"
         :logo="logo"
         :disabled-routes="disabledRoutes"
@@ -65,7 +64,7 @@
         <div
           class="sidebar-spacer d-print-none"
           :class="{
-            'expanded': expanded && pinned,
+            'expanded': expanded,
           }"
         />
       </template>
@@ -144,7 +143,7 @@ export default {
   data () {
     return {
       expanded: undefined,
-      pinned: undefined,
+
       disabledRoutes: [
         'report.list',
         'report.create',
