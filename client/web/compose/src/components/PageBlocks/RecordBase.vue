@@ -287,6 +287,7 @@ export default {
   methods: {
     ...mapActions({
       findModuleByID: 'module/findByID',
+      updateRecordSet: 'record/updateRecords',
     }),
 
     fetchReferenceModule (moduleID) {
@@ -332,6 +333,7 @@ export default {
       response()
         .then(record => {
           this.referenceRecord = new compose.Record(this.fieldModule, { ...record })
+          this.updateRecordSet(this.referenceRecord)
         })
         .catch(e => {
           if (!axios.isCancel(e)) {

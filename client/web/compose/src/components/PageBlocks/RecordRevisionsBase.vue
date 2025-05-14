@@ -232,7 +232,7 @@ export default {
       }
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID }) {
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
       if (this.module.moduleID === moduleID) {
         this.refresh()
       }

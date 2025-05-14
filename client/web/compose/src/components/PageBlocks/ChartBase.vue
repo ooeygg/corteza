@@ -236,8 +236,8 @@ export default {
       }
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      if (this.filter.moduleID === moduleID && this.page.pageID !== notPageID) {
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      if (this.filter.moduleID === moduleID) {
         this.refresh()
       }
     },

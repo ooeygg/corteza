@@ -96,7 +96,9 @@
     </template>
   </wrap>
 </template>
+
 <script>
+import axios from 'axios'
 import { mapGetters } from 'vuex'
 import base from './base'
 import FieldViewer from 'corteza-webapp-compose/src/components/ModuleFields/Viewer'
@@ -273,8 +275,8 @@ export default {
       return user.name || user.handle || user.email || ''
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      if (this.options.moduleID === moduleID && this.page.pageID !== notPageID) {
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      if (this.options.moduleID === moduleID) {
         this.refresh()
       }
     },
@@ -379,12 +381,14 @@ export default {
       if (module.moduleID !== this.options.moduleID) {
         throw Error('Module incompatible, module mismatch')
       }
+
       if (this.referenceField) {
         if (filter.length) {
           filter += ' AND '
         }
         filter += `${this.referenceField.name} = '${this.reference}' `
       }
+
       const { positionField: sort } = this.options
       const { moduleID, namespaceID } = module
 
@@ -395,12 +399,16 @@ export default {
         sort,
       }
 
-      const { response, cancel } = this.$ComposeAPI
-        .recordListCancellable(params)
+      const { response, cancel } = this.$ComposeAPI.recordListCancellable(params)
       this.abortableRequests.push(cancel)
 
-      return response()
-        .then(({ set }) => set.map(r => Object.freeze(new compose.Record(module, r))))
+      return response().then(({ set = [] }) => {
+        return set.map(r => Object.freeze(new compose.Record(module, r)))
+      }).catch(e => {
+        if (!axios.isCancel(e)) {
+          console.error(e)
+        }
+      })
     },
 
     setDefaultValues () {

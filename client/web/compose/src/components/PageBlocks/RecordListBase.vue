@@ -427,7 +427,8 @@
               >
                 <font-awesome-icon
                   :icon="['fas', 'bars']"
-                  class="handle text-secondary my-1"
+                  class="handle text-secondary mt-2"
+                  style="padding-top: 0.2rem;"
                 />
               </b-td>
 
@@ -438,6 +439,7 @@
               >
                 <b-form-checkbox
                   class="ml-1"
+                  :class="{ 'mt-2': inlineEditing }"
                   :checked="selected.includes(item.id)"
                   @change="onSelectRow($event, item)"
                 />
@@ -1348,6 +1350,7 @@ export default {
   methods: {
     ...mapActions({
       loadPaginationRecords: 'ui/loadPaginationRecords',
+      updateRecordSet: 'record/updateRecords',
     }),
 
     createEvents () {
@@ -1381,11 +1384,7 @@ export default {
       }
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      if (this.page.pageID === notPageID) {
-        return
-      }
-
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
       if (this.recordListModule.moduleID === moduleID) {
         this.refresh(true)
       } else {
@@ -1947,6 +1946,8 @@ export default {
       return response().then(({ set, filter, summaries = {} }) => {
         const records = set.map(r => new compose.Record(r, this.recordListModule))
 
+        this.updateRecordSet(records)
+
         this.filter = { ...this.filter, ...filter }
         this.filter.nextPage = filter.nextPage
         this.filter.prevPage = filter.prevPage
@@ -1990,17 +1991,15 @@ export default {
         ]).then(() => {
           this.items = records.map(r => this.wrapRecord(r))
         })
+      }).catch((e) => {
+        if (!axios.isCancel(e)) {
+          this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
+        }
+      }).finally(() => {
+        setTimeout(() => {
+          this.processing = false
+        }, 300)
       })
-        .catch((e) => {
-          if (!axios.isCancel(e)) {
-            this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
-          }
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.processing = false
-          }, 300)
-        })
     },
 
     getStorageRecordListFilter () {

@@ -277,14 +277,12 @@ export default {
       })
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
       this.options.feeds.forEach((feed) => {
         const { moduleID: feedModuleID } = feed.options
 
-        if (feedModuleID) {
-          if (feedModuleID === moduleID && this.page.pageID !== notPageID) {
-            this.refresh()
-          }
+        if (feedModuleID === moduleID) {
+          this.refresh()
         }
       })
     },

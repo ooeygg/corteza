@@ -109,7 +109,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
 import base from './base'
 import draggable from 'vuedraggable'
@@ -274,6 +274,10 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      updateRecordSet: 'record/updateRecords',
+    }),
+
     createEvents () {
       this.$root.$on('module-records-updated', this.refreshOnRelatedRecordsUpdate)
       this.$root.$on('record-field-change', this.refetchOnPrefilterValueChange)
@@ -392,8 +396,8 @@ export default {
       }
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      if (this.options.moduleID === moduleID && this.page.pageID !== notPageID) {
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      if (this.options.moduleID === moduleID) {
         this.refresh()
       }
     },
@@ -501,29 +505,28 @@ export default {
 
       this.processing = true
 
-      const { response, cancel } = this.$ComposeAPI
-        .recordListCancellable({ namespaceID, moduleID, query, sort })
-
+      const { response, cancel } = this.$ComposeAPI.recordListCancellable({ namespaceID, moduleID, query, sort })
       this.abortableRequests.push(cancel)
 
-      return response()
-        .then(({ set }) => {
-          const fields = [this.labelField, this.descriptionField].filter(f => !!f)
-          this.records = set.map(r => Object.freeze(new compose.Record(this.roModule, r)))
+      return response().then(({ set }) => {
+        const fields = [this.labelField, this.descriptionField].filter(f => !!f)
+        this.records = set.map(r => Object.freeze(new compose.Record(this.roModule, r)))
 
-          return Promise.all([
-            this.fetchUsers(fields, this.records),
-            this.fetchRecords(namespaceID, fields, this.records),
-          ])
-        }).catch(e => {
-          if (!axios.isCancel(e)) {
-            console.error(e)
-          }
-        }).finally(() => {
-          setTimeout(() => {
-            this.processing = false
-          }, 300)
-        })
+        this.updateRecordSet(this.records)
+
+        return Promise.all([
+          this.fetchUsers(fields, this.records),
+          this.fetchRecords(namespaceID, fields, this.records),
+        ])
+      }).catch(e => {
+        if (!axios.isCancel(e)) {
+          console.error(e)
+        }
+      }).finally(() => {
+        setTimeout(() => {
+          this.processing = false
+        }, 300)
+      })
     },
 
     handleRecordClick (record) {

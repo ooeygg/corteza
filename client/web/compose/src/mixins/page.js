@@ -66,6 +66,7 @@ export default {
 
   methods: {
     ...mapActions({
+      clearRecordSet: 'record/clearSet',
       updatePageSet: 'page/updateSet',
     }),
 
@@ -113,9 +114,6 @@ export default {
     },
 
     async determineLayout ({ pageLayoutID, redirectOnFail = true } = {}) {
-      // Clear stored records so they can be refetched with latest values
-      this.clearRecordSet()
-
       if (this.isRecordPage) {
         this.resetErrors()
       }
@@ -174,6 +172,8 @@ export default {
     },
 
     async prepareBlocks () {
+      this.blocks = undefined
+
       const tempBlocks = []
       const { blocks = [] } = this.layout || {}
 
@@ -187,8 +187,6 @@ export default {
       if (this.isRecordPage) {
         await new Promise(resolve => setTimeout(resolve, 300))
       }
-
-      this.blocks = undefined
 
       return this.evaluateBlocks(tempBlocks, this.isRecordPage)
     },

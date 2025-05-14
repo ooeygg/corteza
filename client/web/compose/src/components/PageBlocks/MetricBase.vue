@@ -278,12 +278,8 @@ export default {
       })
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      if (this.page.pageID === notPageID) {
-        return
-      }
-
-      const metrics = this.options.metrics
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      const { metrics = [] } = this.options || {}
 
       const hasMatchingModule = metrics.some((m) => {
         return m.moduleID === moduleID

@@ -510,6 +510,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import { isEqual } from 'lodash'
 import { mapGetters, mapActions } from 'vuex'
 import draggable from 'vuedraggable'
@@ -915,13 +916,16 @@ export default {
           }
 
           // Count existing records to see what we can do with this module
-          const { response, cancel } = this.$ComposeAPI
-            .recordListCancellable({ moduleID, namespaceID, limit: 1 })
-
+          const { response, cancel } = this.$ComposeAPI.recordListCancellable({ moduleID, namespaceID, limit: 1 })
           this.abortableRequests.push(cancel)
 
-          return response()
-            .then(({ set }) => { this.hasRecords = (set.length > 0) })
+          return response().then(({ set = [] }) => {
+            this.hasRecords = set.length > 0
+          }).catch(e => {
+            if (!axios.isCancel(e)) {
+              console.error(e)
+            }
+          })
         }).catch(e => {
           this.toastErrorHandler(this.$t('notification:module.loadFailed'))(e)
           this.$router.push({ name: 'admin.modules' })

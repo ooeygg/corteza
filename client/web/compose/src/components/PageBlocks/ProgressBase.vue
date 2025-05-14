@@ -154,8 +154,12 @@ export default {
         })
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      if (this.options.value.moduleID === moduleID && this.page.pageID !== notPageID) {
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      const { value = {} } = this.options || {}
+
+      const hasMatchingModule = value.moduleID === moduleID
+
+      if (hasMatchingModule) {
         this.refresh()
       }
     },

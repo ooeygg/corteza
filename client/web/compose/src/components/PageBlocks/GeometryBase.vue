@@ -162,12 +162,12 @@ export default {
       }
     },
 
-    refreshOnRelatedRecordsUpdate ({ moduleID, notPageID }) {
-      this.options.feeds.forEach((feed) => {
-        if (feed.options.moduleID === moduleID && this.page.pageID !== notPageID) {
-          this.refresh()
-        }
-      })
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      const hasMatchingModule = this.options.feeds.some(({ options = {} } = {}) => options.moduleID === moduleID)
+
+      if (hasMatchingModule) {
+        this.refresh()
+      }
     },
 
     loadEvents () {

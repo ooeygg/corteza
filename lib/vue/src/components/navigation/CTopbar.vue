@@ -404,7 +404,8 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
   min-height: $nav-user-icon-size;
   padding-left: 47px;
 
-  .vue-portal-target {
+  > * {
+    padding: 0.25rem 0;
     display: -webkit-box; /* For Safari and old versions of Chrome */
     display: -ms-flexbox; /* For old versions of IE */
     -webkit-box-orient: vertical; /* For Safari and old versions of Chrome */
@@ -418,7 +419,7 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
 .tools-wrapper {
   flex-grow: 1;
 
-  .vue-portal-target {
+  > * {
     display: flex;
     justify-content: end;
     align-items: center;
