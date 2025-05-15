@@ -17,7 +17,7 @@ export default {
 
   data () {
     return {
-      defaultBlacklistedFields: ['deleted', 'created', 'updated', 'security'],
+      defaultBlacklistedFields: ['deleted', 'created', 'updated', 'security', 'catch_all'],
     }
   },
 

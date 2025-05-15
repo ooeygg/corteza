@@ -37,7 +37,7 @@
       </c-sidebar>
     </aside>
 
-    <main class="d-inline-flex h-100">
+    <main class="d-inline-flex overflow-hidden">
       <!--
         Content spacer
         Large and xl screens should push in content when the nav is expanded
@@ -51,7 +51,9 @@
         />
       </template>
 
-      <search />
+      <div class="flex-grow-1 overflow-hidden">
+        <search />
+      </div>
     </main>
 
     <c-extend-session

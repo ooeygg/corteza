@@ -14,6 +14,7 @@ import {
   faBellSlash,
   faBell as faBellSolid,
   faEllipsisV,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons'
 import {
   faQuestionCircle,
@@ -41,4 +42,5 @@ library.add(
   faEllipsisV,
   faTrashAlt,
   faGripLines,
+  faCheck,
 )

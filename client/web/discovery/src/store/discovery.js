@@ -1,6 +1,6 @@
 const storeTypes = {
   processing: 'processing',
-  types: 'types',
+  resourceTypes: 'resourceTypes',
   aggregations: 'aggregations',
   modules: 'modules',
   namespaces: 'namespaces',
@@ -12,9 +12,7 @@ export default function (DiscoveryAPI) {
 
     state: {
       processing: false,
-      types: [
-        'compose:namespace',
-        'compose:module',
+      resourceTypes: [
         'compose:record',
       ],
       aggregations: [],
@@ -24,17 +22,17 @@ export default function (DiscoveryAPI) {
 
     getters: {
       processing: state => state.processing,
-      types: state => state.types,
+      resourceTypes: state => state.resourceTypes,
       aggregations: state => state.aggregations,
       modules: state => state.modules,
       namespaces: state => state.namespaces,
     },
 
     actions: {
-      async fetchData ({ commit }, { query, modules, namespaces, size }) {
+      async fetchData ({ commit, state }, { query, modules = state.modules, namespaces = state.namespaces, size }) {
         commit(storeTypes.processing, true)
 
-        return DiscoveryAPI.query({ query, modules, namespaces, size }).then((response = {}) => {
+        return DiscoveryAPI.query({ query, modules, namespaces, size, resourceTypes: state.resourceTypes }).then((response = {}) => {
           if (response) {
             commit(storeTypes.aggregations, response.aggregations)
           }
@@ -45,8 +43,8 @@ export default function (DiscoveryAPI) {
         })
       },
 
-      updateTypes ({ commit }, types) {
-        commit(storeTypes.types, types)
+      updateResourceTypes ({ commit }, resourceTypes) {
+        commit(storeTypes.resourceTypes, resourceTypes)
       },
 
       updateModules ({ commit }, modules) {
@@ -63,8 +61,8 @@ export default function (DiscoveryAPI) {
         state.processing = value
       },
 
-      [storeTypes.types] (state, types) {
-        state.types = types
+      [storeTypes.resourceTypes] (state, resourceTypes) {
+        state.resourceTypes = resourceTypes
       },
 
       [storeTypes.aggregations] (state, aggregations) {

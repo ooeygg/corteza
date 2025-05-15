@@ -37,11 +37,11 @@ export default {
 
   computed: {
     component () {
-      let { type } = this.hit
-      type = type.split(':')[1]
+      const { type } = this.hit
+      const resourceType = type.split(':')[1]
 
       const keys = Object.keys(Results)
-      const i = keys.map(c => c.toLocaleLowerCase()).findIndex(c => c === type)
+      const i = keys.map(c => c.toLocaleLowerCase()).findIndex(c => c === resourceType)
 
       return Results[keys[i]]
     },

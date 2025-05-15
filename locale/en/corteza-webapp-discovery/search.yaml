@@ -1,6 +1,6 @@
 notification:
   search-error: There was problem getting search result
-input-placeholder: Enter search text, use "text" for exact match
+input-placeholder: Enter search query
 card:
   button-text: Show more
   type: Type
@@ -16,3 +16,5 @@ tooltip:
 range: Showing {{actual}} of {{all}} results
 discovering: Discovering
 no-results: No results
+show-more: Show more
+loading-more: Loading more

@@ -5,21 +5,21 @@
         {{ $t('types.title') }}
       </h6>
       <b-form-checkbox-group
-        :checked="storeTypes"
-        name="types"
+        :checked="storeResourceTypes"
+        name="type"
         :disabled="storeProcessing"
         stacked
         class="mt-1"
-        @change="updateTypes"
+        @change="updateResourceTypes"
       >
         <b-form-checkbox
           v-for="option in options"
           :key="option.value"
           :value="option.value"
-          class="ml-2"
+          class="pointer ml-2"
         >
           <b-avatar
-            :icon="getFilterIcon(option.value)"
+            :icon="option.icon"
             size="sm"
             class="align-center bg-light text-dark"
           />
@@ -112,7 +112,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      storeTypes: 'discovery/types',
+      storeResourceTypes: 'discovery/resourceTypes',
       storeAggregations: 'discovery/aggregations',
       storeModules: 'discovery/modules',
       storeNamespaces: 'discovery/namespaces',
@@ -121,9 +121,9 @@ export default {
 
     options () {
       return [
-        { text: this.$t('types.namespace'), value: 'compose:namespace' },
-        { text: this.$t('types.module'), value: 'compose:module' },
-        { text: this.$t('types.record'), value: 'compose:record' },
+        { text: this.$t('types.namespace'), value: 'compose:namespace', icon: 'code-square' },
+        { text: this.$t('types.module'), value: 'compose:module', icon: 'list-ul' },
+        { text: this.$t('types.record'), value: 'compose:record', icon: 'file-earmark-text' },
       ]
     },
 
@@ -174,7 +174,7 @@ export default {
 
   methods: {
     ...mapActions({
-      updateTypes: 'discovery/updateTypes',
+      updateResourceTypes: 'discovery/updateResourceTypes',
     }),
 
     getResourceDisplayName (type, { name, handle, slug }) {
@@ -192,20 +192,6 @@ export default {
     clearGroup (name) {
       this.groups[name] = []
       this.updateGroup(name)
-    },
-
-    getFilterIcon (type) {
-      if (type === 'compose:namespace') {
-        return 'code-square'
-      } else if (type === 'compose:module') {
-        return 'file-earmark-text'
-      } else if (type === 'compose:record') {
-        return 'file-earmark-text'
-      } else if (type === 'system:user') {
-        return 'person'
-      }
-
-      return 'question-circle'
     },
   },
 }

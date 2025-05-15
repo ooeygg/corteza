@@ -1,7 +1,7 @@
 <template>
   <b-container
     fluid
-    class="h-100 mh-100 p-0"
+    class="h-100 mh-100 p-0 d-flex flex-column"
   >
     <split
       direction="horizontal"
@@ -11,9 +11,9 @@
       <split-area
         :size="map.show ? 70 : 100"
         :min-size="300"
-        class="overflow-hidden"
+        class="d-flex flex-column"
       >
-        <div class="px-3">
+        <div class="px-3 flex-shrink-0">
           <b-form-group class="mb-0">
             <c-input-search
               :value="query"
@@ -63,13 +63,10 @@
           </div>
         </div>
 
-        <div
-          class="results d-flex flex-wrap gap-3 p-3 w-100 h-100 m-0 mh-100 overflow-auto position-relative"
-          :class="{ 'list-view': viewMode === 'list' }"
-        >
+        <div class="d-flex flex-column flex-fill overflow-hidden">
           <div
-            v-if="storeProcessing || !total.actual"
-            class="position-absolute d-flex align-items-center justify-content-center w-100 h-50"
+            v-if="(storeProcessing || !total.actual) && !loadingMore"
+            class="d-flex align-items-center justify-content-center w-100 my-5"
             style="opacity: 0.8; z-index: 1; background-color: var(--light);"
           >
             <h5 class="mb-0">
@@ -87,36 +84,60 @@
           </div>
 
           <div
-            v-for="(hit, i) in filteredHits"
-            :key="i"
-            class="result-item w-100"
-            :class="{ 'grid-view': viewMode === 'grid' }"
+            v-else
+            class="results d-flex flex-wrap gap-3 p-3 overflow-auto"
+            :class="{ 'list-view': viewMode === 'list' }"
           >
-            <result
-              :id="hit.value.recordID || hit.value.moduleID"
-              :index="i"
-              :hit="hit"
-              :show-map="map.show"
-              :class="{ 'border-primary border shadow': map.clickedMarker && [hit.value.recordID, hit.value.moduleID].includes(map.clickedMarker) }"
-              @hover="map.hoverIndex = $event"
-            />
-          </div>
-        </div>
+            <div
+              v-for="(hit, i) in hits"
+              :key="i"
+              class="result-item w-100"
+              :class="{ 'grid-view': viewMode === 'grid' }"
+            >
+              <result
+                :id="hit.value.recordID || hit.value.moduleID"
+                :index="i"
+                :hit="hit"
+                :show-map="map.show"
+                :class="{ 'border-primary border shadow': map.clickedMarker && [hit.value.recordID, hit.value.moduleID].includes(map.clickedMarker) }"
+                @hover="map.hoverIndex = $event"
+              />
+            </div>
 
-        <div
-          class="position-fixed map-button"
-        >
-          <b-button
-            v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.map'), container: '#body' }"
-            variant="warning"
-            class="rounded-circle p-3"
-            @click="toggleMap"
+            <div
+              v-if="total.actual > 0 && total.actual < total.all"
+              class="w-100 text-center py-3"
+            >
+              <b-button
+                variant="primary"
+                :disabled="loadingMore"
+                @click="getSearchData({ append: true })"
+              >
+                <b-spinner
+                  v-if="loadingMore"
+                  small
+                  class="mr-2"
+                />
+                {{ loadingMore ? $t('search:loading-more') : $t('search:show-more') }}
+              </b-button>
+            </div>
+          </div>
+
+          <div
+            class="position-fixed map-button"
           >
-            <font-awesome-icon
-              :icon="['fas', 'map-marked-alt']"
-              class="h5 mb-0"
-            />
-          </b-button>
+            <b-button
+              v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.map'), container: '#body' }"
+              variant="warning"
+              class="rounded-circle p-3"
+              @click="toggleMap"
+            >
+              <font-awesome-icon
+                :icon="['fas', 'map-marked-alt']"
+                class="h5 mb-0"
+              />
+            </b-button>
+          </div>
         </div>
       </split-area>
 
@@ -159,10 +180,11 @@ export default {
 
   data () {
     return {
+      loadingMore: false,
+
       query: '',
 
       hits: [],
-      filteredHits: [],
 
       pagination: {
         limit: 50,
@@ -191,7 +213,7 @@ export default {
   computed: {
     ...mapGetters({
       storeProcessing: 'discovery/processing',
-      storeTypes: 'discovery/types',
+      storeResourceTypes: 'discovery/resourceTypes',
       storeModules: 'discovery/modules',
       storeNamespaces: 'discovery/namespaces',
     }),
@@ -210,9 +232,11 @@ export default {
   },
 
   watch: {
-    storeTypes: {
+    storeResourceTypes: {
       handler () {
-        this.getFilteredData()
+        if (this.initial) return
+        this.pagination.size = this.pagination.limit
+        this.getSearchData()
       },
     },
 
@@ -233,16 +257,25 @@ export default {
     },
   },
 
-  created () {
+  mounted () {
     this.initial = true
 
-    const { query = '', modules = [], namespaces = [], size = 50 } = this.$route.query
+    const { query = '', modules, namespaces, resourceTypes, size = 50 } = this.$route.query
 
     this.query = query
     this.pagination.size = size
 
-    this.updateNamespaces(Array.isArray(namespaces) ? namespaces : [namespaces])
-    this.updateModules(Array.isArray(modules) ? modules : [modules])
+    if (namespaces) {
+      this.updateNamespaces(Array.isArray(namespaces) ? namespaces : [namespaces])
+    }
+
+    if (modules) {
+      this.updateModules(Array.isArray(modules) ? modules : [modules])
+    }
+
+    if (resourceTypes) {
+      this.updateResourceTypes(Array.isArray(resourceTypes) ? resourceTypes : [resourceTypes])
+    }
 
     this.getSearchData()
 
@@ -251,47 +284,40 @@ export default {
     }, 1000)
   },
 
-  mounted () {
-    const listElm = document.querySelector('.results')
-    listElm.addEventListener('scroll', e => {
-      if (listElm.scrollTop + listElm.clientHeight >= listElm.scrollHeight - 10) {
-        if (!this.storeProcessing && this.total.actual < this.total.all) {
-          this.getSearchData({ append: true })
-        }
-      }
-    })
-  },
-
   methods: {
     ...mapActions({
       fetchData: 'discovery/fetchData',
       updateModules: 'discovery/updateModules',
       updateNamespaces: 'discovery/updateNamespaces',
+      updateResourceTypes: 'discovery/updateResourceTypes',
     }),
 
     getSearchData ({ query = this.query, append = false } = {}) {
       if (append) {
         this.pagination.size += this.pagination.limit
+        this.loadingMore = true
       } else {
         this.map.markers = []
         this.hits = []
-        this.filteredHits = []
       }
 
       const modules = this.storeModules
       const namespaces = this.storeNamespaces
+      const resourceTypes = this.storeResourceTypes
 
       const { size } = this.pagination
 
-      this.updateRouteQuery({ query, modules, namespaces, size })
+      this.updateRouteQuery({ query, modules, namespaces, resourceTypes, size })
 
       this.fetchData({ query, modules, namespaces, size }).then((response = {}) => {
         if (response) {
-          this.hits = (response.hits || [])
-
+          if (append) {
+            this.hits = [...this.hits, ...(response.hits || [])]
+          } else {
+            this.hits = response.hits || []
+          }
           this.total.all = response.total_results || 0
-
-          this.getFilteredData()
+          this.total.actual = this.hits.length
 
           this.pagination = {
             ...this.pagination,
@@ -304,21 +330,9 @@ export default {
       }).catch(e => {
         this.toastErrorHandler(this.$t('notification:search.failed'))(e)
         this.hits = []
-        this.filteredHits = []
+      }).finally(() => {
+        this.loadingMore = false
       })
-    },
-
-    getFilteredData () {
-      let filteredHits = this.hits
-
-      if (this.storeTypes.length > 0 && this.hits.length) {
-        filteredHits = this.hits.filter(hit => this.storeTypes.includes(hit.type))
-      } else {
-        filteredHits = []
-      }
-
-      this.filteredHits.splice(0, this.filteredHits.length, ...filteredHits)
-      this.total.actual = this.filteredHits.length
     },
 
     onQuerySubmit (query) {
@@ -332,7 +346,7 @@ export default {
     getMarkers () {
       const markers = []
 
-      this.filteredHits.forEach(({ type, value }) => {
+      this.hits.forEach(({ type, value }) => {
         if (type === 'compose:record' && Array.isArray(value.values)) {
           const id = value.recordID
           value.values.forEach(({ value = [] }) => {
@@ -370,9 +384,9 @@ export default {
       this.map.show = !this.map.show
     },
 
-    updateRouteQuery ({ query = undefined, modules = [], namespaces = [], size = 0 }) {
-      if (JSON.stringify(this.$route.query) !== JSON.stringify({ query, modules, namespaces })) {
-        this.$router.push({ query: { query: query || undefined, modules, namespaces, size } })
+    updateRouteQuery ({ query = undefined, modules = [], namespaces = [], resourceTypes = [], size = 0 }) {
+      if (JSON.stringify(this.$route.query) !== JSON.stringify({ query, modules, namespaces, resourceTypes, size })) {
+        this.$router.push({ query: { query: query || undefined, modules, namespaces, resourceTypes, size } })
       }
     },
   },
@@ -418,5 +432,11 @@ export default {
   .result-item {
     max-width: 100%;
   }
+}
+
+.results {
+  flex: 1;
+  min-height: 0;
+  position: relative;
 }
 </style>
