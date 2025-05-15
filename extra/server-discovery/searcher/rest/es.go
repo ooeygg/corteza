@@ -199,10 +199,21 @@ type (
 		from          int
 		size          int
 
+		resourceType []string
+
 		aggOnly  bool
 		mAggOnly bool
 
 		allowedRoles map[interface{}]bool
+	}
+)
+
+var (
+	rtIndexMapping = map[string]string{
+		"compose:module":    "compose-modules",
+		"compose:record":    "compose-records-*",
+		"compose:namespace": "compose-namespaces",
+		"system:user":       "system-users",
 	}
 )
 
@@ -437,6 +448,19 @@ func esSearch(ctx context.Context, log *zap.Logger, esc *elasticsearch.Client, p
 	page.From = p.from
 	page.Size = p.size
 
+	// In case of requesting specific resource types, use only the appropriate indexes
+	indexes := []string{}
+	if len(p.resourceType) > 0 {
+		for _, rt := range p.resourceType {
+			if _, ok := rtIndexMapping[rt]; !ok {
+				err = fmt.Errorf("invalid resource type: %s", rt)
+				return
+			}
+
+			indexes = append(indexes, fmt.Sprintf("%s%s", index.Prefix.Index.Value, rtIndexMapping[rt]))
+		}
+	}
+
 	sReqArgs := []func(*esapi.SearchRequest){
 		esc.Search.WithContext(ctx),
 		esc.Search.WithBody(&buf),
@@ -444,6 +468,7 @@ func esSearch(ctx context.Context, log *zap.Logger, esc *elasticsearch.Client, p
 		// esc.Search.WithScroll(),
 		esc.Search.WithSize(p.size),
 		esc.Search.WithFrom(p.from),
+		esc.Search.WithIndex(indexes...),
 		// esc.Search.WithExplain(true), // debug
 	}
 
