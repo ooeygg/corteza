@@ -11,25 +11,12 @@
     header-class="p-3 pb-0 border-bottom-0"
     @ok="onSave()"
   >
-    <b-tabs
-      v-if="modal"
-      v-model="currentTabIndex"
-      card
-    >
-      <b-tab
-        v-for="scope in scopeOptions"
-        :key="scope.value"
-        :title="scope.title"
-        class="mh-tab"
-      >
-        <field-picker
-          :module="module"
-          :fields.sync="currentFields"
-          disable-system-fields
-          style="height: 70vh;"
-        />
-      </b-tab>
-    </b-tabs>
+    <field-picker
+      :module="module"
+      :fields.sync="currentFields"
+      disable-system-fields
+      style="height: 90vh;"
+    />
   </b-modal>
 </template>
 
