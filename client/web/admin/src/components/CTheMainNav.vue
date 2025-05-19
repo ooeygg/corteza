@@ -17,7 +17,7 @@
       <c-sidebar-nav-items
         :items="grp.items"
         default-route-name="dashboard"
-        class="overflow-auto h-100"
+        class="overflow-auto h-100 ml-2"
       />
     </b-list-group>
   </div>
