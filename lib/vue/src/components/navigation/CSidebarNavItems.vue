@@ -12,10 +12,10 @@
         <b-button
           variant="link"
           active-class="nav-active"
-          exact-active-class="nav-active"
+          exact-active-class="nav-exact-active"
           :title="page.title"
           :to="{ name: page.name || defaultRouteName, params }"
-          class="nav-item d-flex align-items-center text-decoration-none flex-grow-1 text-left p-0 py-1 gap-1"
+          class="nav-item d-flex align-items-center text-decoration-none rounded flex-grow-1 text-left pl-1 py-1 gap-1"
           @click="onItemClick()"
         >
           <template v-if="page.icon">
@@ -161,8 +161,9 @@ export default {
 
 <style scoped lang="scss">
 .nav-sidebar {
-  // Navigation item base styles
   .nav-item {
+    transition: background-color 0.25s ease-in-out;
+
     .icon {
       color: var(--black);
       transition: color 0.25s;
@@ -176,18 +177,10 @@ export default {
     }
 
     &:hover {
-      .icon {
-        color: var(--primary);
-      }
-
-      .title {
-        color: var(--primary);
-      }
+      background-color: var(--light);
     }
   }
 
-
-  // Active state
   .nav-active {
     .icon {
       color: var(--primary);
@@ -198,6 +191,7 @@ export default {
       color: var(--primary);
     }
   }
+
 }
 </style>
 
