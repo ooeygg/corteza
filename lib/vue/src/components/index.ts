@@ -26,6 +26,7 @@ export {
   CButtonSubmit,
   CInputSelect,
   CInputRole,
+  CInputUser,
 } from './input'
 
 export {
