@@ -1,13 +1,12 @@
 <template>
   <wrap
-    v-if="recordListModule"
     v-bind="$props"
     :scrollable-body="false"
     v-on="$listeners"
     @refreshBlock="refresh(true, false)"
   >
     <template
-      v-if="isFederated"
+      v-if="recordListModule && isFederated"
       #title-badge
     >
       <b-badge
@@ -20,6 +19,7 @@
 
     <template #toolbar>
       <b-container
+        v-if="recordListModule"
         ref="toolbar"
         fluid
         class="d-flex flex-column gap-2 p-3 d-print-none"
@@ -318,6 +318,7 @@
 
     <template #default>
       <div
+        v-if="recordListModule"
         class="d-flex position-relative h-100"
         :class="{ 'overflow-hidden': !items.length || isProcessing }"
       >
@@ -696,10 +697,17 @@
           </div>
         </b-table-simple>
       </div>
+
+      <label
+        v-else
+        class="text-primary p-3"
+      >
+        {{ $t('recordList.noModule') }}
+      </label>
     </template>
 
     <template
-      v-if="showFooter"
+      v-if="recordListModule && showFooter"
       #footer
     >
       <div
@@ -1323,8 +1331,10 @@ export default {
     options: {
       deep: true,
       handler () {
-        this.prepRecordList()
-        this.refresh(true)
+        if (!this.loadingRecord) {
+          this.prepRecordList()
+          this.refresh(true)
+        }
       },
     },
 
@@ -1607,9 +1617,9 @@ export default {
 
       // Legacy support for linkToParent
       if (this.isOnRecordPage && this.options.linkToParent) {
-        if (this.options.refField) {
-          this.options.linkToParent = false
-        } else {
+        this.options.linkToParent = false
+
+        if (!this.options.refField) {
           this.options.refField = (this.recordListModule.fields.find(f => f.kind === 'Record' && f.options.moduleID === this.page.moduleID) || {}).name
         }
       }

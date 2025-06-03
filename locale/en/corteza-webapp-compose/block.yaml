@@ -321,6 +321,7 @@ record:
   recordSelectorCanAddRecord: Can add records via record selector
   recordSelectorAddRecordDisplayOption: When adding a record via record selector
 recordList:
+  noModule: No module selected
   addRecord: Add
   cancelSelection: Cancel
   customFilter: Custom filter

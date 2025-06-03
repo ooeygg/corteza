@@ -355,13 +355,17 @@ export default {
       }
 
       if (this.options.filter) {
-        return evaluatePrefilter(this.options.filter, {
-          record: this.record,
-          user: this.$auth.user || {},
-          recordID: (this.record || {}).recordID || NoID,
-          ownerID: (this.record || {}).ownedBy || NoID,
-          userID: (this.$auth.user || {}).userID || NoID,
-        })
+        try {
+          return evaluatePrefilter(this.options.filter, {
+            record: this.record,
+            user: this.$auth.user || {},
+            recordID: (this.record || {}).recordID || NoID,
+            ownerID: (this.record || {}).ownedBy || NoID,
+            userID: (this.$auth.user || {}).userID || NoID,
+          })
+        } catch (e) {
+          return e
+        }
       }
 
       return ''
