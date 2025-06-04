@@ -25,7 +25,7 @@ export default (options = {}) => {
     }),
 
     async created () {
-      this.$i18n.i18next.on('loaded', () => {
+      this.$i18n.i18next.on('initialized', () => {
         this.i18nLoaded = true
       })
 
