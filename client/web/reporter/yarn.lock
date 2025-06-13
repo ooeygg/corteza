@@ -961,10 +961,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@cortezaproject/corteza-js@^2024.9.3-dev.5":
-  version "2024.9.3-dev.5"
-  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-js/-/corteza-js-2024.9.3-dev.5.tgz#2b541c14b8e10edf7954efb26d7da9f4d0b4c0bb"
-  integrity sha512-aCAZpf94gz3VcuD7t4ydq2AGKQHr7Mpd8IRBOJseUF8AegRN4IDZhcouFTwTixIGyshVhcPYoYPbODBFNTkFAA==
+"@cortezaproject/corteza-js@^2024.9.3-dev.6":
+  version "2024.9.3-dev.6"
+  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-js/-/corteza-js-2024.9.3-dev.6.tgz#23a3e497b8c8d9d362ef005fdbb8807603858d6d"
+  integrity sha512-phEYVAuOYSn2mvaztVjdhLRqreRpRgMVYntQx7AlnUvzObtprfFLjlAYDsz3XMjgMOSneL5r3t10H2T4Bn4JLA==
   dependencies:
     axios "^1.8.3"
     hex-rgb "^5.0.0"
@@ -975,12 +975,12 @@
     numeral "^2.0.6"
     pino "^9.6.0"
 
-"@cortezaproject/corteza-vue@^2024.9.3-dev.5":
-  version "2024.9.3-dev.5"
-  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-vue/-/corteza-vue-2024.9.3-dev.5.tgz#81948ced98c70cf6b68457a48f71a0fc23755674"
-  integrity sha512-3HJhUkuzvoHpPRfRu7kjUDIEHeA8VzpxeQ63+ReNZp1fgY/hh3/vKz1TZ4u3b+H0PJQry3n+qxcVMMcqlbvglQ==
+"@cortezaproject/corteza-vue@^2024.9.3-dev.6":
+  version "2024.9.3-dev.6"
+  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-vue/-/corteza-vue-2024.9.3-dev.6.tgz#b377facd2a14294063d7ba00be094d9641a42a84"
+  integrity sha512-fv90x6ozZ6wXIkgRYEG2di1EX6FORSCjlBnobAINZul+pSqjEGrB8daYAaKY3AFN7aJQa0IUbhQU5rYoa0QLfg==
   dependencies:
-    "@cortezaproject/corteza-js" "^2024.9.3-dev.5"
+    "@cortezaproject/corteza-js" "^2024.9.3-dev.6"
     "@fortawesome/fontawesome-svg-core" "^6.7.2"
     "@fortawesome/free-solid-svg-icons" "^6.7.2"
     "@fortawesome/vue-fontawesome" "^2.0.10"
@@ -4589,7 +4589,7 @@ escodegen@^2.0.0:
     source-map "~0.6.1"
 
 "eslint-config-corteza-client@file:../../../lib/eslint-client":
-  version "2024.9.3-dev.5"
+  version "2024.9.3-dev.6"
 
 eslint-config-standard@^17.0.0:
   version "17.1.0"
