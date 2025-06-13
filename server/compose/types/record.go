@@ -185,6 +185,13 @@ func (r *Record) GetModule() *Module {
 
 func (r Record) Clone() *Record {
 	c := &r
+	c.ID = 0
+	c.CreatedAt = time.Time{}
+	c.UpdatedAt = nil
+	c.DeletedAt = nil
+	c.CreatedBy = 0
+	c.UpdatedBy = 0
+	c.DeletedBy = 0
 	c.Values = r.Values.Clone()
 	return c
 }

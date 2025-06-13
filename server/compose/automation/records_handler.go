@@ -436,3 +436,17 @@ func wrapRecordValueErrorSet(rr *types.Record, res *types.RecordValueErrorSet, e
 
 	return rr, errors.New(ss)
 }
+
+func (h recordsHandler) clone(ctx context.Context, args *recordsCloneArgs) (*recordsCloneResults, error) {
+	results := &recordsCloneResults{}
+
+	// Get the source record
+	rec, err := h.lookupRecord(ctx, args)
+	if err != nil {
+		return nil, err
+	}
+
+	// Clone the record - Record.Clone() already handles clearing IDs and timestamps
+	results.Record = rec.Clone()
+	return results, nil
+}
