@@ -1006,14 +1006,18 @@ export default {
                 const getConstraintNameLabel = (name) => {
                   return name
                     .split('.')
-                    .map(s => s[0].toUpperCase() + s.slice(1).toLowerCase())
+                    .map(s => {
+                      const first = s[0] || ''
+                      const rest = s.slice(1) || ''
+                      return first.toUpperCase() + rest.toLowerCase()
+                    })
                     .join(' ')
                 }
 
                 constraints = [
                   '<tr class="title"><td><b>Constraints</b></td><td/><td/></tr>',
                   ...constraints.map(({ name = '', op = '', values = '' }) => {
-                    return `<tr><td><samp>${getConstraintNameLabel(name)}</var></td><td><samp>${op}</samp></td><td><code>${encodeHTML(values.join(' or '))}</code></td></tr>`
+                    return `<tr><td><samp>${getConstraintNameLabel(name) || eventType}</var></td><td><samp>${op}</samp></td><td><code>${encodeHTML(values.join(' or '))}</code></td></tr>`
                   }),
                 ]
               } else {
