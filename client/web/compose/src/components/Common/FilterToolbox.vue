@@ -37,7 +37,10 @@
             />
           </b-td>
 
-          <b-td v-if="getField(filter.name)">
+          <b-td
+            v-if="getField(filter.name)"
+            :key="getField(filter.name)?.fieldID"
+          >
             <template v-if="isBetweenOperator(filter.operator)">
               <template v-if="getField(`${filter.name}-start`)">
                 <field-editor
