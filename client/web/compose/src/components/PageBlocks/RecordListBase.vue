@@ -115,9 +115,10 @@
             class="flex-fill"
           >
             <c-input-search
-              v-model.trim="query"
+              :value="query"
               :placeholder="$t('general.label.search')"
-              :debounce="500"
+              submittable
+              @search="handleSearch"
             />
           </div>
         </b-row>
@@ -1042,8 +1043,12 @@ export default {
       recordsPerPage: undefined,
 
       customConfiguredFields: [],
+
       formatActiveFilterOperator,
       isBetweenOperator,
+
+      processingTimeout: undefined,
+      cancelled: false,
     }
   },
 
@@ -1322,12 +1327,6 @@ export default {
   },
 
   watch: {
-    query: {
-      handler () {
-        this.refresh(true)
-      },
-    },
-
     options: {
       deep: true,
       handler () {
@@ -1425,6 +1424,11 @@ export default {
 
     handlePerPageChange () {
       this.filter.limit = this.recordsPerPage
+      this.refresh(true)
+    },
+
+    handleSearch (searchQuery) {
+      this.query = searchQuery ? searchQuery.trim() : null
       this.refresh(true)
     },
 
@@ -1845,12 +1849,7 @@ export default {
         const query = recordID ? `recordID = ${recordID}` : this.bulkQuery
         const { moduleID, namespaceID } = this.filter
 
-        const { response, cancel } = this.$ComposeAPI
-          .recordBulkUndeleteCancellable({ moduleID, namespaceID, query })
-
-        this.abortableRequests.push(cancel)
-
-        response()
+        this.$ComposeAPI.recordBulkUndelete({ moduleID, namespaceID, query })
           .then(() => {
             this.refresh(true)
             this.toastSuccess(this.$t('notification:record.restoreBulkSuccess'))
@@ -1881,12 +1880,7 @@ export default {
         // Pick module and namespace ID from the filter
         const { moduleID, namespaceID } = this.filter
 
-        const { response, cancel } = this.$ComposeAPI
-          .recordBulkDeleteCancellable({ moduleID, namespaceID, query })
-
-        this.abortableRequests.push(cancel)
-
-        response()
+        this.$ComposeAPI.recordBulkDelete({ moduleID, namespaceID, query })
           .then(() => this.refresh(true))
           .then(() => {
             this.toastSuccess(this.$t('notification:record.deleteBulkSuccess'))
@@ -1923,6 +1917,8 @@ export default {
       if (this.recordListModule.moduleID !== this.options.moduleID) {
         throw Error(this.$t('record.moduleMismatch'))
       }
+
+      this.abortRequests()
 
       this.processing = true
       this.selected = []
@@ -2008,11 +2004,17 @@ export default {
       }).catch((e) => {
         if (!axios.isCancel(e)) {
           this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
+        } else {
+          this.cancelled = true
         }
       }).finally(() => {
-        setTimeout(() => {
-          this.processing = false
-        }, 300)
+        if (!this.cancelled) {
+          this.processingTimeout = setTimeout(() => {
+            this.processing = false
+          }, 300)
+        } else {
+          this.cancelled = false
+        }
       })
     },
 
@@ -2432,9 +2434,15 @@ export default {
       this.customSummaryIndex = -1
       this.customSummary = {}
       this.showCustomSummariesModal = false
+      this.processingTimeout = undefined
+      this.cancelled = false
     },
 
     abortRequests () {
+      if (this.processingTimeout) {
+        clearTimeout(this.processingTimeout)
+      }
+
       this.abortableRequests.forEach((cancel) => {
         cancel()
       })
@@ -2451,6 +2459,10 @@ export default {
       this.$root.$off('module-records-updated', this.refreshOnRelatedRecordsUpdate)
       this.$root.$off('record-field-change', this.refetchOnPrefilterValueChange)
       this.$root.$off('refetch-records', this.refreshAndResetPagination)
+
+      if (this.processingTimeout) {
+        clearTimeout(this.processingTimeout)
+      }
     },
 
     handleAddRecord () {

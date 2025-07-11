@@ -248,7 +248,7 @@ export default {
     },
 
     items () {
-      return this.procListResults(this.$SystemAPI.userList(this.encodeListParams()))
+      return this.procListResults(this.$SystemAPI.userListCancellable(this.encodeListParams()))
     },
 
     rowClass (item) {

@@ -320,6 +320,7 @@
           data-test-id="button-load-older-actions"
           variant="light"
           class="mx-auto"
+          :disabled="processing"
           @click.stop="load()"
         >
           {{ $t('loadOlder') }}
@@ -484,7 +485,7 @@ export default {
 
       this.processing = true
 
-      this.procListResults(this.$SystemAPI.actionlogList({ ...this.filter, ...this.pagination }))
+      this.procListResults(this.$SystemAPI.actionlogListCancellable({ ...this.filter, ...this.pagination }))
         .then(rr => {
           this.items.push(...rr)
         })
