@@ -19,7 +19,7 @@
       <template v-for="field in fields">
         <b-form-group
           v-if="canDisplay(field)"
-          :key="field.fieldID"
+          :key="`${field.fieldID}-${field.name}`"
           :data-test-id="getFieldCypressId(field.label || field.name)"
           :label-cols-md="options.horizontalFieldLayoutEnabled && '6'"
           :label-cols-xl="options.horizontalFieldLayoutEnabled && '5'"
