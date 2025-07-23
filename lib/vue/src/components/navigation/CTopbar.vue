@@ -2,7 +2,7 @@
   <div class="header-navigation d-flex flex-wrap align-items-center py-2 px-3 gap-2">
     <div
       class="sidebar-spacer"
-      :class="{ 'expanded': sidebarExpanded }"
+      :class="{ 'expanded': expanded }"
     />
 
     <h2 class="title mb-0">
@@ -185,7 +185,7 @@
           v-if="!settings.hideThemeSelector"
           id="theme-dropleft"
           variant="link"
-          text="Theme"
+          :text="labels.userSettingsTheme"
           dropleft
           no-caret
           toggle-class="text-decoration-none text-left dropdown-item rounded-0"
@@ -231,9 +231,8 @@ export default {
   },
 
   props: {
-    sidebarExpanded: {
+    expanded: {
       type: Boolean,
-      required: true,
       default: false,
     },
 

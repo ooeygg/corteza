@@ -16,6 +16,7 @@
           userSettingsProfile: $t('userSettings.profile'),
           userSettingsChangePassword: $t('userSettings.changePassword'),
           userSettingsLogout: $t('userSettings.logout'),
+          userSettingsTheme: $t('userSettings.theme'),
           lightTheme: $t('themes.labels.light'),
           darkTheme: $t('themes.labels.dark'),
         }"
