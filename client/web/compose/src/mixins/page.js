@@ -180,8 +180,10 @@ export default {
       blocks.forEach(({ blockID, xywh }) => {
         const block = this.page.blocks.find(b => b.blockID === blockID)
 
-        block.xywh = xywh
-        tempBlocks.push(block)
+        if (block) {
+          block.xywh = xywh
+          tempBlocks.push(block)
+        }
       })
 
       return this.evaluateBlocks(tempBlocks)
