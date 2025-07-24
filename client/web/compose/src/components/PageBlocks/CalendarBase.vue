@@ -191,10 +191,12 @@ export default {
         ],
 
         // Handle event fetching when view/date-range changes
-        datesRender: ({ view: { activeStart, activeEnd, title } = {} } = {}) => {
-          this.loadEvents(moment(activeStart), moment(activeEnd))
-          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-          this.title = title
+        datesRender: this.renderDate,
+        eventRender: ({ event, el }) => {
+          if (event.title) {
+            el.querySelector('.fc-title').classList.add('rt-content')
+            el.querySelector('.fc-title').innerHTML = event.title
+          }
         },
       }
     },
@@ -393,6 +395,11 @@ export default {
             this.updateSize()
           }, 300)
         })
+    },
+
+    renderDate ({ view: { activeStart, activeEnd, title } = {} } = {}) {
+      this.loadEvents(moment(activeStart), moment(activeEnd))
+      this.title = title
     },
 
     /**
