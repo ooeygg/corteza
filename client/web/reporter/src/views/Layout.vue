@@ -82,7 +82,7 @@
         />
       </div>
     </main>
-    <!-- <c-prompts /> -->
+
     <c-permissions-modal
       :labels="{
         save: $t('permissions:ui.save'),

@@ -142,6 +142,7 @@ export const prompts = Object.freeze([
                   { value: 'email', text: 'Email' },
                   { value: 'password', text: 'Password' },
                   { value: 'search', text: 'Search' },
+                  { value: 'datetime', text: 'Date & Time' },
                   { value: 'date', text: 'Date' },
                   { value: 'time', text: 'Time' },
                 ],
