@@ -12,6 +12,9 @@ Vue.use(BootstrapVue, {
     autoHideDelay: 7000,
     toaster: 'b-toaster-bottom-right',
   },
+  BModal: {
+    noEnforceFocus: true,
+  },
 })
 Vue.use(BootstrapVueIcons)
 
