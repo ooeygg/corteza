@@ -97,6 +97,7 @@ func (v RecordValue) Cast(f *ModuleField) (interface{}, error) {
 		return expr.CastToBoolean(v.Value)
 
 	case f.IsNumeric():
+		// @todo !! This is temporary; precision and scale require a rework
 		if f.Options.Precision() == 0 {
 			return cast.ToInt64E(v.Value)
 		}

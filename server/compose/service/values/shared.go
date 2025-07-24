@@ -20,6 +20,8 @@ const (
 	fieldOpt_Datetime_onlyPastValues   = "onlyPastValues"
 
 	fieldOpt_Url_onlySecure = "onlySecure"
+
+	maxPrecision = 15
 )
 
 var (

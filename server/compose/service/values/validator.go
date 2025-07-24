@@ -124,7 +124,6 @@ func (vldtr *validator) FileRefChecker(fn ReferenceChecker) {
 
 // Run validates record and it's values against module & module fields options
 //
-//
 // Validation is done in phases for optimal resource usage:
 //   - check if required values are present
 //   - check for unique-multi-value in multi value fields
@@ -372,7 +371,8 @@ func (vldtr validator) vFile(ctx context.Context, s store.Storer, v *types.Recor
 }
 
 func (vldtr validator) vNumber(ctx context.Context, v *types.RecordValue, f *types.ModuleField, r *types.Record, m *types.Module) []types.RecordValueError {
-	if _, _, err := big.ParseFloat(v.Value, 0, f.Options.Precision(), big.ToNearestEven); err != nil {
+	// @todo !! This is temporary; precision and scale require a rework
+	if _, _, err := big.ParseFloat(v.Value, 0, maxPrecision, big.ToNearestEven); err != nil {
 		return e2s(makeInvalidValueErr(ctx, f, v.Value, vldtr.localeSvc))
 	}
 
