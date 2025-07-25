@@ -110,6 +110,7 @@ navigation:
     loggedInAs: Logged in as {{user}}
     logout: Logout
     profile: Profile
+    theme: Theme
 picker:
   role:
     placeholder: Start typing to search for roles
