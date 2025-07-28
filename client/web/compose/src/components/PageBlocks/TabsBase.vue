@@ -185,7 +185,7 @@ export default {
 
     navClass () {
       const { orientation } = this.block.options.style
-      const style = orientation === 'vertical' ? 'px-3' : 'px-2'
+      const style = orientation === 'vertical' ? 'px-3 flex-nowrap' : 'px-2'
       return `bg-transparent ${style}`
     },
 
@@ -234,8 +234,8 @@ export default {
     },
 
     getTitleItemClass (index) {
-      const { justify, alignment } = this.block.options.style
-      return `order-${index} text-truncate text-${alignment} ${justify !== 'none' ? 'flex-fill' : ''}`
+      const { justify, alignment, orientation } = this.block.options.style
+      return `order-${index} ${orientation === 'horizontal' ? 'text-truncate' : ''} text-${alignment} ${justify !== 'none' ? 'flex-fill' : ''}`
     },
 
     getTabTitle ({ title = '', block = {} }, tabIndex) {
