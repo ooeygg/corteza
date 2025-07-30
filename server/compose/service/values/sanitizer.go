@@ -240,14 +240,14 @@ func sDatetime(v interface{}, onlyDate, onlyTime bool) string {
 	return ""
 }
 
-func sNumber(num interface{}, p uint) string {
+func sNumber(num interface{}, p uint, s uint) string {
 	base, err := strconv.ParseFloat(fmt.Sprintf("%v", num), 64)
 	if err != nil {
 		return "0"
 	}
 
 	// Format the value to the desired precision
-	str := strconv.FormatFloat(base, 'f', int(p), 64)
+	str := strconv.FormatFloat(base, 'f', int(s), 64)
 
 	// In case of fractures, remove trailing 0's
 	if strings.Contains(str, ".") {
@@ -276,7 +276,7 @@ func sanitize(f *types.ModuleField, v interface{}) string {
 		v = sDatetime(v, f.Options.Bool("onlyDate"), f.Options.Bool("onlyTime"))
 	case "number":
 		// @todo !! This is temporary; precision and scale require a rework
-		v = sNumber(v, maxPrecision)
+		v = sNumber(v, maxPrecision, f.Options.Precision())
 	case "string":
 		v = sString(v)
 	}
