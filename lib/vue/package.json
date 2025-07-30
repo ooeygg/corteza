@@ -5,9 +5,14 @@
   "license": "Apache-2.0",
   "author": "Denis Arh <denis.arh@crust.tech>",
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist/"
   ],
