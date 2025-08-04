@@ -71,6 +71,7 @@ import {
   faCamera,
   faBellSlash,
   faBell as faBellSolid,
+  faLocationCrosshairs,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -191,4 +192,5 @@ library.add(
   faBell,
   faBellSolid,
   faBellSlash,
+  faLocationCrosshairs,
 )
