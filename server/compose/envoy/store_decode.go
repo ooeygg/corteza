@@ -228,6 +228,7 @@ func (d StoreDecoder) decodeRecordDatasource(ctx context.Context, s store.Storer
 
 	// Get the iterator
 	iter, _, err := dalutils.ComposeRecordsIterator(ctx, dl, module, types.RecordFilter{
+		Query:       rf.Query,
 		ModuleID:    module.ID,
 		NamespaceID: namespace.ID,
 		Paging: filter.Paging{
