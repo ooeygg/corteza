@@ -4,15 +4,11 @@
       v-for="(b, i) in buttons"
       :key="i"
       :variant="variant(b)"
-      :disabled="!isValid(b) || processingID === i"
-      :class="`d-flex align-items-center justify-content-center gap-1 ${buttonClass}`"
+      :disabled="!isValid(b) || processingIDs.includes(i)"
+      :class="buttonClass"
       @click.prevent="handle(b, i)"
     >
       {{ buttonLabel(b.label) || '-' }}
-      <b-spinner
-        v-if="processingID === i"
-        small
-      />
     </b-button>
   </div>
 </template>
@@ -49,7 +45,7 @@ export default {
 
   data () {
     return {
-      processingID: false,
+      processingIDs: [],
     }
   },
 
@@ -107,7 +103,7 @@ export default {
 
     handle (b, i) {
       try {
-        this.processingID = i
+        this.processingIDs.push(i)
 
         // Base of the raise event:
         // we'll attach all extra arguments passed to component to
@@ -148,28 +144,10 @@ export default {
               workflowID,
               stepID,
               input,
-              async: true,
-            }).then(({ sessionID }) => {
-              return new Promise((resolve, reject) => {
-                const checkSession = () => {
-                  this.$AutomationAPI.sessionRead({ sessionID }).then(({ completedAt }) => {
-                    setTimeout(() => {
-                      if (completedAt) {
-                        this.processingID = undefined
-                        resolve()
-                      } else {
-                        checkSession()
-                      }
-                    }, 1000)
-                  }).catch(reject)
-                }
-
-                checkSession()
-              })
             })
             .catch(this.toastErrorHandler(this.$t('notification:automation.scriptFailed')))
             .finally(() => {
-              this.processingID = undefined
+              this.processingIDs = this.processingIDs.filter(id => id !== i)
             })
 
           return
@@ -192,11 +170,11 @@ export default {
           .Dispatch(ev, b.script)
           .catch(this.toastErrorHandler(this.$t('notification:automation.scriptFailed')))
           .finally(() => {
-            this.processingID = undefined
+            this.processingIDs = this.processingIDs.filter(id => id !== i)
           })
       } catch (e) {
         this.toastErrorHandler(this.$t('notification:automation.scriptFailed'))(e)
-        this.processingID = undefined
+        this.processingIDs = this.processingIDs.filter(id => id !== i)
       }
     },
 
