@@ -229,8 +229,13 @@ export default {
   watch: {
     'field.options.moduleID' () {
       this.f.options.labelField = ''
-      this.f.options.queryFields = []
       this.f.options.selectType = 'default'
+    },
+
+    'field.options.labelField' () {
+      this.f.options.queryFields = []
+      this.f.options.prefilter = ''
+      this.f.options.recordLabelField = ''
     },
   },
 

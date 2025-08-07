@@ -212,7 +212,7 @@ export default {
 
   methods: {
     chartList () {
-      return this.procListResults(this.$ComposeAPI.chartList(this.encodeListParams()))
+      return this.procListResults(this.$ComposeAPI.chartListCancellable(this.encodeListParams()))
     },
 
     ...mapActions({

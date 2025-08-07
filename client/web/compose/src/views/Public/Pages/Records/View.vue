@@ -388,7 +388,7 @@ export default {
     title: {
       immediate: true,
       handler (title) {
-        if (title) {
+        if (title && !this.inModal) {
           document.title = title
         }
       },

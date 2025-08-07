@@ -29,10 +29,10 @@
             class="flex-fill"
           >
             <c-input-search
-              v-model.trim="filter[queryField]"
+              :value="filter[queryField]"
               :placeholder="translations.searchPlaceholder"
-              :debounce="300"
-              @input="$emit('search')"
+              :submittable="true"
+              @search="handleSearch"
             />
           </div>
         </b-row>
@@ -503,6 +503,11 @@ export default {
       this.sorting.sortDesc = !this.sorting.sortDesc
       this.pagination.page = 1
       this.$refs.resourceList.refresh()
+    },
+
+    handleSearch (searchQuery) {
+      this.filter[this.queryField] = searchQuery ? searchQuery.trim() : ''
+      this.$emit('search')
     },
   },
 }

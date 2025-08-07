@@ -5,7 +5,7 @@
   >
     <header>
       <c-topbar
-        :sidebar-expanded="expanded"
+        :expanded="expanded"
         :settings="$Settings.get('ui.topbar', {})"
         :labels="{
           appMenu: $t('appMenu'),
@@ -17,6 +17,7 @@
           userSettingsProfile: $t('userSettings.profile'),
           userSettingsChangePassword: $t('userSettings.changePassword'),
           userSettingsLogout: $t('userSettings.logout'),
+          userSettingsTheme: $t('userSettings.theme'),
           lightTheme: $t('general:themes.labels.light'),
           darkTheme: $t('general:themes.labels.dark'),
         }"

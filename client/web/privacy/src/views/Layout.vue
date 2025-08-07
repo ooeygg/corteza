@@ -2,7 +2,7 @@
   <div class="d-flex flex-column w-100 vh-100">
     <header>
       <c-topbar
-        :sidebar-expanded="expanded"
+        :expanded="expanded"
         :settings="$Settings.get('ui.topbar', {})"
         :labels="{
           appMenu: $t('navigation:appMenu'),
@@ -14,6 +14,7 @@
           userSettingsProfile: $t('navigation:userSettings.profile'),
           userSettingsChangePassword: $t('navigation:userSettings.changePassword'),
           userSettingsLogout: $t('navigation:userSettings.logout'),
+          userSettingsTheme: $t('navigation:userSettings.theme'),
           lightTheme: $t('general:themes.labels.light'),
           darkTheme: $t('general:themes.labels.dark'),
         }"
@@ -108,7 +109,7 @@ export default {
 
   data () {
     return {
-      expanded: undefined,
+      expanded: false,
     }
   },
 

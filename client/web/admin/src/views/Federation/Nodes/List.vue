@@ -271,7 +271,7 @@ export default {
 
   methods: {
     items () {
-      return this.procListResults(this.$FederationAPI.nodeSearch(this.encodeListParams()))
+      return this.procListResults(this.$FederationAPI.nodeSearchCancellable(this.encodeListParams()))
     },
 
     openPairModal () {

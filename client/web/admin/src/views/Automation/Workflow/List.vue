@@ -192,7 +192,7 @@ export default {
 
   methods: {
     items () {
-      return this.procListResults(this.$AutomationAPI.workflowList(this.encodeListParams()))
+      return this.procListResults(this.$AutomationAPI.workflowListCancellable(this.encodeListParams()))
     },
 
     handleDelete (workflow) {

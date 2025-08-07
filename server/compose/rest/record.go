@@ -766,6 +766,7 @@ func (ctrl *Record) Export(ctx context.Context, r *request.RecordExport) (interf
 			},
 			Filter: map[string]envoyx.ResourceFilter{
 				composeEnvoy.ComposeRecordDatasourceAuxType: {
+					Query: rf.Query,
 					Refs: map[string]envoyx.Ref{
 						"NamespaceID": {
 							ResourceType: types.NamespaceResourceType,

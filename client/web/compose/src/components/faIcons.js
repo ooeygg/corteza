@@ -52,6 +52,7 @@ import {
   faUserCog,
   faGripHorizontal,
   faCogs,
+  faCog,
   faPen,
   faThumbtack,
   faPlus,
@@ -70,6 +71,7 @@ import {
   faCamera,
   faBellSlash,
   faBell as faBellSolid,
+  faLocationCrosshairs,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -169,6 +171,7 @@ library.add(
   faGripHorizontal,
   faUser,
   faCogs,
+  faCog,
   faPen,
   faThumbtack,
   faEye,
@@ -189,4 +192,5 @@ library.add(
   faBell,
   faBellSolid,
   faBellSlash,
+  faLocationCrosshairs,
 )

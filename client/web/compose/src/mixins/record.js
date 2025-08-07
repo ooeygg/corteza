@@ -176,8 +176,12 @@ export default {
                 // If we are in a modal we need to refresh blocks/records not in modal
                 this.$root.$emit('refetch-records', { recordID: record.recordID })
               } else {
-                // Refresh blocks related to the module
-                this.$root.$emit('module-records-updated', { moduleID: this.module.moduleID })
+                // Refresh blocks that are related to the updated records
+                const relatedRecords = [
+                  this.module.moduleID,
+                  ...new Set(records.filter(r => r.module.moduleID !== this.module.moduleID).map(r => r.module.moduleID)),
+                ]
+                relatedRecords.forEach(moduleID => this.$root.$emit('module-records-updated', { moduleID }))
 
                 this.$router.push({ name: route, params: { ...this.$route.params, recordID: record.recordID, edit: false } })
               }

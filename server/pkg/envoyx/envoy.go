@@ -104,6 +104,7 @@ type (
 		Refs        map[string]Ref
 
 		Limit uint
+		Query string
 		Scope Scope
 	}
 

@@ -86,7 +86,7 @@
           @click="goToCurrentLocation"
         >
           <font-awesome-icon
-            :icon="['fas', 'location-arrow']"
+            :icon="['fas', 'location-crosshairs']"
           />
         </a>
       </l-control>

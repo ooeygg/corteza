@@ -1,4 +1,4 @@
-name: "E2e test on main branch push"
+name: 'E2e test on main branch push'
 
 # These jobs can be tested with nektos/act tool
 # https://github.com/nektos/act
@@ -60,9 +60,7 @@ jobs:
           RELEASE_CRUST_SFTP_URI: ${{ secrets.RELEASE_CRUST_SFTP_URI }}
           CLIENT_NAME: ${{ matrix.client.name }}
         run: |
-          echo "SCREENSHOTS_GEN_FOLDER=$(date +"%Y%m%d%H%M%S")_$CLIENT_NAME" >> $GITHUB_ENV && \
           echo "TMP_KEY=$(mktemp)" >> $GITHUB_ENV
-          echo $SCREENSHOTS_GEN_FOLDER
 
       - name: Create crust key
         env:
@@ -72,19 +70,11 @@ jobs:
           echo ${RELEASE_CRUST_SFTP_KEY} | base64 -d > ${RELEASE_CRUST_KEY_FILE} && \
           echo ${RELEASE_CRUST_SFTP_KEY} > /tmp/foo
 
-      - name: Make folder for uploaded screenshots
-        env:
-          RELEASE_CRUST_SFTP_URI: ${{ secrets.RELEASE_CRUST_SFTP_URI }}
-          RELEASE_CRUST_KEY_FILE: ${{ env.TMP_KEY }}
-          SCREENSHOTS_GEN_FOLDER: ${{ env.SCREENSHOTS_GEN_FOLDER }}
-        run: |
-          printf '%s\n' 'cd screenshots' "mkdir ${SCREENSHOTS_GEN_FOLDER}" | sftp -o "StrictHostKeyChecking no" -i ${RELEASE_CRUST_KEY_FILE} ${RELEASE_CRUST_SFTP_URI}
-
       - uses: actions/setup-node@v3
-        with: { node-version: "${{ env.NODE_VERSION }}" }
+        with: { node-version: '${{ env.NODE_VERSION }}' }
 
       - uses: actions/setup-go@v3
-        with: { go-version: "${{ env.GO_VERSION }}" }
+        with: { go-version: '${{ env.GO_VERSION }}' }
 
       - name: Setup YARN
         run: npm install -g yarn @vue/cli-service
@@ -194,18 +184,9 @@ jobs:
 
           docker compose run \
             --entrypoint="bash -c \" \
-              cypress run --spec cypress/e2e/basic-functionalities/${CLIENT_NAME}/index.cy.js --browser chrome \
+              cypress run --spec cypress/e2e/basic-functionalities/${CLIENT_NAME}/index.cy.js --browser chrome --config video=false,screenshotOnRunFailure=false \
             \"" \
           cypress
-
-      - name: Upload screenshots
-        if: failure()
-        env:
-          RELEASE_CRUST_SFTP_URI: ${{ secrets.RELEASE_CRUST_SFTP_URI }}
-          RELEASE_CRUST_KEY_FILE: ${{ env.TMP_KEY }}
-          SCREENSHOTS_GEN_FOLDER: ${{ env.SCREENSHOTS_GEN_FOLDER }}
-        run: |
-          printf '%s\n' "cd screenshots/${SCREENSHOTS_GEN_FOLDER}" 'put -r corteza-e2e-cypress/cypress/screenshots/*' | sftp -q -o "StrictHostKeyChecking no" -i ${RELEASE_CRUST_KEY_FILE} ${RELEASE_CRUST_SFTP_URI}
 
       - name: Publish results
         # always() runs the step even when canceled manually
@@ -220,7 +201,7 @@ jobs:
           echo "put cypress/reports-build/index.html" | sftp -q -o "StrictHostKeyChecking no" -i ${RELEASE_CRUST_KEY_FILE} ${RELEASE_CRUST_SFTP_URI}
 
   notify-failure:
-    needs: [ server-client-setup ]
+    needs: [server-client-setup]
     runs-on: ubuntu-22.04
     if: failure()
     steps:
@@ -235,8 +216,6 @@ jobs:
           token: ${{ secrets.MATRIX_ACCESS_TOKEN }}
           channel: ${{ secrets.MATRIX_ROOM_ID }}
           message: |
-            ❌ E2e tests did not pass, screenshots provided
+            ❌ E2e tests did not pass
 
             🔗 https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASS }}@releases.cortezaproject.org/e2e-reports/
-
-            📷 https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASS }}@releases.cortezaproject.org/e2e-reports/screenshots/${{ env.SCREENSHOTS_GEN_FOLDER }}/

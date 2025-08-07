@@ -2,7 +2,7 @@
   <div class="d-flex flex-column w-100 vh-100 overflow-hidden">
     <header>
       <c-topbar
-        :sidebar-expanded="expanded"
+        :expanded="expanded"
         :settings="$Settings.get('ui.topbar', {})"
         :labels="{
           appMenu: $t('navigation.appMenu'),
@@ -14,6 +14,7 @@
           userSettingsProfile: $t('navigation.userSettings.profile'),
           userSettingsChangePassword: $t('navigation.userSettings.changePassword'),
           userSettingsLogout: $t('navigation.userSettings.logout'),
+          userSettingsTheme: $t('navigation.userSettings.theme'),
           lightTheme: $t('general:themes.labels.light'),
           darkTheme: $t('general:themes.labels.dark'),
         }"
@@ -188,19 +189,37 @@ export default {
       { resource: 'compose/', operation: 'grant' },
       { resource: 'federation/', operation: 'grant' },
       { resource: 'automation/', operation: 'grant' },
-      // Create
+      // System - Search
+      { resource: 'system/', operation: 'users.search' },
+      { resource: 'system/', operation: 'roles.search' },
+      { resource: 'system/', operation: 'applications.search' },
+      { resource: 'system/', operation: 'templates.search' },
+      { resource: 'system/', operation: 'auth-clients.search' },
+      { resource: 'system/', operation: 'queues.search' },
+      { resource: 'system/', operation: 'apigw-routes.search' },
+      { resource: 'system/', operation: 'dal-connections.search' },
+      // System - Create
       { resource: 'system/', operation: 'auth-client.create' },
       { resource: 'system/', operation: 'role.create' },
       { resource: 'system/', operation: 'user.create' },
       { resource: 'system/', operation: 'application.create' },
-      { resource: 'system/', operation: 'template.create' },
-      { resource: 'system/', operation: 'report.create' },
       { resource: 'system/', operation: 'queue.create' },
       { resource: 'system/', operation: 'apigw-route.create' },
-      // Manage
+      { resource: 'system/', operation: 'dal-connection.create' },
+      // System - Manage/Read
       { resource: 'system/', operation: 'settings.read' },
-      { resource: 'system/', operation: 'system.manage' },
+      { resource: 'system/', operation: 'settings.manage' },
       { resource: 'system/', operation: 'action-log.read' },
+      { resource: 'system/', operation: 'dal-sensitivity-level.manage' },
+      // Compose
+      { resource: 'compose/', operation: 'settings.read' },
+      { resource: 'compose/', operation: 'settings.manage' },
+      // Automation
+      { resource: 'automation/', operation: 'workflows.search' },
+      { resource: 'automation/', operation: 'workflow.create' },
+      { resource: 'automation/', operation: 'sessions.search' },
+      // Federation
+      { resource: 'federation/', operation: 'pair' },
     ]
 
     this.allowed = rulesToCheck.some(({ resource, operation }) => this.can(resource, operation))

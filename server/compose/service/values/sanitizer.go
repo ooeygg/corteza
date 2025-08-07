@@ -27,10 +27,10 @@ func Sanitizer() *sanitizer {
 }
 
 // Run cleans up input data
-//  - fix multi-value order/place index
-//  - trim all the strings!
-//  - parse & format input values to match field specific -- nullify/falsify invalid
-//  - field kind specific, no errors raised, data is modified
+//   - fix multi-value order/place index
+//   - trim all the strings!
+//   - parse & format input values to match field specific -- nullify/falsify invalid
+//   - field kind specific, no errors raised, data is modified
 //
 // Existing data (when updating record) is not yet loaded at this point
 func (s sanitizer) Run(m *types.Module, vv types.RecordValueSet) (out types.RecordValueSet) {
@@ -240,14 +240,14 @@ func sDatetime(v interface{}, onlyDate, onlyTime bool) string {
 	return ""
 }
 
-func sNumber(num interface{}, p uint) string {
+func sNumber(num interface{}, p uint, s uint) string {
 	base, err := strconv.ParseFloat(fmt.Sprintf("%v", num), 64)
 	if err != nil {
 		return "0"
 	}
 
 	// Format the value to the desired precision
-	str := strconv.FormatFloat(base, 'f', int(p), 64)
+	str := strconv.FormatFloat(base, 'f', int(s), 64)
 
 	// In case of fractures, remove trailing 0's
 	if strings.Contains(str, ".") {
@@ -275,7 +275,8 @@ func sanitize(f *types.ModuleField, v interface{}) string {
 	case "datetime":
 		v = sDatetime(v, f.Options.Bool("onlyDate"), f.Options.Bool("onlyTime"))
 	case "number":
-		v = sNumber(v, f.Options.Precision())
+		// @todo !! This is temporary; precision and scale require a rework
+		v = sNumber(v, maxPrecision, f.Options.Precision())
 	case "string":
 		v = sString(v)
 	}

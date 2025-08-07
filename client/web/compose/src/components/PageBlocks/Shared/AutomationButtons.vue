@@ -4,9 +4,9 @@
       v-for="(b, i) in buttons"
       :key="i"
       :variant="variant(b)"
-      :disabled="!isValid(b) || processing"
+      :disabled="!isValid(b) || processingIDs.includes(i)"
       :class="buttonClass"
-      @click.prevent="handle(b)"
+      @click.prevent="handle(b, i)"
     >
       {{ buttonLabel(b.label) || '-' }}
     </b-button>
@@ -45,7 +45,7 @@ export default {
 
   data () {
     return {
-      processing: false,
+      processingIDs: [],
     }
   },
 
@@ -101,9 +101,9 @@ export default {
       return false
     },
 
-    handle (b) {
+    handle (b, i) {
       try {
-        this.processing = true
+        this.processingIDs.push(i)
 
         // Base of the raise event:
         // we'll attach all extra arguments passed to component to
@@ -147,7 +147,7 @@ export default {
             })
             .catch(this.toastErrorHandler(this.$t('notification:automation.scriptFailed')))
             .finally(() => {
-              this.processing = false
+              this.processingIDs = this.processingIDs.filter(id => id !== i)
             })
 
           return
@@ -170,11 +170,11 @@ export default {
           .Dispatch(ev, b.script)
           .catch(this.toastErrorHandler(this.$t('notification:automation.scriptFailed')))
           .finally(() => {
-            this.processing = false
+            this.processingIDs = this.processingIDs.filter(id => id !== i)
           })
       } catch (e) {
         this.toastErrorHandler(this.$t('notification:automation.scriptFailed'))(e)
-        this.processing = false
+        this.processingIDs = this.processingIDs.filter(id => id !== i)
       }
     },
 

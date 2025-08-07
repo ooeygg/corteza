@@ -1278,7 +1278,7 @@ export default {
     },
 
     getLayoutRoles () {
-      return this.currentLayoutRoles.map(roleID => this.resolvedRoles[roleID])
+      return this.currentLayoutRoles.map(roleID => this.resolvedRoles[roleID]).filter(r => !!r)
     },
 
     onLayoutRoleChange (roles) {

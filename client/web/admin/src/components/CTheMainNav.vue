@@ -56,19 +56,28 @@ export default {
               label: 'system.items.users',
               route: 'system.user',
               icon: 'users',
-              can: ['system/', 'users.search'],
+              can: [
+                ['system/', 'users.search'],
+                ['system/', 'user.create'],
+              ],
             },
             {
               label: 'system.items.roles',
               route: 'system.role',
               icon: 'hat-cowboy',
-              can: ['system/', 'roles.search'],
+              can: [
+                ['system/', 'roles.search'],
+                ['system/', 'role.create'],
+              ],
             },
             {
               label: 'system.items.applications',
               route: 'system.application',
               icon: 'th-large',
-              can: ['system/', 'applications.search'],
+              can: [
+                ['system/', 'applications.search'],
+                ['system/', 'application.create'],
+              ],
             },
             {
               label: 'system.items.templates',
@@ -88,13 +97,19 @@ export default {
               icon: 'envelope-open',
               // all email management is handled
               // via settings for now
-              can: ['system/', 'settings.read'],
+              can: [
+                ['system/', 'settings.read'],
+                ['system/', 'settings.manage'],
+              ],
             },
             {
               label: 'system.items.authclients',
               route: 'system.authClient',
               icon: 'key',
-              can: ['system/', 'auth-clients.search'],
+              can: [
+                ['system/', 'auth-clients.search'],
+                ['system/', 'auth-client.create'],
+              ],
             },
             {
               label: 'system.items.actionlog',
@@ -106,25 +121,37 @@ export default {
               label: 'system.items.queues',
               route: 'system.queue',
               icon: 'stream',
-              can: ['system/', 'queues.search'],
+              can: [
+                ['system/', 'queues.search'],
+                ['system/', 'queue.create'],
+              ],
             },
             {
               label: 'system.items.apigw',
               route: 'system.apigw',
               icon: 'archway',
-              can: ['system/', 'apigw-routes.search'],
+              can: [
+                ['system/', 'apigw-routes.search'],
+                ['system/', 'apigw-route.create'],
+              ],
             },
             {
               label: 'system.items.connections',
               route: 'system.connection',
               icon: 'cloud',
-              can: ['system/', 'dal-connections.search'],
+              can: [
+                ['system/', 'dal-connections.search'],
+                ['system/', 'dal-connection.create'],
+              ],
             },
             {
               label: 'system.items.code-snippets',
               route: 'system.codesnippets',
               icon: 'file-code',
-              can: ['system/', 'settings.read'],
+              can: [
+                ['system/', 'settings.read'],
+                ['system/', 'settings.manage'],
+              ],
             },
             {
               label: 'system.items.sensitivityLevel',
@@ -148,7 +175,10 @@ export default {
               label: 'compose.items.settings',
               route: 'compose.settings',
               icon: 'sliders-h',
-              can: ['system/', 'settings.read'],
+              can: [
+                ['compose/', 'settings.read'],
+                ['compose/', 'settings.manage'],
+              ],
             },
 
             {
@@ -167,7 +197,10 @@ export default {
               label: 'automation.items.workflows',
               route: 'automation.workflow',
               icon: 'project-diagram',
-              can: ['automation/', 'workflows.search'],
+              can: [
+                ['automation/', 'workflows.search'],
+                ['automation/', 'workflow.create'],
+              ],
             },
 
             {
@@ -216,7 +249,10 @@ export default {
               label: 'ui.items.settings',
               route: 'ui.settings',
               icon: 'eye',
-              can: ['system/', 'settings.read'],
+              can: [
+                ['system/', 'settings.read'],
+                ['system/', 'settings.manage'],
+              ],
             },
           ],
         },
@@ -247,7 +283,11 @@ export default {
 
             if (Array.isArray(itm.can)) {
               // if array then call the perm checking function
-              itm.can = this.can(...itm.can)
+              if (Array.isArray(itm.can[0])) {
+                itm.can = itm.can.every(c => this.can(...c))
+              } else {
+                itm.can = this.can(...itm.can)
+              }
             }
 
             return { page, can: itm.can }

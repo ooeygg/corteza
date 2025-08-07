@@ -836,8 +836,33 @@ func initValuestore(opt *options.Options) {
 		vars[fmt.Sprintf("webapp.base-url.%s", k)] = v
 	}
 
+	for k, v := range cortezaEnvVars() {
+		vars[k] = v
+	}
+
 	s.SetEnv(vars)
 	valuestore.SetGlobal(s)
+}
+
+// cortezaEnvVars returns a set of environment variables that should be passed
+// through to Corteza for use in workflows and elsewhere.
+func cortezaEnvVars() (vars map[string]string) {
+	vars = make(map[string]string, 2)
+
+	for _, e := range os.Environ() {
+		if !strings.HasPrefix(strings.ToLower(e), "corteza_env") {
+			continue
+		}
+
+		pp := strings.SplitN(e, "=", 2)
+		if len(pp) != 2 {
+			continue
+		}
+
+		vars[strings.ToLower(pp[0])] = pp[1]
+	}
+
+	return
 }
 
 // takes current options (SMTP_* env variables) and copies their values to settings

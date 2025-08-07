@@ -20,7 +20,7 @@
       <template v-for="field in fields">
         <div
           v-if="canDisplay(field)"
-          :key="field.fieldID"
+          :key="`${field.fieldID}-${field.name}`"
           :class="`field-container ${columnWrapClass}`"
           :style="fieldWidth"
         >

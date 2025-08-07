@@ -102,6 +102,8 @@ const (
 	// https://www.rfc-editor.org/errata/eid1690
 	emailLength = 254
 
+	maxPrecisionLength = 15
+
 	// Generally the upper most limit
 	urlLength = 2048
 
@@ -1535,7 +1537,9 @@ func moduleFieldToAttribute(f *types.ModuleField) (out *dal.Attribute, err error
 		out = dal.FullAttribute(f.Name, at, codec)
 	case "number":
 		at := &dal.TypeNumber{
-			Precision: int(f.Options.Precision()),
+			// @todo !! This is temporary; precision and scale require a rework
+			Precision: maxPrecisionLength,
+			Scale:     int(f.Options.Precision()),
 			Nullable:  !f.Required,
 		}
 		out = dal.FullAttribute(f.Name, at, codec)
