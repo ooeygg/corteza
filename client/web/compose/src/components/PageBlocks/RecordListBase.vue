@@ -108,7 +108,9 @@
               :module="recordListModule"
               :fields="fields.map(({ moduleField }) => moduleField)"
               @updateFields="onUpdateFields"
-            />
+            >
+              {{ $t('module:allRecords.columns.title') }}
+            </column-picker>
           </div>
           <div
             v-if="!options.hideSearch"
@@ -922,26 +924,26 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { mapGetters, mapActions } from 'vuex'
-import base from 'corteza-webapp-compose/src/components/PageBlocks/base'
-import FieldViewer from 'corteza-webapp-compose/src/components/ModuleFields/Viewer'
-import FieldEditor from 'corteza-webapp-compose/src/components/ModuleFields/Editor'
-import ExporterModal from 'corteza-webapp-compose/src/components/Public/Record/Exporter'
-import ImporterModal from 'corteza-webapp-compose/src/components/Public/Record/Importer'
-import AutomationButtons from 'corteza-webapp-compose/src/components/PageBlocks/Shared/AutomationButtons.vue'
-import { compose, validator, NoID } from '@cortezaproject/corteza-js'
-import users from 'corteza-webapp-compose/src/mixins/users'
-import records from 'corteza-webapp-compose/src/mixins/records'
-import { evaluatePrefilter, queryToFilter, isFieldInFilter, formatActiveFilterOperator, isBetweenOperator } from 'corteza-webapp-compose/src/lib/record-filter'
-import { getItem, setItem, removeItem } from 'corteza-webapp-compose/src/lib/local-storage'
+import { NoID, compose, validator } from '@cortezaproject/corteza-js'
 import { components, url } from '@cortezaproject/corteza-vue'
-import draggable from 'vuedraggable'
-import RecordListFilter from 'corteza-webapp-compose/src/components/Common/RecordListFilter'
+import axios from 'axios'
 import ColumnPicker from 'corteza-webapp-compose/src/components/Admin/Module/Records/ColumnPicker'
-import BulkEditModal from 'corteza-webapp-compose/src/components/Public/Record/BulkEdit'
+import RecordListFilter from 'corteza-webapp-compose/src/components/Common/RecordListFilter'
+import FieldEditor from 'corteza-webapp-compose/src/components/ModuleFields/Editor'
+import FieldViewer from 'corteza-webapp-compose/src/components/ModuleFields/Viewer'
 import CustomFilterPreset from 'corteza-webapp-compose/src/components/PageBlocks/RecordList/CustomFilterPreset'
 import CustomSummary from 'corteza-webapp-compose/src/components/PageBlocks/RecordList/CustomSummary'
+import AutomationButtons from 'corteza-webapp-compose/src/components/PageBlocks/Shared/AutomationButtons.vue'
+import base from 'corteza-webapp-compose/src/components/PageBlocks/base'
+import BulkEditModal from 'corteza-webapp-compose/src/components/Public/Record/BulkEdit'
+import ExporterModal from 'corteza-webapp-compose/src/components/Public/Record/Exporter'
+import ImporterModal from 'corteza-webapp-compose/src/components/Public/Record/Importer'
+import { getItem, removeItem, setItem } from 'corteza-webapp-compose/src/lib/local-storage'
+import { evaluatePrefilter, formatActiveFilterOperator, isBetweenOperator, isFieldInFilter, queryToFilter } from 'corteza-webapp-compose/src/lib/record-filter'
+import records from 'corteza-webapp-compose/src/mixins/records'
+import users from 'corteza-webapp-compose/src/mixins/users'
+import draggable from 'vuedraggable'
+import { mapActions, mapGetters } from 'vuex'
 
 const { CInputSearch } = components
 
