@@ -50,7 +50,6 @@ func (e CsvEncoder) encodeRecordDatasources(ctx context.Context, writer *csv.Wri
 func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writer, p envoyx.EncodeParams, node *envoyx.Node, tt envoyx.Traverser) (_ any, err error) {
 	rds := node.Datasource.(*RecordDatasource)
 
-	out := make(datasource.RawRecord)
 	header := make([]string, 0, 4)
 
 	hasID := false
@@ -93,8 +92,8 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 		wrapBrackets = true
 	}
 
-	getValue := func(h string) string {
-		v := out[h]
+	getValue := func(cache datasource.RawRecord, h string) string {
+		v := cache[h]
 		if len(v.Values) == 0 {
 			return ""
 		}
@@ -126,13 +125,14 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 		hWritten bool
 	)
 	for {
-		_, more, err = rds.Next(ctx, out)
+		cache := make(datasource.RawRecord)
+		_, more, err = rds.Next(ctx, cache)
 		if err != nil || !more {
 			return
 		}
 
 		if len(header) == 0 {
-			for k := range out {
+			for k := range cache {
 				header = append(header, k)
 			}
 		}
@@ -147,7 +147,7 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 		}
 
 		for _, h := range header {
-			row = append(row, getValue(h))
+			row = append(row, getValue(cache, h))
 		}
 
 		err = writer.Write(row)
