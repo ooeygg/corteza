@@ -57,6 +57,32 @@
             multiple
             @search="search"
           >
+            <template #option="option">
+              <field-viewer
+                v-if="labelField && option.values[labelField.name]"
+                :field="labelField"
+                :record="option"
+                :namespace="namespace"
+                value-only
+              />
+
+              <template v-else>
+                {{ option.recordID }}
+              </template>
+            </template>
+            <template #selected-option-container="option">
+              <field-viewer
+                v-if="labelField && getRecordByID(option.recordID).values[labelField.name]"
+                :field="labelField"
+                :record="option"
+                :namespace="namespace"
+                value-only
+              />
+
+              <template v-else>
+                {{ option.label }}
+              </template>
+            </template>
             <pagination
               v-if="showPagination"
               slot="list-footer"
@@ -83,6 +109,36 @@
             @input="selectChange($event)"
             @search="search"
           >
+            <template
+              #option="option"
+            >
+              <field-viewer
+                v-if="labelField && option.values[labelField.name]"
+                :field="labelField"
+                :record="option"
+                :namespace="namespace"
+                value-only
+              />
+
+              <template v-else>
+                {{ option.recordID }}
+              </template>
+            </template>
+            <template
+              #selected-option="option"
+            >
+              <field-viewer
+                v-if="labelField && getRecordByID(option.recordID).values[labelField.name]"
+                :field="labelField"
+                :record="option"
+                :namespace="namespace"
+                value-only
+              />
+
+              <template v-else>
+                {{ option.recordID }}
+              </template>
+            </template>
             <pagination
               v-if="showPagination"
               slot="list-footer"
@@ -128,6 +184,38 @@
             @input="setRecord($event, ctx.index)"
             @search="search"
           >
+            <template
+              #option="option"
+            >
+              <field-viewer
+                v-if="labelField && option.values[labelField.name]"
+                :field="labelField"
+                :record="option"
+                :namespace="namespace"
+                value-only
+              />
+
+              <template v-else>
+                {{ option.recordID }}
+              </template>
+            </template>
+
+            <template
+              #selected-option="option"
+            >
+              <field-viewer
+                v-if="labelField && option.values[labelField.name]"
+                :field="labelField"
+                :record="getRecordByID(option.recordID)"
+                :namespace="namespace"
+                value-only
+              />
+
+              <template v-else>
+                {{ option.recordID }}
+              </template>
+            </template>
+
             <pagination
               v-if="showPagination"
               slot="list-footer"
@@ -152,15 +240,14 @@
             </b-button>
           </b-input-group-append>
         </b-input-group>
-        <b-spinner
-          v-else-if="resolving"
-          variant="primary"
-          small
-        />
 
-        <span v-else>
-          {{ getOptionLabel(multipleSelected[ctx.index]) }}
-        </span>
+        <field-viewer
+          v-else
+          :field="labelField"
+          :record="getRecordByID(multipleSelected[ctx.index])"
+          :namespace="namespace"
+          value-only
+        />
       </template>
     </multi>
 
@@ -181,6 +268,32 @@
           :selectable="isSelectable"
           @search="search"
         >
+          <template #option="option">
+            <field-viewer
+              v-if="labelField && option.values[labelField.name]"
+              :field="labelField"
+              :record="option"
+              :namespace="namespace"
+              value-only
+            />
+
+            <template v-else>
+              {{ option.recordID }}
+            </template>
+          </template>
+          <template #selected-option>
+            <field-viewer
+              v-if="labelField && getRecordByID(selected).values[labelField.name]"
+              :field="labelField"
+              :record="getRecordByID(selected)"
+              :namespace="namespace"
+              value-only
+            />
+
+            <template v-else>
+              {{ selected }}
+            </template>
+          </template>
           <pagination
             v-if="showPagination"
             slot="list-footer"
@@ -217,6 +330,8 @@ import { compose, NoID } from '@cortezaproject/corteza-js'
 import { mapActions, mapGetters } from 'vuex'
 import { queryToFilter, evaluatePrefilter, isFieldInFilter } from 'corteza-webapp-compose/src/lib/record-filter'
 import Pagination from '../Common/Pagination.vue'
+import users from 'corteza-webapp-compose/src/mixins/users'
+import recordsMixin from 'corteza-webapp-compose/src/mixins/records'
 
 export default {
   i18nOptions: {
@@ -225,20 +340,23 @@ export default {
 
   components: {
     Pagination,
+    FieldViewer: () => import('corteza-webapp-compose/src/components/ModuleFields/Viewer'),
   },
 
   extends: base,
 
+  mixins: [
+    users,
+    recordsMixin,
+  ],
+
   data () {
     return {
       processing: false,
-      resolving: false,
 
       query: '',
 
       records: [],
-
-      recordValues: {},
 
       filter: {
         query: '',
@@ -255,9 +373,17 @@ export default {
     ...mapGetters({
       getModuleByID: 'module/getByID',
       findUserByID: 'user/findByID',
+      findRecordByID: 'record/findByID',
       findRecordsByIDs: 'record/findByIDs',
       pages: 'page/set',
     }),
+
+    labelField () {
+      if (!this.field.options.labelField || !this.module) {
+        return undefined
+      }
+      return this.module.fields.find(({ name }) => name === this.field.options.labelField)
+    },
 
     options () {
       return this.records
@@ -340,20 +466,11 @@ export default {
 
     this.loadLatest()
 
-    if (this.value) {
-      this.resolving = true
-
-      this.formatRecordValues(this.value).finally(() => {
-        this.resolving = false
-      })
-    }
+    this.formatRecordValues(this.value)
   },
 
   methods: {
     ...mapActions({
-      findModuleByID: 'module/findByID',
-      resolveUsers: 'user/resolveUsers',
-      resolveRecords: 'record/resolveRecords',
       updateRecordSet: 'record/updateRecords',
     }),
 
@@ -369,6 +486,10 @@ export default {
         const moduleID = this.field.options.moduleID
         this.fetchPrefiltered({ namespaceID, moduleID })
       }
+    },
+
+    getRecordByID (recordID) {
+      return new compose.Record(this.module, this.findRecordByID(recordID))
     },
 
     getRecord (index = undefined) {
@@ -477,9 +598,8 @@ export default {
 
           this.updateRecordSet(set)
 
-          return this.formatRecordValues(set.map(({ recordID }) => recordID)).then(() => {
-            this.records = set.map(r => new compose.Record(this.module, r))
-          })
+          this.records = set.map(r => new compose.Record(this.module, r))
+          this.formatRecordValues(set.map(({ recordID }) => recordID))
         }).finally(() => {
           this.processing = false
         })
@@ -489,72 +609,28 @@ export default {
       return [this.field.options.labelField].filter(f => !!f).join(', ')
     },
 
-    async formatRecordValues (recordIDs) {
+    formatRecordValues (recordIDs) {
       recordIDs = Array.isArray(recordIDs) ? recordIDs : [recordIDs].filter(v => v) || []
       const { namespaceID = NoID } = this.namespace
-      const { moduleID = NoID, labelField, recordLabelField } = this.field.options
+      const { moduleID = NoID, recordLabelField } = this.field.options
 
-      if (!recordIDs.length || [moduleID, namespaceID].includes(NoID) || !labelField) {
+      if (!recordIDs.length || [moduleID, namespaceID].includes(NoID) || !this.labelField || !this.module) {
         return
       }
 
-      return this.findModuleByID({ namespace: this.namespace, moduleID }).then(async module => {
-        const relatedField = module.fields.find(({ name }) => name === labelField)
-        let records = this.findRecordsByIDs(recordIDs).map(r => new compose.Record(module, r))
-        const mappedIDs = {}
+      const stopProcessing = () => {
+        setTimeout(() => {
+          this.processing = false
+        }, 300)
+      }
 
-        if (relatedField.kind === 'Record' && recordLabelField) {
-          const relatedModule = await this.findModuleByID({ namespaceID, moduleID: relatedField.options.moduleID })
-          const relatedRecordIDs = new Set()
-
-          records.forEach(r => {
-            const recordValue = relatedField.isMulti ? r.values[relatedField.name] : [r.values[relatedField.name]]
-            recordValue.forEach(rID => relatedRecordIDs.add(rID))
-          })
-
-          await this.resolveRecords({ namespaceID, moduleID: relatedModule.moduleID, recordIDs: [...relatedRecordIDs] })
-
-          const relatedLabelField = relatedModule.fields.find(({ name }) => name === recordLabelField)
-
-          for (let r of await this.findRecordsByIDs([...relatedRecordIDs])) {
-            r = new compose.Record(relatedModule, r)
-            let relatedRecordValue = relatedLabelField.isMulti ? r.values[relatedLabelField.name] : [r.values[relatedLabelField.name]]
-
-            if (relatedLabelField.kind === 'User') {
-              await this.resolveUsers(relatedRecordValue)
-              relatedRecordValue = relatedRecordValue.map(v => relatedLabelField.formatter(this.findUserByID(v)))
-            }
-
-            mappedIDs[r.recordID] = relatedRecordValue.join(relatedLabelField.options.multiDelimiter)
-            relatedRecordIDs.clear()
-          }
-        } else if (relatedField.kind === 'User') {
-          this.processing = true
-
-          const relatedUserIDs = new Set()
-          records.forEach(r => {
-            const recordValue = relatedField.isMulti ? r.values[relatedField.name] : [r.values[relatedField.name]]
-            recordValue.forEach(uID => relatedUserIDs.add(uID))
-          })
-
-          await this.resolveUsers([...relatedUserIDs])
-        } else if (records.length === 0) {
-          await this.resolveRecords({ namespaceID, moduleID, recordIDs: [...recordIDs] })
-          records = this.findRecordsByIDs(recordIDs).map(r => new compose.Record(module, r))
-        }
-
-        records.forEach(record => {
-          let recordValue = relatedField.isMulti ? record.values[relatedField.name] : [record.values[relatedField.name]]
-
-          if (relatedField.kind === 'User') {
-            recordValue = recordValue.map(v => relatedField.formatter(this.findUserByID(v)))
-          } else if (relatedField.kind === 'Record' && recordLabelField) {
-            recordValue = recordValue.map(v => mappedIDs[v])
-          }
-
-          this.$set(this.recordValues, record.recordID, recordValue.join(relatedField.options.multiDelimiter))
-        })
-      })
+      if (this.labelField.kind === 'Record' && recordLabelField) {
+        this.processing = true
+        return this.fetchRecords(namespaceID, [this.labelField], this.records).finally(stopProcessing)
+      } else if (this.labelField.kind === 'User') {
+        this.processing = true
+        return this.fetchUsers([this.labelField], this.records).finally(stopProcessing)
+      }
     },
 
     addRecordThroughRecordSelectField () {
@@ -627,7 +703,7 @@ export default {
 
       const recordID = typeof value === 'string' ? value : value.recordID
 
-      return this.recordValues[recordID] || recordID
+      return recordID
     },
 
     destroyEvents () {
@@ -636,10 +712,8 @@ export default {
 
     setDefaultValues () {
       this.processing = false
-      this.resolving = false
       this.query = ''
       this.records = []
-      this.recordValues = {}
       this.filter = {}
     },
   },

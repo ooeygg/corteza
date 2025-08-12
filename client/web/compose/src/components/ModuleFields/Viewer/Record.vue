@@ -8,7 +8,7 @@
   <div v-else>
     <span
       v-for="(v, index) of formattedValue"
-      :key="index"
+      :key="v.id || index"
       :class="{ 'd-block': field.options.multiDelimiter === '\n', 'mt-1': field.options.multiDelimiter === '\n' && index !== 0 }"
       @click.stop
     >
@@ -18,7 +18,18 @@
         :class="{ 'text-decoration-none default-cursor': !v.to}"
         @click="(e) => onRecordSelectorClick(e, v.to)"
       >
-        {{ v.value }}{{ index !== formattedValue.length - 1 ? field.options.multiDelimiter : '' }}
+        <template v-if="v.record">
+          <field-viewer
+            :field="labelField"
+            :record="v.record"
+            :namespace="namespace"
+            value-only
+          />
+        </template>
+        <template v-else>
+          {{ v.id }}
+        </template>
+        {{ index !== formattedValue.length - 1 ? field.options.multiDelimiter : '' }}
       </a>
 
       <router-link
@@ -26,51 +37,121 @@
         :to="v.to"
         :class="{ 'text-decoration-none default-cursor': !v.to}"
       >
-        {{ v.value }}{{ index !== formattedValue.length - 1 ? field.options.multiDelimiter : '' }}
+        <template v-if="v.record">
+          <field-viewer
+            :field="labelField"
+            :record="v.record"
+            :namespace="namespace"
+            value-only
+          />
+        </template>
+        <template v-else>
+          {{ v.id }}
+        </template>
+        {{ index !== formattedValue.length - 1 ? field.options.multiDelimiter : '' }}
       </router-link>
     </span>
   </div>
 </template>
 
 <script>
-import base from './base'
 import { compose, NoID } from '@cortezaproject/corteza-js'
-import { mapActions, mapGetters } from 'vuex'
+import records from 'corteza-webapp-compose/src/mixins/records'
+import users from 'corteza-webapp-compose/src/mixins/users'
+import { mapGetters } from 'vuex'
+import base from './base'
 
 export default {
+  components: {
+    FieldViewer: () => import('corteza-webapp-compose/src/components/ModuleFields/Viewer'),
+  },
+
   extends: base,
+
+  mixins: [
+    users,
+    records,
+  ],
 
   data () {
     return {
       processing: false,
 
       recordValues: {},
-
-      relRecords: [],
-
-      relatedModuleID: undefined,
     }
   },
 
   computed: {
     ...mapGetters({
       pages: 'page/set',
-      findUserByID: 'user/findByID',
+      getModuleByID: 'module/getByID',
+      findRecordByID: 'record/findByID',
       findRecordsByIDs: 'record/findByIDs',
     }),
 
     formattedValue () {
-      const value = Array.isArray(this.value) ? this.value : [this.value].filter(v => v) || []
+      const value = Array.isArray(this.value) ? this.value : [this.value]
       return value.map(recordID => {
+        let record = this.findRecordByID(recordID)
+
+        if (record) {
+          record = new compose.Record(this.recordModule, record)
+        }
+
         return {
+          id: recordID,
           to: this.linkToRecord(recordID),
-          value: this.recordValues[recordID] || recordID,
+          record,
         }
       })
     },
 
     recordPage () {
       return this.pages.find(p => p.moduleID === this.field.options.moduleID)
+    },
+
+    recordModule () {
+      if (!this.field.options.moduleID) {
+        return undefined
+      }
+
+      return this.getModuleByID(this.field.options.moduleID)
+    },
+
+    labelField () {
+      if (!this.field.options.labelField || !this.recordModule) {
+        return undefined
+      }
+
+      let labelField = this.recordModule.fields.find(({ name }) => name === this.field.options.labelField)
+
+      if (!labelField) {
+        return undefined
+      }
+
+      labelField = compose.ModuleFieldMaker(labelField)
+
+      if (labelField.kind === 'Record' && this.field.options.recordLabelField) {
+        labelField.options.labelField = this.field.options.recordLabelField
+      }
+
+      return labelField
+    },
+
+    relatedModule () {
+      if (!this.labelField.options.moduleID) {
+        return undefined
+      }
+
+      return this.getModuleByID(this.labelField.options.moduleID)
+    },
+
+    relatedLabelField () {
+      if (!this.field.options.recordLabelField || !this.relatedModule) {
+        return undefined
+      }
+
+      return this.relatedModule.fields.find(({ name }) => name === this.field.options.recordLabelField)
     },
   },
 
@@ -83,11 +164,6 @@ export default {
   },
 
   methods: {
-    ...mapActions({
-      findModuleByID: 'module/findByID',
-      resolveUsers: 'user/resolveUsers',
-      resolveRecords: 'record/resolveRecords',
-    }),
 
     linkToRecord (recordID) {
       if (!this.recordPage || !recordID) {
@@ -103,101 +179,59 @@ export default {
       }
     },
 
-    async formatRecordValues (recordIDs) {
+    formatRecordValues (recordIDs) {
       recordIDs = Array.isArray(recordIDs) ? recordIDs : [recordIDs].filter(v => v) || []
       const { namespaceID = NoID } = this.namespace
-      const { moduleID = NoID, labelField, recordLabelField } = this.field.options
+      const { moduleID = NoID, recordLabelField } = this.field.options
 
-      if (!recordIDs.length || [moduleID, namespaceID].includes(NoID) || !labelField) {
+      if (!recordIDs.length || [moduleID, namespaceID].includes(NoID) || !this.labelField || !this.recordModule) {
         return
       }
 
-      return this.findModuleByID({ namespace: this.namespace, moduleID }).then(async module => {
-        const mappedIDs = {}
-        const relatedField = module.fields.find(({ name }) => name === labelField)
-
-        let records = this.findRecordsByIDs(recordIDs).map(r => new compose.Record(module, r))
-
-        if (relatedField.kind === 'Record' && recordLabelField) {
-          this.processing = true
-
-          const relatedModule = await this.findModuleByID({ namespaceID, moduleID: relatedField.options.moduleID })
-          const relatedRecordIDs = new Set()
-
-          this.relatedModuleID = relatedModule.moduleID
-
-          records.forEach(r => {
-            const recordValue = relatedField.isMulti ? r.values[relatedField.name] : [r.values[relatedField.name]]
-            recordValue.forEach(rID => relatedRecordIDs.add(rID))
-          })
-
-          await this.resolveRecords({ namespaceID, moduleID: relatedModule.moduleID, recordIDs: [...relatedRecordIDs] })
-
-          const relatedLabelField = relatedModule.fields.find(({ name }) => name === recordLabelField)
-
-          for (let r of await this.findRecordsByIDs([...relatedRecordIDs])) {
-            r = new compose.Record(relatedModule, r)
-            let relatedRecordValue = relatedLabelField.isMulti ? r.values[relatedLabelField.name] : [r.values[relatedLabelField.name]]
-
-            if (relatedLabelField.kind === 'User') {
-              await this.resolveUsers(relatedRecordValue)
-              relatedRecordValue = relatedRecordValue.map(v => relatedLabelField.formatter(this.findUserByID(v)))
-            }
-
-            mappedIDs[r.recordID] = relatedRecordValue.join(relatedLabelField.options.multiDelimiter)
-            relatedRecordIDs.clear()
-          }
-        } else if (relatedField.kind === 'User') {
-          this.processing = true
-
-          const relatedUserIDs = new Set()
-          records.forEach(r => {
-            const recordValue = relatedField.isMulti ? r.values[relatedField.name] : [r.values[relatedField.name]]
-            recordValue.forEach(uID => relatedUserIDs.add(uID))
-          })
-
-          await this.resolveUsers([...relatedUserIDs])
-        } else if (records.length === 0) {
-          await this.resolveRecords({ namespaceID, moduleID, recordIDs: [...recordIDs] })
-          records = this.findRecordsByIDs(recordIDs).map(r => new compose.Record(module, r))
-        }
-
-        records.forEach(record => {
-          let recordValue = relatedField.isMulti ? record.values[relatedField.name] : [record.values[relatedField.name]]
-
-          if (relatedField.kind === 'User') {
-            recordValue = recordValue.map(v => relatedField.formatter(this.findUserByID(v)))
-          } else if (relatedField.kind === 'Record' && recordLabelField) {
-            recordValue = recordValue.map(v => mappedIDs[v])
-          }
-
-          this.$set(this.recordValues, record.recordID, recordValue.join(relatedField.options.multiDelimiter))
-        })
-      }).finally(() => {
+      const stopProcessing = () => {
         setTimeout(() => {
           this.processing = false
         }, 300)
-      })
+      }
+
+      const records = this.findRecordsByIDs(recordIDs).map(r => new compose.Record(this.recordModule, r))
+
+      if (this.labelField.kind === 'Record' && recordLabelField) {
+        this.processing = true
+
+        return this.fetchRecords(namespaceID, [this.labelField], records).finally(stopProcessing)
+      } else if (this.labelField.kind === 'User') {
+        this.processing = true
+
+        return this.fetchUsers([this.labelField], records).finally(stopProcessing)
+      }
     },
 
     onRecordSelectorClick (e, route) {
       e.preventDefault()
 
+      if (!route) {
+        return
+      }
+
       if (this.extraOptions.recordSelectorDisplayOption === 'modal' || this.inModal) {
-        this.$root.$emit('show-record-modal', {
-          recordID: route.params.recordID,
-          recordPageID: route.params.pageID,
-        })
+        if (route.params && route.params.recordID && route.params.pageID) {
+          this.$root.$emit('show-record-modal', {
+            recordID: route.params.recordID,
+            recordPageID: route.params.pageID,
+          })
+        }
       } else if (this.extraOptions.recordSelectorDisplayOption === 'newTab') {
-        window.open(this.$router.resolve(route).href, '_blank')
+        const resolved = this.$router.resolve(route)
+        if (resolved && resolved.href) {
+          window.open(resolved.href, '_blank')
+        }
       }
     },
 
     setDefaultValues () {
       this.processing = false
       this.recordValues = {}
-      this.relRecords = []
-      this.relatedModuleID = undefined
     },
   },
 }
