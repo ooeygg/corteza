@@ -23,6 +23,13 @@ edit:
   edit: Edit module
   fields:
     label: Fields
+    columns:
+      name:
+        label: Name
+      title:
+        label: Title
+      type:
+        label: Type
   federationSettings:
     downstream:
       allFields: All Fields

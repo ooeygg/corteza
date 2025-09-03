@@ -43,6 +43,7 @@
     "@tiptap/core": "^3.3.0",
     "@tiptap/extension-list": "^3.3.0",
     "@tiptap/extension-mention": "^3.3.0",
+    "@tiptap/extension-placeholder": "^3.3.1",
     "@tiptap/extension-table": "^3.3.0",
     "@tiptap/extension-text-align": "^3.3.0",
     "@tiptap/extension-text-style": "^3.3.0",

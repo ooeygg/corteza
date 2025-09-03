@@ -477,6 +477,14 @@ fieldset.required {
     cursor: ew-resize;
     cursor: col-resize;
   }
+
+  .tiptap p.is-editor-empty:first-child::before {
+    color: var(--secondary);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
 }
 
 .ProseMirror.ProseMirror-focused {

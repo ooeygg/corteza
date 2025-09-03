@@ -23,7 +23,7 @@
     </div>
 
     <b-card
-      body-class="d-flex rounded p-0 p-1"
+      body-class="comment-card-body d-flex rounded"
       class="comment-card rounded-lg position-relative"
     >
       <div class="comment-toolbox bg-light rounded-lg">
@@ -178,8 +178,8 @@ export default {
 
 <style lang="scss" scoped>
 .avatar {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
   user-select: none;
 }
@@ -187,13 +187,9 @@ export default {
 .comment-item {
   .comment-time {
     display: block;
-    width: 3.8rem;
+    min-width: 3.25rem;
     opacity: 0;
     transition: opacity 0.2s ease;
-  }
-
-  .comment-time.always-visible {
-    opacity: 1;
   }
 
   .comment-toolbox {
@@ -206,6 +202,10 @@ export default {
   }
 
   .comment-card {
+    .comment-card-body {
+      padding: 0.15rem 0.25rem;
+    }
+
     &.comment-highlighted {
       background-color: var(--light);
     }

@@ -26,7 +26,7 @@
         <section
           v-else-if="comments.length"
           ref="chatContainer"
-          class="flex-grow-1 py-3 px-1 overflow-auto"
+          class="flex-grow-1 py-2 px-1 overflow-auto"
         >
           <div
             v-if="showNewestFirst && hasNextPage"
@@ -44,9 +44,12 @@
           <div
             v-for="dateGroup in comments"
             :key="dateGroup.date"
-            class="date-group d-flex flex-column gap-1 mt-2"
+            class="date-group d-flex flex-column gap-2 mt-2"
           >
-            <div class="d-flex align-items-center justify-content-center gap-3 mx-2 text-muted gap-2">
+            <div
+              v-if="comments.length > 1"
+              class="d-flex align-items-center justify-content-center gap-3 mx-2 text-muted gap-2"
+            >
               <hr class="flex-grow-1 m-0">
               <span>{{ dateGroup.date }}</span>
               <hr class="flex-grow-1 m-0">
@@ -101,17 +104,17 @@
 
         <section
           v-if="canAddRecord"
-          class="d-flex flex-column px-3 py-3 bg-white border-top"
+          class="d-flex flex-column bg-white border-top"
         >
           <div
             v-if="newRecord.replyTo"
-            class="reply-to-container"
+            class="reply-to-container p-3"
           >
             <p class="text-muted">
               Replying to
             </p>
 
-            <div class="position-relative mb-3">
+            <div class="position-relative">
               <div class="reply-to-toolbox">
                 <b-button
                   variant="extra-light"
@@ -137,12 +140,12 @@
             v-if="titleField"
             v-model="newRecord.title"
             class="mb-2"
-            :placeholder="$t('comment.titleInput')"
+            :placeholder="$t('comment.title.placeholder')"
           />
 
           <c-rich-text-input
             v-model="newRecord.content"
-            :placeholder="$t('comment.contentInput')"
+            :placeholder="$t('comment.content.placeholder')"
             :labels="{
               urlPlaceholder: $t('content.urlPlaceholder'),
               ok: $t('content.ok'),
@@ -150,13 +153,14 @@
             min-body-height="4rem"
             max-body-height="10rem"
             body-class="overflow-auto"
+            class="rounded-0"
           />
 
           <c-button-submit
             :text="$t('comment.submit')"
             :disabled="!isValid || isProcessing"
             :processing="submitting"
-            class="ml-auto mt-2"
+            class="ml-auto m-3"
             @submit="createNewRecord()"
           />
         </section>

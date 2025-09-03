@@ -232,7 +232,7 @@
                             <div
                               class="d-flex align-items-center"
                             >
-                              {{ $t('general.label.name') }}
+                              {{ $t('edit.fields.columns.name.label') }}
                               <c-hint
                                 :tooltip="$t('edit.tooltip.name')"
                               />
@@ -245,7 +245,7 @@
                             <div
                               class="d-flex align-items-center"
                             >
-                              {{ $t('general.label.title') }}
+                              {{ $t('edit.fields.columns.title.label') }}
                               <c-hint
                                 :tooltip="$t('edit.tooltip.title')"
                               />
@@ -256,7 +256,7 @@
                             class="text-primary"
                             scope="col"
                           >
-                            {{ $t('general:label.type') }}
+                            {{ $t('edit.fields.columns.type.label') }}
                           </th>
 
                           <th scope="col" />

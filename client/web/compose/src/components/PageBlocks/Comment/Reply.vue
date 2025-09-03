@@ -96,6 +96,7 @@ export default {
 }
 
 .comment-reply {
+  max-height: 6.5rem;
   border-left-color: var(--primary) !important;
   border-left-width: 3px !important;
 

@@ -64,12 +64,18 @@ export default {
       type: String,
       default: '',
     },
+
+    placeholder: {
+      type: String,
+      default: '',
+    },
   },
 
   data () {
-    const formats = getFormats()
     return {
-      formats,
+      formats: getFormats({
+        placeholder: this.placeholder,
+      }),
       toolbar: getToolbar(),
       // Helper to determine if current content differs from prop's content
       emittedContent: false,
@@ -107,7 +113,7 @@ export default {
     init () {
       this.editor = new Editor({
         extensions: this.formats,
-        content: this.value || ' ',
+        content: this.value || '',
         parseOptions: {
           preserveWhitespace: 'full',
         },
@@ -123,9 +129,6 @@ export default {
      */
     onUpdate () {
       this.currentValue = this.editor.getHTML()
-
-      // Makes sure to default to '' as the value if no text is present, for validation purposes
-      this.currentValue = this.currentValue !== '<p><br></p>' ? this.currentValue : ''
 
       this.emittedContent = true
       this.$emit('input', this.currentValue)
