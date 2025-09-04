@@ -4051,6 +4051,64 @@ func getEventTypeDefinitions() []eventTypeDef {
 
 		{
 			ResourceType: "system:user-group",
+			EventType:    "beforeMemberAdd",
+			Properties: []eventTypePropertyDef{
+
+				{
+					Name:      "userGroup",
+					Type:      "",
+					Immutable: false,
+				},
+
+				{
+					Name:      "oldUserGroup",
+					Type:      "",
+					Immutable: true,
+				},
+			},
+			Constraints: []eventTypeConstraintDef{
+
+				{
+					Name: "userGroup.handle",
+				},
+
+				{
+					Name: "userGroup.name",
+				},
+			},
+		},
+
+		{
+			ResourceType: "system:user-group",
+			EventType:    "beforeMemberRemove",
+			Properties: []eventTypePropertyDef{
+
+				{
+					Name:      "userGroup",
+					Type:      "",
+					Immutable: false,
+				},
+
+				{
+					Name:      "oldUserGroup",
+					Type:      "",
+					Immutable: true,
+				},
+			},
+			Constraints: []eventTypeConstraintDef{
+
+				{
+					Name: "userGroup.handle",
+				},
+
+				{
+					Name: "userGroup.name",
+				},
+			},
+		},
+
+		{
+			ResourceType: "system:user-group",
 			EventType:    "afterCreate",
 			Properties: []eventTypePropertyDef{
 
@@ -4110,6 +4168,64 @@ func getEventTypeDefinitions() []eventTypeDef {
 		{
 			ResourceType: "system:user-group",
 			EventType:    "afterDelete",
+			Properties: []eventTypePropertyDef{
+
+				{
+					Name:      "userGroup",
+					Type:      "",
+					Immutable: false,
+				},
+
+				{
+					Name:      "oldUserGroup",
+					Type:      "",
+					Immutable: true,
+				},
+			},
+			Constraints: []eventTypeConstraintDef{
+
+				{
+					Name: "userGroup.handle",
+				},
+
+				{
+					Name: "userGroup.name",
+				},
+			},
+		},
+
+		{
+			ResourceType: "system:user-group",
+			EventType:    "afterMemberAdd",
+			Properties: []eventTypePropertyDef{
+
+				{
+					Name:      "userGroup",
+					Type:      "",
+					Immutable: false,
+				},
+
+				{
+					Name:      "oldUserGroup",
+					Type:      "",
+					Immutable: true,
+				},
+			},
+			Constraints: []eventTypeConstraintDef{
+
+				{
+					Name: "userGroup.handle",
+				},
+
+				{
+					Name: "userGroup.name",
+				},
+			},
+		},
+
+		{
+			ResourceType: "system:user-group",
+			EventType:    "afterMemberRemove",
 			Properties: []eventTypePropertyDef{
 
 				{
