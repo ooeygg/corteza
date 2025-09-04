@@ -231,7 +231,6 @@ fieldset.required {
   p {
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.6;
   }
 
   /* Headings */
@@ -465,12 +464,11 @@ fieldset.required {
 
   .mention {
     background-color: var(--extra-light);
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
+    padding: 0rem 0.2rem;
     box-decoration-break: clone;
     color: var(--primary);
-    padding: 0.125rem 0.275rem;
-    font-weight: 500;
-    border: 1px solid var(--light);
+    border: 1px solid var(--extra-light);
   }
 
   .resize-cursor {

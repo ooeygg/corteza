@@ -153,7 +153,7 @@
             min-body-height="4rem"
             max-body-height="10rem"
             body-class="overflow-auto"
-            class="rounded-0"
+            style="border: none !important;"
           />
 
           <c-button-submit

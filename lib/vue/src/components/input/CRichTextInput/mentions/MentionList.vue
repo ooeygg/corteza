@@ -114,7 +114,6 @@ export default {
   font-family: var(--font-regular);
 }
 
-// Mirroring CInputSelect's vs__dropdown-option styles
 .mention-option {
   display: block;
   width: 100%;
