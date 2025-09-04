@@ -91,14 +91,14 @@ export function getFieldFilter (name, kind, query = '', operator = '=') {
   }
 
   if (['DateTime'].includes(kind)) {
-    const dataFmtEntry = (date) => `TIMESTAMP(DATE_FORMAT('${date.format()}', '%Y-%m-%dT%H:%i:00.%f+00:00'))`
+    const dataFmtEntry = (date) => `TIMESTAMP(DATE_FORMAT('${date.format()}', '%Y-%m-%dT%H:%i:%s.%f+00:00'))`
 
     if (['BETWEEN', 'NOT BETWEEN'].includes(operator)) {
       const startDateTime = moment(query.start, 'YYYY-MM-DDTHH:mm:ssZ', true)
       const endDateTime = moment(query.end, 'YYYY-MM-DDTHH:mm:ssZ', true)
 
       if (startDateTime.isValid() && endDateTime.isValid()) {
-        return build(operator, `TIMESTAMP(DATE_FORMAT(${name}, '%Y-%m-%dT%H:%i:00.%f+00:00'))`, `${dataFmtEntry(startDateTime)} ${dataFmtEntry(endDateTime)}`)
+        return build(operator, `TIMESTAMP(DATE_FORMAT(${name}, '%Y-%m-%dT%H:%i:%s.%f+00:00'))`, `${dataFmtEntry(startDateTime)} ${dataFmtEntry(endDateTime)}`)
       }
 
       const startDate = moment(query.start, 'YYYY-MM-DD', true)
@@ -125,7 +125,7 @@ export function getFieldFilter (name, kind, query = '', operator = '=') {
       // * changing Z to +00:00
       // * doing the same for time-only fields
       if (dateTime.isValid()) {
-        return build(operator, `TIMESTAMP(DATE_FORMAT(${name}, '%Y-%m-%dT%H:%i:00.%f+00:00'))`, dataFmtEntry(dateTime))
+        return build(operator, `TIMESTAMP(DATE_FORMAT(${name}, '%Y-%m-%dT%H:%i:%s.%f+00:00'))`, dataFmtEntry(dateTime))
       } else if (date.isValid()) {
         return build(operator, name, `DATE('${query}')`)
       } else if (time.isValid()) {
