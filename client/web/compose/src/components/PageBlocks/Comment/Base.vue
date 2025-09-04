@@ -161,7 +161,7 @@
             :disabled="!isValid || isProcessing"
             :processing="submitting"
             class="ml-auto m-3"
-            @submit="createNewRecord()"
+            @submit="submitComment()"
           />
         </section>
 
@@ -213,7 +213,7 @@
 import { NoID, compose, fmt } from '@cortezaproject/corteza-js'
 import { components } from '@cortezaproject/corteza-vue'
 import axios from 'axios'
-import { evaluatePrefilter, isFieldInFilter } from 'corteza-webapp-compose/src/lib/record-filter'
+import { evaluatePrefilter, getFieldFilter, isFieldInFilter } from 'corteza-webapp-compose/src/lib/record-filter'
 import records from 'corteza-webapp-compose/src/mixins/records'
 import users from 'corteza-webapp-compose/src/mixins/users'
 import { mapGetters } from 'vuex'
@@ -269,6 +269,9 @@ export default {
         show: false,
         comment: null,
       },
+
+      commentRefreshInterval: null,
+      autoFetching: false,
     }
   },
 
@@ -279,6 +282,32 @@ export default {
       findUserByID: 'user/findByID',
       findRecordByID: 'record/findByID',
     }),
+
+    lastCommentTimestamp () {
+      if (this.comments.length === 0) {
+        return null
+      }
+
+      const { messages = [] } = this.comments[this.comments.length - 1] || {}
+
+      if (messages.length === 0) {
+        return null
+      }
+
+      const { comments = [] } = messages[messages.length - 1] || {}
+
+      if (comments.length === 0) {
+        return null
+      }
+
+      const comment = comments[comments.length - 1]
+
+      if (!comment) {
+        return null
+      }
+
+      return comment.createdAt
+    },
 
     roModule () {
       return this.getModuleByID(this.moduleID)
@@ -384,6 +413,7 @@ export default {
 
   created () {
     this.refreshBlock(this.refresh)
+    this.startAutoRefresh()
   },
 
   mounted () {
@@ -401,6 +431,20 @@ export default {
       this.$root.$on('module-records-updated', this.refreshOnRelatedRecordsUpdate)
       this.$root.$on('record-field-change', this.refetchOnPrefilterValueChange)
       this.$root.$on('refetch-records', this.refresh)
+    },
+
+    startAutoRefresh () {
+      this.commentRefreshInterval = setInterval(() => {
+        if (!this.showNewestFirst && (this.filter.nextPage || this.autoFetching || this.submitting)) {
+          return
+        }
+
+        this.autoFetching = true
+
+        this.loadNewComments().finally(() => {
+          this.autoFetching = false
+        })
+      }, 5000)
     },
 
     refetchOnPrefilterValueChange ({ fieldName }) {
@@ -438,24 +482,52 @@ export default {
       return fmt.time(date)
     },
 
-    mergeMessageGroups (existing, newGroups) {
+    loadNewComments () {
+      const filter = [
+        this.expandFilter(),
+        this.lastCommentTimestamp ? `${getFieldFilter('createdAt', 'DateTime', this.lastCommentTimestamp, '>')}` : '',
+      ].filter(Boolean).join(' AND ')
+
+      return this.fetchCommentRecords(this.roModule, filter, false).then(newComments => {
+        this.comments = this.mergeMessageGroups(this.comments, newComments, false)
+      })
+    },
+
+    mergeMessageGroups (existing, newGroups, showNewestFirst = this.showNewestFirst) {
       if (!existing.length || !newGroups.length) {
-        return this.showNewestFirst ? [...newGroups, ...existing] : [...existing, ...newGroups]
+        return showNewestFirst ? [...newGroups, ...existing] : [...existing, ...newGroups]
       }
 
-      const [existingGroup, newGroup] = this.showNewestFirst
+      const [existingGroup, newGroup] = showNewestFirst
         ? [existing[0], newGroups[newGroups.length - 1]]
         : [existing[existing.length - 1], newGroups[0]]
 
       if (existingGroup.date === newGroup.date) {
-        existingGroup.messages = this.showNewestFirst
-          ? [...newGroup.messages, ...existingGroup.messages]
-          : [...existingGroup.messages, ...newGroup.messages]
+        if (showNewestFirst) {
+          existingGroup.messages = [...newGroup.messages, ...existingGroup.messages]
+        } else {
+          // Merge messages from newGroup into existingGroup
+          newGroup.messages.forEach(newMessage => {
+            const lastExistingMessage = existingGroup.messages[existingGroup.messages.length - 1]
 
-        this.showNewestFirst ? newGroups.pop() : newGroups.shift()
+            // If the last message in existing group has the same author, merge the comments
+            if (!showNewestFirst && lastExistingMessage && lastExistingMessage.authorId === newMessage.authorId) {
+              lastExistingMessage.comments = showNewestFirst
+                ? [...newMessage.comments, ...lastExistingMessage.comments]
+                : [...lastExistingMessage.comments, ...newMessage.comments]
+            } else {
+              // Add as a new message group
+              existingGroup.messages = showNewestFirst
+                ? [...existingGroup.messages, newMessage]
+                : [newMessage, ...existingGroup.messages]
+            }
+          })
+        }
+
+        showNewestFirst ? newGroups.pop() : newGroups.shift()
       }
 
-      return this.showNewestFirst
+      return showNewestFirst
         ? [...newGroups, ...existing]
         : [...existing, ...newGroups]
     },
@@ -565,7 +637,7 @@ export default {
       container.scrollTop = container.scrollHeight
     },
 
-    createNewRecord () {
+    submitComment () {
       this.submitting = true
 
       const record = new compose.Record(this.roModule)
@@ -586,19 +658,23 @@ export default {
         record.values[this.replyField.name] = this.newRecord.replyTo.recordID
       }
 
-      this.$ComposeAPI.recordCreate(record).then(rec => {
+      return this.$ComposeAPI.recordCreate(record).then(rec => {
         rec = new compose.Record(this.roModule, rec)
 
         this.newRecord.title = ''
         this.newRecord.content = ''
         this.newRecord.replyTo = null
 
-        this.showNewestFirst = true
-        this.filter.nextPage = ''
+        if (this.showNewestFirst) {
+          return this.loadNewComments()
+        } else {
+          this.showNewestFirst = true
+          this.filter.nextPage = ''
 
-        return this.fetchCommentRecords(this.roModule, this.expandFilter()).then(groupedRecords => {
-          this.comments = groupedRecords
-        })
+          return this.fetchCommentRecords(this.roModule, this.expandFilter()).then(groupedRecords => {
+            this.comments = groupedRecords
+          })
+        }
       })
         .catch(this.toastErrorHandler(this.$t('notification:record.createFailed')))
         .finally(() => {
@@ -640,7 +716,7 @@ export default {
       return ''
     },
 
-    async fetchCommentRecords (module, query) {
+    async fetchCommentRecords (module, query, useNextPage = true) {
       if (module.moduleID !== this.options.moduleID) {
         throw Error('Module incompatible, module mismatch')
       }
@@ -654,7 +730,7 @@ export default {
 
       let sort = this.showNewestFirst ? 'createdAt DESC' : 'createdAt ASC'
 
-      if (this.filter.nextPage) {
+      if (useNextPage && this.filter.nextPage) {
         sort = ''
       }
 
@@ -665,15 +741,17 @@ export default {
         moduleID,
         query,
         sort,
-        limit: this.filter.limit,
-        pageCursor: this.filter.nextPage,
+        limit: useNextPage ? this.filter.limit : 500,
+        pageCursor: useNextPage ? this.filter.nextPage : '',
       }
 
       const { response, cancel } = this.$ComposeAPI.recordListCancellable(params)
       this.abortableRequests.push(cancel)
 
       return response().then(({ set = [], filter = {} }) => {
-        this.filter.nextPage = filter.nextPage || ''
+        if (useNextPage) {
+          this.filter.nextPage = filter.nextPage || ''
+        }
 
         const comments = set.map(r => new compose.Record(module, r))
 
@@ -839,6 +917,12 @@ export default {
       this.replyModal = {
         show: false,
         comment: null,
+      }
+
+      this.autoFetching = false
+      if (this.commentRefreshInterval) {
+        clearInterval(this.commentRefreshInterval)
+        this.commentRefreshInterval = null
       }
     },
 
