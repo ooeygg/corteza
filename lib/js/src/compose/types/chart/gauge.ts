@@ -109,8 +109,8 @@ export default class GaugeChart extends BaseChart {
             name: this.name,
           } : undefined,
         },
-        top: 15,
-        right: 5,
+        top: 23,
+        right: 2,
       },
       grid: {
         bottom: 0,

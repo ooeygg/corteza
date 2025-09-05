@@ -334,8 +334,8 @@ export default class Chart extends BaseChart {
             name: this.name,
           } : undefined,
         },
-        top: 15,
-        right: 5,
+        top: 23,
+        right: 2,
       },
       dataZoom,
       legend: {

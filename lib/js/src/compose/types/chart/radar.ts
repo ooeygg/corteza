@@ -65,6 +65,8 @@ export default class RadarChart extends BaseChart {
             name: this.name,
           } : undefined,
         },
+        top: 23,
+        right: 2,
       },
       legend: {
         show: !l?.isHidden,

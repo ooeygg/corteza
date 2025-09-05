@@ -113,8 +113,8 @@ export default class FunnelChart extends BaseChart {
             name: this.name,
           } : undefined,
         },
-        top: 15,
-        right: 5,
+        top: 23,
+        right: 2,
       },
       tooltip: {
         trigger: 'item',

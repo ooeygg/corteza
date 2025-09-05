@@ -17,8 +17,11 @@
     <template v-if="options.liveFilterEnabled">
       <b-button
         variant="outline-light"
-        class="chart__livefilter-btn position-absolute d-flex d-print-none border-0 px-1"
-        :class="[!!liveFilterValue && !liveFilterModal.show ? 'text-primary' : 'text-secondary']"
+        class="chart-filter-button position-absolute d-flex d-print-none border-0 px-1"
+        :class="[
+          hasLiveFilter ? 'text-primary' : 'text-secondary',
+          hasSaveChartEnabled && 'save-chart-enabled'
+        ]"
         @click="showFilterModal"
       >
         <font-awesome-icon
@@ -190,6 +193,20 @@ export default {
     liveFilterPreview () {
       return this.getFilter(this.liveFilterModal.value, this.liveFilterModal.option)
     },
+
+    hasSaveChartEnabled () {
+      const { config = {} } = this.chart || {}
+
+      if (!config.toolbox) {
+        return false
+      }
+
+      return config.toolbox.saveAsImage
+    },
+
+    hasLiveFilter () {
+      return !!this.liveFilterValue
+    },
   },
 
   watch: {
@@ -311,7 +328,7 @@ export default {
       this.liveFilterOption = this.liveFilterModal.option
 
       this.liveFilterModal.show = false
-      this.refresh()
+      this.updateChart()
     },
 
     resetLiveFilter () {
@@ -325,11 +342,15 @@ export default {
 
     refresh () {
       this.fetchChart({ force: true }).then(() => {
-        if (this.chart) {
-          this.chart.config.noAnimation = true
-          this.key++
-        }
+        this.updateChart()
       })
+    },
+
+    updateChart () {
+      if (this.chart) {
+        this.chart.config.noAnimation = true
+        this.key++
+      }
     },
 
     /**
@@ -429,9 +450,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.chart__livefilter-btn {
+.chart-filter-button {
   right: 0.5rem;
-  top: 1.5rem;
+  top: 2rem;
   z-index: 1;
+
+  &.save-chart-enabled {
+    right: 2.2rem;
+  }
 }
 </style>
