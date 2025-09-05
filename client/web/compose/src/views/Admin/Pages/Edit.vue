@@ -7,9 +7,25 @@
     </portal>
 
     <portal to="topbar-tools">
+      <b-button
+        v-if="page && isRecordPage && page.canUpdatePage"
+        variant="primary"
+        :disabled="!moduleEditor"
+        :to="moduleEditor"
+        size="sm"
+        class="d-flex align-items-center mr-2"
+      >
+        {{ $t('navigation.editModule') }}
+        <font-awesome-icon
+          :icon="['far', 'edit']"
+          class="ml-2"
+        />
+      </b-button>
+
       <b-button-group
         v-if="page && page.canUpdatePage"
         size="sm"
+        class="text-nowrap"
       >
         <b-button
           data-test-id="button-page-builder"
@@ -936,17 +952,17 @@
 </template>
 
 <script>
-import { isEqual } from 'lodash'
-import { mapGetters, mapActions } from 'vuex'
+import { NoID, compose } from '@cortezaproject/corteza-js'
+import { components, handle } from '@cortezaproject/corteza-vue'
 import EditorToolbar from 'corteza-webapp-compose/src/components/Admin/EditorToolbar'
 import PageTranslator from 'corteza-webapp-compose/src/components/Admin/Page/PageTranslator'
 import PageLayoutTranslator from 'corteza-webapp-compose/src/components/Admin/PageLayout/PageLayoutTranslator'
-import pages from 'corteza-webapp-compose/src/mixins/pages'
 import Uploader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/Uploader'
-import Draggable from 'vuedraggable'
-import { compose, NoID } from '@cortezaproject/corteza-js'
-import { handle, components } from '@cortezaproject/corteza-vue'
 import autocomplete from 'corteza-webapp-compose/src/mixins/autocomplete.js'
+import pages from 'corteza-webapp-compose/src/mixins/pages'
+import { isEqual } from 'lodash'
+import Draggable from 'vuedraggable'
+import { mapActions, mapGetters } from 'vuex'
 const { CInputRole, CInputExpression } = components
 
 export default {
@@ -1048,6 +1064,11 @@ export default {
       const { pageID } = this.page
       const name = this.isRecordPage ? 'page.record.create' : 'page'
       return { name, params: { pageID } }
+    },
+
+    moduleEditor () {
+      if (!this.module) return undefined
+      return { name: 'admin.modules.edit', params: { moduleID: this.module.moduleID } }
     },
 
     isRecordPage () {

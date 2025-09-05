@@ -1,6 +1,6 @@
 import { compose } from '@cortezaproject/corteza-js'
-import { mapGetters, mapActions } from 'vuex'
 import PageTranslator from 'corteza-webapp-compose/src/components/Admin/Page/PageTranslator'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -61,6 +61,12 @@ export default {
     pageBuilder () {
       const { pageLayoutID } = this.layout || {}
       return { name: 'admin.pages.builder', params: { pageID: this.page.pageID }, query: { layoutID: pageLayoutID } }
+    },
+
+    moduleEditor () {
+      if (!this.module) return undefined
+
+      return { name: 'admin.modules.edit', params: { moduleID: this.module.moduleID } }
     },
   },
 

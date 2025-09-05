@@ -12,20 +12,37 @@
 
     <portal to="topbar-tools">
       <c-input-select
-        v-if="layout && layouts.length > 1"
+        v-if="page && layout && layouts.length > 1"
         ref="layoutSelect"
         :value="layout.pageLayoutID"
         :options="layouts"
         :reduce="layout => layout.pageLayoutID"
         size="sm"
         style="min-width: 250px; max-width: 300px;"
+        class="mr-2"
         @input="setLayout"
       />
 
-      <b-button-group
-        v-if="page.canUpdatePage"
+      <b-button
+        v-if="page && isRecordPage"
+        variant="primary"
+        :disabled="!moduleEditor"
+        :to="moduleEditor"
+        style="margin-right:2px;"
         size="sm"
-        class="ml-2 text-nowrap"
+        class="d-flex align-items-center mr-2"
+      >
+        {{ $t('navigation.editModule') }}
+        <font-awesome-icon
+          :icon="['far', 'edit']"
+          class="ml-2"
+        />
+      </b-button>
+
+      <b-button-group
+        v-if="page && page.canUpdatePage"
+        size="sm"
+        class="text-nowrap"
       >
         <b-button
           variant="primary"
@@ -457,11 +474,19 @@ export default {
     },
 
     module () {
-      if (this.page && this.page.moduleID !== NoID) {
-        return this.$store.getters['module/getByID'](this.page.moduleID)
-      } else {
-        return undefined
-      }
+      if (!this.page || this.page.moduleID === NoID) return undefined
+
+      return this.$store.getters['module/getByID'](this.page.moduleID)
+    },
+
+    isRecordPage () {
+      return !!this.module
+    },
+
+    moduleEditor () {
+      if (!this.module) return undefined
+
+      return { name: 'admin.modules.edit', params: { moduleID: this.module.moduleID }, query: null }
     },
 
     /**

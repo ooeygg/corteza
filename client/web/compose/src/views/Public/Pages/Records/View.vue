@@ -7,9 +7,25 @@
     </portal>
 
     <portal to="topbar-tools">
+      <b-button
+        v-if="page && isRecordPage && page.canUpdatePage"
+        variant="primary"
+        :disabled="!moduleEditor"
+        :to="moduleEditor"
+        size="sm"
+        class="d-flex align-items-center mr-2"
+      >
+        {{ $t('navigation.editModule') }}
+        <font-awesome-icon
+          :icon="['far', 'edit']"
+          class="ml-2"
+        />
+      </b-button>
+
       <b-button-group
         v-if="page && page.canUpdatePage"
         size="sm"
+        class="text-nowrap"
       >
         <b-button
           data-test-id="button-page-builder"

@@ -116,6 +116,7 @@ moduleEdit: Edit module
 navigation:
   page: Pages
   viewPage: View Page
+  editModule: Edit module
 noBlock: No block added yet
 noPages: No pages
 notVisible: Hidden
