@@ -81,10 +81,6 @@ export default {
 
       return t
     },
-
-    label () {
-      return this.pVal('label', '')
-    },
   },
 
   beforeMount () {

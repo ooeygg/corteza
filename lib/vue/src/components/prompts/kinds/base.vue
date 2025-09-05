@@ -18,6 +18,10 @@ export default {
     message () {
       return this.pVal('message', '')
     },
+
+    label () {
+      return this.pVal('label', '')
+    },
   },
 
   methods: {

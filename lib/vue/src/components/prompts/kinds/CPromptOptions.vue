@@ -7,7 +7,7 @@
     />
 
     <b-form-group
-      :label="pVal('label', 'Input')"
+      :label="label"
       label-class="text-primary"
     >
       <c-input-select
@@ -19,7 +19,7 @@
         append-to-body
         label="text"
         :get-option-key="r => r.value"
-        :placeholder="pVal('placeholder', 'Select an option')"
+        :placeholder="placeholder"
         :reduce="r => r.value"
         class="w-100"
       />
@@ -90,6 +90,10 @@ export default {
 
     multiple () {
       return this.pVal('multiselect', false)
+    },
+
+    placeholder () {
+      return this.pVal('placeholder', 'Select an option')
     },
   },
 

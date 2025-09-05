@@ -7,7 +7,7 @@
     />
 
     <b-form-group
-      :label="pVal('label', '')"
+      :label="label"
       label-class="text-primary"
     >
       <c-input-select
@@ -17,7 +17,7 @@
         :loading="processing"
         append-to-body
         option-value="recordID"
-        :placeholder="pVal('placeholder', 'Select a record')"
+        :placeholder="placeholder"
         :filterable="false"
         :reduce="r => r.recordID"
         class="w-100"
@@ -100,6 +100,10 @@ export default {
     hasNextPage () {
       return !!this.filter.nextPage
     },
+
+    placeholder () {
+      return this.pVal('placeholder', 'Select a record')
+    },
   },
 
   watch: {
@@ -167,7 +171,7 @@ export default {
         return { '@type': 'Any', '@value': null }
       }
 
-      const record = this.options.find(({ recordID }) => recordID === this.value)
+      const { record = {} } = this.options.find(({ recordID }) => recordID === this.value) || {}
 
       return { '@type': 'ComposeRecord', '@value': record }
     },

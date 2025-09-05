@@ -4,6 +4,7 @@
     <c-prompt-modal />
   </div>
 </template>
+
 <script>
 import CPromptToast from './CPromptToast.vue'
 import CPromptModal from './CPromptModal.vue'
