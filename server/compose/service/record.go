@@ -309,6 +309,11 @@ func (svc record) lookup(ctx context.Context, namespaceID, moduleID uint64, look
 
 		dd, err = svc.DupDetection(ctx, m, r)
 
+		// Attach meta ID to each value error for FE identification
+		if r != nil && dd != nil {
+			dd.SetMetaID(r.ID)
+		}
+
 		return nil
 	}()
 

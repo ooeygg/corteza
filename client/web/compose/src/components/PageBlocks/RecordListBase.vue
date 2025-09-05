@@ -974,14 +974,6 @@ export default {
     records,
   ],
 
-  props: {
-    errors: {
-      type: validator.Validated,
-      required: false,
-      default: () => new validator.Validated(),
-    },
-  },
-
   data () {
     return {
       uniqueID: undefined,
@@ -1519,11 +1511,22 @@ export default {
 
     // Grabs errors specific to this record item
     recordErrors (item, field) {
-      if (field) {
-        return this.errors.filterByMeta('id', item.id)
-          .filterByMeta('field', field.key)
+      const id = `${item.id}:${field.key}`
+
+      if (!this.errors) {
+        this.$emit('errors', { errors: undefined, id })
+        return new validator.Validated()
       }
-      return this.errors.filterByMeta('id', item.id)
+
+      const errors = this.errors.filterByMeta('id', item.id).filterByMeta('field', field.key)
+
+      if (errors.set.length > 0) {
+        this.$emit('errors', { errors, id })
+      } else {
+        this.$emit('errors', { errors: undefined, id })
+      }
+
+      return errors
     },
 
     wrapRecord (r, id) {

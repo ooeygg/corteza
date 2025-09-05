@@ -22,8 +22,6 @@
         style="height: 1.5rem; min-width: 15rem;"
       />
     </template>
-
-    <errors :errors="errors" />
   </div>
 </template>
 

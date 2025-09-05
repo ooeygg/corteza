@@ -11,8 +11,6 @@
       :hide-file-name="field.options.hideFileName"
       :preview-options="options"
     />
-
-    <errors :errors="errors" />
   </div>
 </template>
 

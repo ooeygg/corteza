@@ -46,6 +46,13 @@
         <template #title>
           <span>
             {{ getTabTitle(tab, index) }}
+
+            <font-awesome-icon
+              v-if="hasTabErrors(index)"
+              :icon="['fas', 'exclamation-triangle']"
+              :class="errorTriangleClass(index)"
+              class="ml-1"
+            />
           </span>
 
           <div
@@ -115,6 +122,7 @@
           :module="module"
           :magnified="magnified"
           header-class="border-0 border-white"
+          @errors="setTabErrors(index, $event)"
         />
 
         <div
@@ -149,6 +157,13 @@ export default {
   },
 
   extends: base,
+
+  data () {
+    return {
+      tabErrors: [],
+      tabErrorKinds: [],
+    }
+  },
 
   computed: {
     tabbedBlocks () {
@@ -262,6 +277,37 @@ export default {
     isTabLazy ({ block = {} }) {
       const { kind } = block
       return ['Calendar', 'Metric', 'Geometry'].includes(kind)
+    },
+
+    setTabErrors (index, { errors, id }) {
+      if (!this.tabErrors[index]) {
+        this.$set(this.tabErrors, index, {})
+      }
+
+      if (!errors) {
+        this.$set(this.tabErrors[index], id, undefined)
+      } else {
+        const errorKind = errors.set.some(error => error.kind.includes('error')) ? 'error' : 'warning'
+        this.$set(this.tabErrors[index], id, errorKind)
+      }
+    },
+
+    hasTabErrors (index) {
+      if (!this.tabErrors[index]) {
+        return false
+      }
+
+      return Object.values(this.tabErrors[index]).filter(error => !!error).length > 0
+    },
+
+    errorTriangleClass (index) {
+      const errorKinds = Object.values(this.tabErrors[index]).filter(error => !!error)
+
+      if (errorKinds.length > 0) {
+        return errorKinds.includes('error') ? 'text-danger' : 'text-warning'
+      } else {
+        return undefined
+      }
     },
   },
 }

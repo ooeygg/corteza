@@ -1,8 +1,8 @@
 // This mixin is used on View component of Records.
 
-import { compose, validator, NoID } from '@cortezaproject/corteza-js'
-import { mapGetters } from 'vuex'
+import { NoID, compose, validator } from '@cortezaproject/corteza-js'
 import { throttle } from 'lodash'
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
@@ -149,12 +149,14 @@ export default {
           }
         }).catch(err => {
           this.processing = false
+
           const { details = undefined } = err
+
           if (!!details && Array.isArray(details) && details.length > 0) {
             this.errors = new validator.Validated()
             this.errors.push(...details)
 
-            throw new Error(this.$t('notification:record.validationErrors'))
+            throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorsFields() }))
           }
 
           throw err
@@ -163,9 +165,11 @@ export default {
         }).then(() => this.dispatchUiEvent('afterFormSubmit', record, { $records: records }))
         .then(() => {
           setTimeout(() => {
-            // reset the record initial state in cases where the record edit page is redirected to the record view page
             if (record.valueErrors.set) {
-              this.toastWarning(this.$t('notification:record.validationWarnings'))
+              this.initialRecordState = record.clone()
+              this.$root.$emit('refetch-records', { recordID: record.recordID })
+              this.toastWarning(this.$t('notification:record.validationWarnings', { fields: this.getValidationErrorsFields({ errors: record.valueErrors, includeWarnings: true }) }))
+
               this.processing = false
             } else {
               this.initialRecordState = this.record.clone()
@@ -341,6 +345,22 @@ export default {
         })
     }, 500),
 
+    getValidationErrorsFields ({ errors = this.errors, includeWarnings = false, includeErrors = true } = {}) {
+      const { set = [] } = errors || {}
+
+      const fields = new Set(set.filter(d => {
+        if (includeWarnings) {
+          return d.kind.includes('warning')
+        } else if (includeErrors) {
+          return d.kind.includes('error')
+        }
+
+        return true
+      }).map(d => d.meta.field))
+
+      return Array.from(fields).join(', ')
+    },
+
     /**
      * Validates record and dispatches onFormSubmitError
      *
@@ -399,7 +419,7 @@ export default {
       await this.dispatchUiEvent('onFormSubmitError')
       vRunner()
       if (!this.errors.valid()) {
-        throw new Error(this.$t('notification:record.validationErrors'))
+        throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorsFields() }))
       }
     },
 

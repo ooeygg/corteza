@@ -3,21 +3,12 @@
     <!-- Extra empty line is added thanks to white-space: pre-line (multivalue) if we write div in multiple lines  -->
     <!-- eslint-disable-next-line -->
     <div :class="classes">{{ formatted }}</div>
-
-    <errors :errors="errors" />
   </div>
 </template>
 <script>
-import errors from '../errors'
-import { compose, validator } from '@cortezaproject/corteza-js'
+import { compose } from '@cortezaproject/corteza-js'
 
 export default {
-  components: {
-    // errors is used in the components that extends base
-    // eslint-disable-next-line vue/no-unused-components
-    errors,
-  },
-
   props: {
     namespace: {
       type: compose.Namespace,
@@ -32,11 +23,6 @@ export default {
     record: {
       type: compose.Record,
       required: true,
-    },
-
-    errors: {
-      type: validator.Validated,
-      default () { return new validator.Validated() },
     },
 
     valueOnly: {

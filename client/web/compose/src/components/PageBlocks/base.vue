@@ -1,5 +1,5 @@
 <script>
-import { compose, NoID } from '@cortezaproject/corteza-js'
+import { compose, NoID, validator } from '@cortezaproject/corteza-js'
 import Wrap from './Wrap'
 
 export default {
@@ -83,6 +83,12 @@ export default {
       required: false,
       default: false,
     },
+
+    errors: {
+      type: validator.Validated,
+      required: false,
+      default: () => new validator.Validated(),
+    },
   },
 
   data () {
@@ -121,6 +127,11 @@ export default {
     isRecordPage () {
       return this.page && this.page.moduleID !== NoID
     },
+
+    errorID () {
+      const { recordID = NoID } = this.record || {}
+      return recordID === NoID ? 'parent:0' : recordID
+    },
   },
 
   beforeDestroy () {
@@ -152,6 +163,28 @@ export default {
       }, this.options.refreshRate * 1000)
 
       this.refreshInterval = interval
+    },
+
+    /**
+     * Returns errors, filtered for a specific field
+     * @param name
+     * @returns {validator.Validated} filtered validation results
+     */
+    fieldErrors (name) {
+      if (!this.errors) {
+        this.$emit('errors', { errors: undefined, id: `${this.errorID}:${name}` })
+        return new validator.Validated()
+      }
+
+      const errors = this.errors.filterByMeta('field', name).filterByMeta('id', this.errorID)
+
+      if (errors.set.length > 0) {
+        this.$emit('errors', { errors, id: `${this.errorID}:${name}` })
+      } else {
+        this.$emit('errors', { errors: undefined, id: `${this.errorID}:${name}` })
+      }
+
+      return errors
     },
   },
 }

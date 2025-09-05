@@ -88,7 +88,7 @@
   </wrap>
 </template>
 <script>
-import { validator, NoID } from '@cortezaproject/corteza-js'
+import { NoID } from '@cortezaproject/corteza-js'
 import base from './base'
 import users from 'corteza-webapp-compose/src/mixins/users'
 import records from 'corteza-webapp-compose/src/mixins/records'
@@ -116,14 +116,6 @@ export default {
     conditionalFields,
     recordLayout,
   ],
-
-  props: {
-    errors: {
-      type: validator.Validated,
-      required: false,
-      default: undefined,
-    },
-  },
 
   computed: {
     fields () {
@@ -160,11 +152,6 @@ export default {
       }
 
       return { 'min-width': '20rem' }
-    },
-
-    errorID () {
-      const { recordID = NoID } = this.record || {}
-      return recordID === NoID ? 'parent:0' : recordID
     },
 
     isProcessing () {
@@ -233,21 +220,6 @@ export default {
   },
 
   methods: {
-    /**
-     * Returns errors, filtered for a specific field
-     * @param name
-     * @returns {validator.Validated} filtered validation results
-     */
-    fieldErrors (name) {
-      if (!this.errors) {
-        return new validator.Validated()
-      }
-
-      return this.errors
-        .filterByMeta('field', name)
-        .filterByMeta('id', this.errorID)
-    },
-
     onFieldChange: debounce(function (field) {
       this.$root.$emit('record-field-change', {
         fieldName: field.name,

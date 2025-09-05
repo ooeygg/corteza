@@ -4,16 +4,17 @@
       v-for="(error, i) in set"
       :key="i"
       force-show
-      class="m-0"
+      class="mt-1"
     >
       <span
-        :class="{ 'text-secondary': error.kind.includes('warning') }"
+        :class="{ 'text-warning': error.kind.includes('warning') }"
       >
         {{ $t(error.message, { interpolation: { escapeValue: false }, value: error.meta.value}) }}
       </span>
     </b-form-invalid-feedback>
   </div>
 </template>
+
 <script>
 import { validator } from '@cortezaproject/corteza-js'
 

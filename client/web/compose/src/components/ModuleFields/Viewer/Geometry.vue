@@ -33,8 +33,6 @@
         @on-geosearch-error="onGeoSearchError"
       />
     </b-modal>
-
-    <errors :errors="errors" />
   </div>
 </template>
 <script>

@@ -14,8 +14,6 @@
 
       {{ index !== value.length - 1 ? field.options.multiDelimiter : '' }}
     </span>
-
-    <errors :errors="errors" />
   </div>
 </template>
 

@@ -10,8 +10,6 @@
         v-html="formatted"
       />
     </div>
-
-    <errors :errors="errors" />
   </div>
 </template>
 <script>
