@@ -1,5 +1,5 @@
-import { PageBlock, Registry } from '../base'
 import { Apply } from '../../../../cast'
+import { PageBlock, Registry } from '../base'
 import Feed, { FeedInput } from './feed'
 import { RecordFeed } from './feed-record'
 
@@ -20,6 +20,7 @@ interface Options {
   showRefresh: boolean;
   magnifyOption: string;
   displayOption: string;
+  hideGeoSearch: boolean;
 }
 
 const defaults: Readonly<Options> = Object.freeze({
@@ -35,6 +36,7 @@ const defaults: Readonly<Options> = Object.freeze({
   showRefresh: false,
   magnifyOption: '',
   displayOption: 'sameTab',
+  hideGeoSearch: true,
 })
 
 export class PageBlockGeometry extends PageBlock {
@@ -59,7 +61,7 @@ export class PageBlockGeometry extends PageBlock {
 
     Apply(this.options, o, String, 'magnifyOption', 'displayOption')
     Apply(this.options, o, Number, 'zoomStarting', 'zoomMin', 'zoomMax', 'refreshRate')
-    Apply(this.options, o, Boolean, 'lockBounds', 'showRefresh')
+    Apply(this.options, o, Boolean, 'lockBounds', 'showRefresh', 'hideGeoSearch')
   }
 
   static makeFeed (f?: FeedInput): Feed {

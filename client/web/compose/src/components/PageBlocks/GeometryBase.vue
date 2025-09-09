@@ -26,29 +26,23 @@
         }"
         :markers="localValue"
         :disabled="editable"
-        hide-geo-search
+        :hide-geo-search="options.hideGeoSearch"
         :polygons="geometries"
         class="w-100 h-100"
         @on-marker-click="onMarkerCLick"
         @on-geosearch-error="onGeoSearchError"
-      >
-        <template #marker-tooltip="{ marker }">
-          <h6 class="mb-0">
-            {{ marker.title }}
-          </h6>
-        </template>
-      </c-map>
+      />
     </div>
   </wrap>
 </template>
 
 <script>
-import axios from 'axios'
 import { compose, NoID } from '@cortezaproject/corteza-js'
 import { components } from '@cortezaproject/corteza-vue'
-import { mapGetters, mapActions } from 'vuex'
+import axios from 'axios'
 import { evaluatePrefilter, isFieldInFilter } from 'corteza-webapp-compose/src/lib/record-filter'
 import { isNumber } from 'lodash'
+import { mapActions, mapGetters } from 'vuex'
 
 import base from './base'
 

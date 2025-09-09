@@ -909,6 +909,7 @@ geometry:
   openInSameTab: Open in the same tab
   openInNewTab: Open in a new tab
   openInModal: Open in a modal
+  hideGeoSearch: Hide location search
   recordFeed:
     colorPicker: Choose a color
     moduleLabel: Module*

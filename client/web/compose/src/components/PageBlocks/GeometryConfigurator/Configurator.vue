@@ -6,7 +6,7 @@
         :labels="{
           tooltip: { 'goToCurrentLocation': $t('geometry.tooltip.goToCurrentLocation') },
         }"
-        hide-geo-search
+        :hide-geo-search="options.hideGeoSearch"
         class="w-100 cursor-pointer"
         style="height: 45vh;"
         @on-bounds-update="boundsUpdated"
@@ -110,13 +110,29 @@
           />
         </b-form-group>
       </b-col>
+
+      <b-col
+        cols="12"
+        lg="4"
+      >
+        <b-form-group
+          :label="$t('geometry.hideGeoSearch')"
+          label-class="text-primary"
+        >
+          <c-input-checkbox
+            v-model="options.hideGeoSearch"
+            switch
+            :labels="checkboxLabel"
+          />
+        </b-form-group>
+      </b-col>
     </b-row>
   </div>
 </template>
 
 <script>
-import base from '../base'
 import { components } from '@cortezaproject/corteza-vue'
+import base from '../base'
 const { CMap } = components
 
 export default {

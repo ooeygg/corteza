@@ -64,7 +64,7 @@
         @click="onMarkerClick(i, marker)"
       >
         <l-tooltip
-          v-if="$scopedSlots['marker-tooltip']"
+          v-if="$scopedSlots['marker-tooltip'] || marker.title"
           :options="{
             offset: [-1, 5],
             direction: 'bottom',
@@ -73,7 +73,24 @@
           <slot
             name="marker-tooltip"
             :marker="marker"
-          />
+          >
+            {{ marker.title }}
+          </slot>
+        </l-tooltip>
+      </l-marker>
+
+      <l-marker
+        v-if="geoSearch.marker"
+        :lat-lng="geoSearch.marker.latlng"
+        :icon="getIcon(getCSSVariable('--secondary'))"
+      >
+        <l-tooltip
+          :options="{
+            offset: [-1, 5],
+            direction: 'bottom',
+          }"
+        >
+          {{ geoSearch.marker.title }}
         </l-tooltip>
       </l-marker>
 
@@ -95,10 +112,10 @@
 </template>
 
 <script>
-import { OpenStreetMapProvider } from 'leaflet-geosearch'
 import { divIcon, latLng, latLngBounds } from 'leaflet'
-import { LMap, LControl, LTooltip, LPolygon, LTileLayer, LMarker } from 'vue2-leaflet'
+import { OpenStreetMapProvider } from 'leaflet-geosearch'
 import { isNumber } from 'lodash'
+import { LControl, LMap, LMarker, LPolygon, LTileLayer, LTooltip } from 'vue2-leaflet'
 import CInputSearch from '../input/CInputSearch.vue'
 
 import 'leaflet/dist/leaflet.css'
@@ -157,6 +174,7 @@ export default {
         query: '',
         provider: new OpenStreetMapProvider(),
         results: [],
+        marker: null,
       },
     }
   },
@@ -199,6 +217,7 @@ export default {
     onGeoSearch (query) {
       if (!query) {
         this.geoSearch.results = []
+        this.geoSearch.marker = null
         return
       }
 
@@ -218,6 +237,7 @@ export default {
     placeGeoSearchMarker (result) {
       const zoom = this.$refs.map.mapObject._zoom >= 15 ? this.$refs.map.mapObject._zoom : 15
       this.$refs.map.mapObject.flyTo([result.latlng.lat, result.latlng.lng], zoom, { animate: false })
+      this.geoSearch.marker = { title: result.label, latlng: result.latlng }
       this.geoSearch.results = []
       this.onMapClick(result)
     },
@@ -231,7 +251,7 @@ export default {
     },
 
     onLocationFound ({ latitude, longitude }) {
-      const zoom = this.$refs.map.mapObject._zoom >= 13 ? this.$refs.map.mapObject._zoom : 13
+      const zoom = this.$refs.map.mapObject._zoom >= 15 ? this.$refs.map.mapObject._zoom : 15
       this.$refs.map.mapObject.flyTo([latitude, longitude], zoom)
       this.$emit('location-found', { latlng: { lat: latitude, lng: longitude } })
     },
@@ -256,7 +276,11 @@ export default {
       this.$emit('on-map-click', e)
     },
 
-    getIcon (markerColor = '#4883C5') {
+    getCSSVariable (variable) {
+      return getComputedStyle(document.documentElement).getPropertyValue(variable)
+    },
+
+    getIcon (markerColor = this.getCSSVariable('--primary')) {
       const markerIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 34.892337" height="60" width="40" style="margin-top: -40px;margin-left: -15px;height: 35px;">
           <g transform="translate(-814.59595,-274.38623)">
             <g transform="matrix(1.1855854,0,0,1.1855854,-151.17715,-57.3976)">
