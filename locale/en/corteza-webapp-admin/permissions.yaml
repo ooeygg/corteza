@@ -19,7 +19,6 @@ ui:
     description: Select role to set permissions
 
   evaluate:
-    title: Evaluated permissions
     description: Evaluate applied permissions
 
   add:

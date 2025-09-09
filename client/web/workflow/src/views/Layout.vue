@@ -75,7 +75,6 @@
           description: $t('permissions:ui.edit.description'),
         },
         evaluate: {
-          label: $t('permissions:ui.evaluate.label'),
           description: $t('permissions:ui.evaluate.description'),
         },
         add: {

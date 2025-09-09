@@ -90,7 +90,6 @@
           description: $t('permissions:ui.edit.description'),
         },
         evaluate: {
-          label: $t('permissions:ui.evaluate.label'),
           description: $t('permissions:ui.evaluate.description'),
         },
         add: {
@@ -123,8 +122,8 @@
 </template>
 
 <script>
-import CTheMainNav from 'corteza-webapp-admin/src/components/CTheMainNav'
 import { components, mixins } from '@cortezaproject/corteza-vue'
+import CTheMainNav from 'corteza-webapp-admin/src/components/CTheMainNav'
 import { mapGetters } from 'vuex'
 
 const { CExtendSession, CPermissionsModal, CPrompts, CTopbar, CSidebar, CNotificationSidebar } = components

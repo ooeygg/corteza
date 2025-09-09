@@ -91,7 +91,6 @@
           description: $t('permissions:ui.edit.description'),
         },
         evaluate: {
-          label: $t('permissions:ui.evaluate.label'),
           description: $t('permissions:ui.evaluate.description'),
         },
         add: {
@@ -126,11 +125,11 @@
 </template>
 
 <script>
-import moment from 'moment'
-import CTranslationModal from '../components/Translator/CTranslatorModal'
-import { mapGetters, mapActions } from 'vuex'
-import { debounce } from 'lodash'
 import { components } from '@cortezaproject/corteza-vue'
+import { debounce } from 'lodash'
+import moment from 'moment'
+import { mapActions, mapGetters } from 'vuex'
+import CTranslationModal from '../components/Translator/CTranslatorModal'
 const { CToaster, CPrompts, CPermissionsModal, CTopbar, CSidebar, CExtendSession, CNotificationSidebar } = components
 
 export default {
