@@ -488,8 +488,18 @@ export default {
         this.lastCommentTimestamp ? `${getFieldFilter('createdAt', 'DateTime', this.lastCommentTimestamp, '>')}` : '',
       ].filter(Boolean).join(' AND ')
 
+      // Remember if scroll was at bottom before updating comments
+      const wasAtBottom = this.isScrollAtBottom()
+
       return this.fetchCommentRecords(this.roModule, filter, false).then(newComments => {
         this.comments = this.mergeMessageGroups(this.comments, newComments, false)
+
+        // Auto-scroll to bottom if scroll was at bottom before the update
+        if (wasAtBottom) {
+          this.$nextTick(() => {
+            this.scrollToLatest()
+          })
+        }
       })
     },
 
@@ -635,6 +645,15 @@ export default {
       const container = this.$refs.chatContainer
       if (!container) return
       container.scrollTop = container.scrollHeight
+    },
+
+    isScrollAtBottom () {
+      const container = this.$refs.chatContainer
+      if (!container) return false
+
+      // Consider it "at bottom" if within 25px of the bottom
+      const threshold = 25
+      return container.scrollTop + container.clientHeight >= container.scrollHeight - threshold
     },
 
     submitComment () {
