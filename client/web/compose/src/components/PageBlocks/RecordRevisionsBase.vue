@@ -300,6 +300,8 @@ export default {
     },
 
     async loadRevisions () {
+      this.revisions = []
+
       if (this.revisionsDisabledOnModule) {
         return
       }
