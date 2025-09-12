@@ -36,7 +36,7 @@
           :fields="columns"
           sticky-header
           hover
-          details-td-class="bg-light"
+          details-td-class="bg-light p-0"
           responsive
           class="flex-fill mh-100 mb-0 w-100 rounded"
         >
@@ -86,21 +86,25 @@
           </template>
 
           <template #row-details="row">
-            <div class="bg-white rounded-lg overflow-hidden">
-              <b-table-simple class="mb-0">
+            <div class="overflow-hidden">
+              <b-table-simple
+                table-variant="light"
+                hover
+                class="mb-0"
+              >
                 <b-thead>
-                  <b-tr class="text-primary bg-white">
+                  <b-tr class="text-primary">
                     <b-th>{{ $t('changes.columns.field.label') }}</b-th>
                     <b-th>{{ $t('changes.columns.old-value.label') }}</b-th>
                     <b-th>{{ $t('changes.columns.new-value.label') }}</b-th>
                   </b-tr>
                 </b-thead>
 
-                <b-tbody
-                  v-for="(change) in row.item.meta.changes"
-                  :key="change.key"
-                >
-                  <b-tr>
+                <b-tbody>
+                  <b-tr
+                    v-for="(change) in row.item.meta.changes"
+                    :key="change.key"
+                  >
                     <b-td>
                       {{ change.key }}
                     </b-td>
@@ -341,11 +345,11 @@ export default {
         this.revisions = set.map(r => {
           const changes = r.changes.reduce((acc, c) => {
             if (c.old) {
-              acc[`${c.key}_old`] = c.old[0]
+              acc[`${c.key}_old`] = c.old
             }
 
             if (c.new) {
-              acc[`${c.key}_new`] = c.new[0]
+              acc[`${c.key}_new`] = c.new
             }
 
             return acc
