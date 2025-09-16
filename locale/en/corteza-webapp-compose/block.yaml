@@ -63,6 +63,8 @@ calendar:
     prefilterPlaceholder: field1 = 1 AND field2 = 232
     titleLabel: Event title
     titlePlaceholder: Field used as event title
+  reminderFeed:
+    optionLabel: Reminders
   today: Today
   view:
     dayGridMonth: Month
