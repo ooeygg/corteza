@@ -220,15 +220,9 @@ export function trimChar (text = '', char = '') {
 
 // Helper function that checks if field name is included in a filter
 export function isFieldInFilter (fieldName, filter = '') {
-  if (!fieldName) return
+  if (!fieldName || !filter) return
 
-  const filterCases = [
-    '${' + fieldName + '}',
-    '${record.' + fieldName + '}',
-    '${record.values.' + fieldName + '}',
-  ]
-
-  return filterCases.some(filterCase => filter.includes(filterCase))
+  return filter.includes(fieldName)
 }
 
 export function formatActiveFilterOperator (op) {
