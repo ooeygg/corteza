@@ -149,17 +149,16 @@
           />
         </b-form-group>
 
-        <template>
-          <b-form-group
-            :label="$t('recordList.export.multiValueDelimiter.label')"
-            label-class="text-primary"
-          >
-            <b-form-select
-              v-model="multiValueDelimiter"
-              :options="multiValueDelimiterOptions"
-            />
-          </b-form-group>
-        </template>
+        <b-form-group
+          v-if="isMultiFieldSelected"
+          :label="$t('recordList.export.multiValueDelimiter.label')"
+          label-class="text-primary"
+        >
+          <b-form-select
+            v-model="multiValueDelimiter"
+            :options="multiValueDelimiterOptions"
+          />
+        </b-form-group>
       </template>
 
       <template #modal-footer>
@@ -531,6 +530,10 @@ export default {
         return { start: this.start, end: this.end, rangeBy: this.rangeBy }
       }
       return undefined
+    },
+
+    isMultiFieldSelected () {
+      return this.fields.some(f => f.isMulti)
     },
   },
 
