@@ -20,6 +20,7 @@
     </b-form-group>
 
     <b-form-group
+      v-if="!f.options.onlyTime"
       :label="$t('kind.dateTime.constraints.label')"
       label-class="text-primary"
       class="mt-2"

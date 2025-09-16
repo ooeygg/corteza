@@ -29,7 +29,7 @@ kind:
     label: Date and time
     outputFormat: Output format
     outputFormatFootnote: See {{0}} for formatting options
-    relativeOutput: 'Output Relative value (eg: 3 days ago)'
+    relativeOutput: 'Output Relative value (eg: 3 days ago, 15 minutes ago)'
     warning:
       futureValuesOnly: Only dates in the future will be saved
       pastValuesOnly: Only dates in the past will be saved
