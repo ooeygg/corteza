@@ -937,8 +937,12 @@ export default {
                 .map(({ id }) => this.edges[id])
                 .map(({ node, config }) => `<tr><td><var>${encodeHTML(node.value)}</var></td><td><code>${encodeHTML(config.expr || '')}</code></td></tr>`)
                 .join('')
-            } else if (['expressions', 'function', 'prompt', 'iterator', 'exec-workflow'].includes(kind)) {
-              let { arguments: args = [], results = [], ref } = vertex.config || {}
+            } else if (['expressions', 'function', 'prompt', 'iterator', 'exec-workflow', 'error-handler'].includes(kind)) {
+              let { arguments: args = [], results = [], ref, kind } = vertex.config || {}
+
+              if (!ref) {
+                ref = kind
+              }
 
               const { meta = {}, results: functionResults = [], parameters = [] } = this.functionTypes.find(f => f.ref === ref) || {}
 
@@ -2628,8 +2632,65 @@ export default {
     async getFunctionTypes () {
       return this.$AutomationAPI.functionList()
         .then(({ set }) => {
-          this.functionTypes = set
-          this.functionTypes.push(...components.promptDefinitions)
+          this.functionTypes = [
+            ...set,
+            ...components.promptDefinitions,
+            ...[
+              {
+                ref: 'error-handler',
+                kind: 'error-handler',
+                meta: {
+                  short: 'Handle error',
+                },
+                parameters: [],
+                results: [
+                  {
+                    name: 'error',
+                    types: [
+                      'Any',
+                    ],
+                  },
+                  {
+                    name: 'errorMessage',
+                    types: [
+                      'String',
+                    ],
+                  },
+                  {
+                    name: 'errorStepID',
+                    types: [
+                      'Integer',
+                    ],
+                  },
+                ],
+              },
+              {
+                ref: 'exec-workflow',
+                kind: 'error-handler',
+                meta: {
+                  short: 'Execute a workflow',
+                },
+                parameters: [
+                  {
+                    name: 'workflow',
+                    types: [
+                      'ID',
+                      'Handle',
+                    ],
+                    required: true,
+                  },
+                  {
+                    name: 'scope',
+                    types: [
+                      'Vars',
+                    ],
+                    required: false,
+                  },
+                ],
+                results: [],
+              },
+            ],
+          ]
         })
         .catch(this.toastErrorHandler(this.$t('notification:failed-fetch-functions')))
     },
