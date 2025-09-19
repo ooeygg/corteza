@@ -277,6 +277,15 @@ export default {
         }
       },
     },
+
+    referenceRecord: {
+      handler () {
+        if (!this.referenceRecord) return
+
+        this.fetchUsers(this.fields, [this.referenceRecord])
+        this.fetchRecords(this.namespace.namespaceID, this.fields, [this.referenceRecord])
+      },
+    },
   },
 
   beforeDestroy () {
