@@ -199,7 +199,7 @@ func (svc *auth) External(ctx context.Context, profile types.ExternalAuthUser) (
 				EmailConfirmed: true,
 			}
 
-			if !handle.IsValid(profile.NickName) {
+			if handle.IsValid(profile.NickName) {
 				u.Handle = profile.NickName
 			}
 
