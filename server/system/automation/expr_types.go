@@ -195,6 +195,8 @@ func CastToRbacResource(val interface{}) (out rbac.Resource, err error) {
 		return val, nil
 	case RbacResource:
 		return val.value, nil
+	case string:
+		return rbac.NewResource(val), nil
 	default:
 		return nil, fmt.Errorf("unable to cast type %T to %T", val, out)
 	}
