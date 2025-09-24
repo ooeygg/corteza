@@ -33,54 +33,51 @@
             class="d-flex flex-row flex-nowrap align-items-center"
           >
             <b-form-checkbox
-              v-b-tooltip.noninteractive.hover.left.350="{ title: $t(`reminder.${!!r.dismissedAt ? 'undismiss' : 'dismiss'}`), container: '#body' }"
               data-test-id="checkbox-dismiss-reminder"
               :checked="!!r.dismissedAt"
               class="my-2 ml-2"
               @change="$emit('dismiss', r, $event)"
-            />
-
-            <div
-              data-test-id="span-reminder-title"
-              class="text-break text-truncate"
-              :style="`${!!r.dismissedAt ? 'text-decoration: line-through;' : ''}`"
             >
-              {{ r.payload.title || r.link || rlLabel(r) || r.linkLabel }}
-            </div>
+              <div
+                data-test-id="span-reminder-title"
+                class="text-break text-truncate"
+                :style="`${!!r.dismissedAt ? 'text-decoration: line-through;' : ''}`"
+              >
+                {{ r.payload.title || r.link || rlLabel(r) || r.linkLabel }}
+              </div>
+            </b-form-checkbox>
 
             <div
               class="d-flex align-items-center text-primary ml-auto px-2"
             >
-              <b-button-group
+              <b-button
+                v-if="r.payload.link"
+                v-b-tooltip.noninteractive.hover="{ title: $t('reminder.recordPageLink'), container: '#body' }"
+                :to="recordViewer(r.payload.link)"
+                variant="outline-light"
                 size="sm"
+                class="text-primary border-0"
               >
-                <b-button
-                  v-if="r.payload.link"
-                  v-b-tooltip.noninteractive.hover="{ title: $t('reminder.recordPageLink'), container: '#body' }"
-                  :to="recordViewer(r.payload.link)"
-                  variant="outline-light"
-                  class="d-flex align-items-center py-2 text-primary border-0"
-                >
-                  <font-awesome-icon :icon="['far', 'file-alt']" />
-                </b-button>
+                <font-awesome-icon :icon="['far', 'file-alt']" />
+              </b-button>
 
-                <b-button
-                  v-b-tooltip.noninteractive.hover="{ title: $t('reminder.edit.label'), container: '#body' }"
-                  data-test-id="button-edit-reminder"
-                  variant="outline-light"
-                  class="d-flex align-items-center py-2 text-primary border-0"
-                  @click="$emit('edit', r)"
-                >
-                  <font-awesome-icon :icon="['far', 'edit']" />
-                </b-button>
+              <b-button
+                v-b-tooltip.noninteractive.hover="{ title: $t('reminder.edit.label'), container: '#body' }"
+                data-test-id="button-edit-reminder"
+                variant="outline-light"
+                size="sm"
+                class="text-primary border-0"
+                @click="$emit('edit', r)"
+              >
+                <font-awesome-icon :icon="['far', 'edit']" />
+              </b-button>
 
-                <c-input-confirm
-                  data-test-id="button-delete-reminder"
-                  show-icon
-                  :tooltip="$t('reminder.delete')"
-                  @confirmed="$emit('delete', r)"
-                />
-              </b-button-group>
+              <c-input-confirm
+                data-test-id="button-delete-reminder"
+                show-icon
+                :tooltip="$t('reminder.delete')"
+                @confirmed="$emit('delete', r)"
+              />
             </div>
           </div>
 
@@ -149,7 +146,7 @@ export default {
         return 0
       }
 
-      return a.dismissedAt - b.dismissedAt
+      return b.dismissedAt - a.dismissedAt
     },
 
     makeTooltip ({ remindAt }) {

@@ -16,7 +16,7 @@
         body-class="p-0"
         class="border-0"
       >
-        <b-card-text>
+        <b-card-text v-if="t.payload.notes">
           {{ t.payload.notes }}
         </b-card-text>
 

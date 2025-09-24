@@ -303,7 +303,7 @@ export default {
       }
 
       r.options = {
-        variant: 'warning',
+        variant: 'secondary',
         'no-auto-hide': true,
         solid: true,
         ...r.options,
@@ -326,6 +326,7 @@ export default {
         options: {
           variant: 'outline-warning',
           class: ['float-left'],
+          size: 'sm',
           items: [
             { kind: 'item-button', label: this.$t('general:label.timeMinute', { t: 5 }), value: { duration: 1000 * 60 * 5 } },
             { kind: 'item-button', label: this.$t('general:label.timeMinute', { t: 15 }), value: { duration: 1000 * 60 * 15 } },

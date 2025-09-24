@@ -44,6 +44,7 @@ export default {
 
   mounted () {
     this.fetchReminders()
+
     // @todo remove this, when sockets get implemented
     this.$root.$on('reminders.pull', this.fetchReminders)
     this.$root.$on('reminder.updated', this.fetchReminders)
@@ -78,7 +79,6 @@ export default {
         return this.fetchReminders()
       }).then(() => {
         this.onCancel()
-        this.$Reminder.prefetch()
       }).finally(() => {
         this.processingSave = false
       })
@@ -107,6 +107,7 @@ export default {
         limit: 0,
       }).then(({ set: reminders = [] }) => {
         this.reminders = reminders.map(r => new system.Reminder(r))
+        this.$Reminder.enqueue(this.reminders)
       })
     },
 

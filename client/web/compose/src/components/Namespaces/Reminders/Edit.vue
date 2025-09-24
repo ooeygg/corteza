@@ -8,17 +8,6 @@
       @submit.prevent
     >
       <b-form-group
-        v-if="reminder.reminderID !== '0'"
-      >
-        <b-form-checkbox
-          :checked="!!reminder.dismissedAt"
-          @change="$emit('dismiss', reminder, $event)"
-        >
-          {{ $t('reminder.dismissed') }}
-        </b-form-checkbox>
-      </b-form-group>
-
-      <b-form-group
         :label="$t('reminder.edit.titleLabel')"
         label-class="text-primary"
       >
@@ -60,7 +49,7 @@
         />
       </b-form-group>
 
-      <b-form-group
+      <!-- <b-form-group
         :label="$t('reminder.edit.assigneeLabel')"
         label-class="text-primary"
       >
@@ -74,7 +63,7 @@
           :filterable="false"
           @search="searchUsers"
         />
-      </b-form-group>
+      </b-form-group> -->
 
       <b-form-group
         v-if="reminder.payload.link"
@@ -99,6 +88,18 @@
             </b-button>
           </b-input-group-append>
         </b-input-group>
+      </b-form-group>
+
+      <b-form-group
+        v-if="reminder.reminderID !== '0'"
+      >
+        <b-form-checkbox
+          :checked="!!reminder.dismissedAt"
+          switch
+          @change="$emit('dismiss', reminder, $event)"
+        >
+          {{ $t('reminder.dismissed') }}
+        </b-form-checkbox>
       </b-form-group>
 
       <b-form-group

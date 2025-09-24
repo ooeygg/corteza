@@ -100,9 +100,6 @@ export default (options = {}) => {
         // Load effective permissions
         this.$store.dispatch('rbac/load')
 
-        // Initializes reminders subsystems, do prefetch of all pending reminders
-        this.$Reminder.init(this, { filter: { assignedTo: user.userID } })
-
         // Initialize notifications
         this.$store.dispatch('notifications/fetchNotifications')
 

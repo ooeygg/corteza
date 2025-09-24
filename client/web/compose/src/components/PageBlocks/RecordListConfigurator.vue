@@ -1198,8 +1198,6 @@ export default {
 
     getResolvedRoles ({ roles = [] }) {
       return roles.map(roleID => {
-        console.log('roleID', roleID)
-        console.log('resolvedRoles', this.resolvedRoles[roleID])
         return this.resolvedRoles[roleID]
       })
     },
