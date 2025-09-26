@@ -172,7 +172,7 @@
                       </span>
 
                       <span
-                        class="text-primary text-lowercase"
+                        class="text-lowercase"
                       >
                         {{ $t('recordList.filter.conditions.and') }}
                       </span>
@@ -1039,7 +1039,6 @@ export default {
       customConfiguredFields: [],
 
       formatActiveFilterOperator,
-      isBetweenOperator,
 
       processingTimeout: undefined,
       cancelled: false,
@@ -1362,6 +1361,8 @@ export default {
       loadPaginationRecords: 'ui/loadPaginationRecords',
       updateRecordSet: 'record/updateRecords',
     }),
+
+    isBetweenOperator,
 
     createEvents () {
       const { pageID = NoID } = this.page

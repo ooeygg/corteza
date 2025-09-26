@@ -35,12 +35,10 @@
           class="px-3 pb-0 overflow-auto"
         >
           <filter-toolbox
-            v-if="componentFilter.length"
             v-model="componentFilter"
             :module="module"
-            :selected-field="selectedField"
             :namespace="namespace"
-            :mock.sync="mock"
+            :selected-field="selectedField"
             start-empty
             @prevent-close="onValueChange"
           />
@@ -84,9 +82,11 @@
     </b-popover>
   </div>
 </template>
+
 <script>
-import { compose, validator } from '@cortezaproject/corteza-js'
+import { compose } from '@cortezaproject/corteza-js'
 import FilterToolbox from 'corteza-webapp-compose/src/components/Common/FilterToolbox.vue'
+import recordFilter from 'corteza-webapp-compose/src/mixins/record-filter.js'
 
 export default {
   i18nOptions: {
@@ -96,6 +96,8 @@ export default {
   components: {
     FilterToolbox,
   },
+
+  mixins: [recordFilter],
 
   props: {
     target: {
@@ -153,8 +155,6 @@ export default {
     return {
       componentFilter: [],
 
-      mock: {},
-
       // Used to prevent unwanted closure of popover
       preventPopoverClose: false,
     }
@@ -176,30 +176,6 @@ export default {
     this.setDefaultValues()
   },
 
-  created () {
-    // Change all module fields to single value to keep multi value fields and single value
-    const module = new compose.Module(this.module)
-
-    module.fields = module.fields.map(f => {
-      f.multi = f.isMulti
-      f.isMulti = false
-
-      // Disable edge case options
-      if (f.kind === 'DateTime') {
-        f.options.onlyFutureValues = false
-        f.options.onlyPastValues = false
-      }
-
-      return f
-    })
-
-    this.mock = {
-      namespace: this.namespace,
-      module,
-      errors: new validator.Validated(),
-    }
-  },
-
   methods: {
     onHide (e) {
       if (this.preventPopoverClose) {
@@ -219,49 +195,14 @@ export default {
       }, 100)
     },
 
-    getField (name = '') {
-      const field = name ? (this.mock.module.fields.find(f => f.name === name) || this.mock.module.systemFields().find(f => f.name === name)) : undefined
-
-      return field ? { ...field } : undefined
-    },
-
-    createDefaultFilter (condition, field = {}) {
-      return {
-        condition,
-        name: field.name,
-        operator: field.isMulti ? 'IN' : '=',
-        value: undefined,
-        kind: field.kind,
-        record: new compose.Record(this.mock.module, {}),
-      }
-    },
-
-    createDefaultFilterGroup (groupCondition = undefined, field) {
-      return {
-        groupCondition,
-        filter: [
-          this.createDefaultFilter('Where', field),
-        ],
-      }
-    },
-
     addFilter (groupIndex) {
       if ((this.componentFilter[groupIndex] || {}).filter) {
         this.componentFilter[groupIndex].filter.push(this.createDefaultFilter('AND', this.selectedField))
       }
     },
 
-    addGroup () {
-      this.$refs.btnSave.focus()
-
-      this.componentFilter[this.componentFilter.length - 1].groupCondition = 'AND'
-      this.componentFilter.push(this.createDefaultFilterGroup(undefined, this.selectedField))
-    },
-
     resetFilter () {
-      this.componentFilter = [
-        this.createDefaultFilterGroup(),
-      ]
+      this.componentFilter = [this.createDefaultFilterGroup()]
       this.$emit('reset')
     },
 
@@ -271,21 +212,16 @@ export default {
         .filter(({ filter = [] }) => filter.some(f => f.name))
         .map(({ groupCondition, filter = [], name }) => {
           filter = filter.map(({ value, ...f }) => {
-            f.record = new compose.Record(this.mock.module, {})
+            f.record = new compose.Record(this.module, {})
 
             if (this.isBetweenOperator(f.operator)) {
-              if (this.getField(f.name).isSystem) {
+              if (this.getField(f.name, this.module).isSystem) {
                 f.record[`${f.name}-start`] = value.start
                 f.record[`${f.name}-end`] = value.end
               } else {
                 f.record.values[`${f.name}-start`] = value.start
                 f.record.values[`${f.name}-end`] = value.end
               }
-
-              const field = this.mock.module.fields.find(field => field.name === f.name)
-
-              this.mock.module.fields.push({ ...field, name: `${f.name}-end` })
-              this.mock.module.fields.push({ ...field, name: `${f.name}-start` })
             } else if (Object.keys(f.record.values).includes(f.name)) {
               f.record.values[f.name] = value
             } else if (Object.keys(f.record).includes(f.name)) {
@@ -307,47 +243,18 @@ export default {
       }
     },
 
-    processFilter () {
-      return this.componentFilter.map(({ groupCondition, filter = [], name }) => {
-        filter = filter.map(({ record, ...f }) => {
-          if (!f.name || !record) {
-            return undefined
-          }
-
-          if (this.isBetweenOperator(f.operator)) {
-            f.value = {
-              start: this.getField(f.name).isSystem ? record[`${f.name}-start`] : record.values[`${f.name}-start`],
-              end: this.getField(f.name).isSystem ? record[`${f.name}-end`] : record.values[`${f.name}-end`],
-            }
-          } else if (Object.keys(record.values).includes(f.name)) {
-            f.value = record.values[f.name]
-          } else if (Object.keys(record).includes(f.name)) {
-            f.value = record[f.name]
-          }
-
-          return f
-        }).filter(f => f)
-
-        return { groupCondition, filter, name }
-      }).filter(({ filter }) => filter.length)
-    },
-
     onSave (close = true, type = 'filter') {
       if (close) {
         this.$refs.popover.$emit('close')
       }
 
-      // Emit only value and not whole record with every filter
-      this.$emit(type, this.processFilter())
-    },
-
-    isBetweenOperator (op) {
-      return ['BETWEEN', 'NOT BETWEEN'].includes(op)
+      setTimeout(() => {
+        this.$emit(type, this.processFilter(this.componentFilter, this.module))
+      }, 100)
     },
 
     setDefaultValues () {
       this.componentFilter = []
-      this.mock = {}
       this.preventPopoverClose = false
     },
   },

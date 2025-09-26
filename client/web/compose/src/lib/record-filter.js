@@ -114,6 +114,9 @@ export function getFieldFilter (name, kind, query = '', operator = '=') {
       if (startTime.isValid() && endTime.isValid()) {
         return build(operator, name, `TIME('${query.start}') TIME('${query.end}')`)
       }
+
+      // Special case where between object is invalid
+      return undefined
     } else {
       // Build different querries if date, time or datetime
       const dateTime = moment(query, 'YYYY-MM-DDTHH:mm:ssZ', true)

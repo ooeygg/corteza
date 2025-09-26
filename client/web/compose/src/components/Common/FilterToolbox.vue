@@ -24,42 +24,45 @@
           </b-td>
 
           <b-td
-            v-if="getField(filter.name)"
+            v-if="getField(filter.name, mockModule)"
             style="width: 250px;"
-            :class="{ 'px-2': getField(filter.name) }"
+            :class="{ 'px-2': getField(filter.name, mockModule) }"
           >
             <b-form-select
-              v-if="getField(filter.name)"
+              v-if="getField(filter.name, mockModule)"
               v-model="filter.operator"
-              :options="getOperators(filter.kind, getField(filter.name))"
+              :options="getOperators(filter.kind, getField(filter.name, mockModule))"
               class="d-flex field-operator w-100"
-              @change="updateFilterProperties(filter)"
             />
           </b-td>
 
           <b-td
-            v-if="getField(filter.name)"
-            :key="`${getField(filter.name)?.fieldID}-${filter.name}`"
+            v-if="getField(filter.name, mockModule)"
+            :key="`${getField(filter.name, mockModule)?.fieldID}-${filter.name}`"
           >
             <template v-if="isBetweenOperator(filter.operator)">
-              <template v-if="getField(`${filter.name}-start`)">
+              <template v-if="getField(`${filter.name}-start`, mockModule)">
                 <field-editor
-                  v-bind="mock"
-                  class="mb-0 field-editor"
-                  value-only
-                  :field="getField(`${filter.name}-start`)"
+                  :field="getField(`${filter.name}-start`, mockModule)"
                   :record="filter.record"
+                  :module="mockModule"
+                  :namespace="namespace"
+                  :errors="errors"
+                  value-only
+                  class="mb-0 field-editor"
                   @change="onValueChange"
                 />
                 <div class="my-1 text-center w-100">
                   {{ $t("general.label.and") }}
                 </div>
                 <field-editor
-                  v-bind="mock"
-                  class="mb-0 field-editor"
-                  value-only
-                  :field="getField(`${filter.name}-end`)"
+                  :field="getField(`${filter.name}-end`, mockModule)"
                   :record="filter.record"
+                  :module="mockModule"
+                  :namespace="namespace"
+                  :errors="errors"
+                  value-only
+                  class="mb-0 field-editor"
                   @change="onValueChange"
                 />
               </template>
@@ -67,18 +70,20 @@
 
             <template v-else>
               <field-editor
-                v-bind="mock"
-                class="mb-0 field-editor"
-                value-only
-                :field="getField(filter.name)"
+                :field="getField(filter.name, mockModule)"
+                :errors="errors"
                 :record="filter.record"
+                :module="mockModule"
+                :namespace="namespace"
+                value-only
+                class="mb-0 field-editor"
                 @change="onValueChange"
               />
             </template>
           </b-td>
 
           <b-td
-            v-if="getField(filter.name)"
+            v-if="getField(filter.name, mockModule)"
             style="width: 1%;"
           >
             <b-button
@@ -150,8 +155,9 @@
 </template>
 
 <script>
-import { compose } from '@cortezaproject/corteza-js'
+import { compose, validator } from '@cortezaproject/corteza-js'
 import FieldEditor from 'corteza-webapp-compose/src/components/ModuleFields/Editor'
+import recordFilter from 'corteza-webapp-compose/src/mixins/record-filter.js'
 
 export default {
   i18nOptions: {
@@ -164,6 +170,8 @@ export default {
     FieldEditor,
   },
 
+  mixins: [recordFilter],
+
   props: {
     value: {
       type: Array,
@@ -175,14 +183,14 @@ export default {
       required: true,
     },
 
+    namespace: {
+      type: compose.Namespace,
+      required: true,
+    },
+
     selectedField: {
       type: Object,
       default: undefined,
-    },
-
-    mock: {
-      type: Object,
-      required: true,
     },
 
     resetFilterOnCreated: {
@@ -202,6 +210,10 @@ export default {
         { value: 'AND', text: this.$t('recordList.filter.conditions.and') },
         { value: 'OR', text: this.$t('recordList.filter.conditions.or') },
       ],
+
+      errors: new validator.Validated(),
+
+      mockModule: undefined,
     }
   },
 
@@ -215,9 +227,7 @@ export default {
 
     fields () {
       return [
-        ...[...this.module.fields].sort((a, b) =>
-          (a.label || a.name).localeCompare(b.label || b.name),
-        ),
+        ...[...this.module.fields].sort((a, b) => (a.label || a.name).localeCompare(b.label || b.name)),
         ...this.module.systemFields().map((sf) => {
           sf.label = this.$t(`field:system.${sf.name}`)
           return sf
@@ -240,6 +250,19 @@ export default {
     },
   },
 
+  watch: {
+    module: {
+      immediate: true,
+      handler (newModule) {
+        this.mockModule = new compose.Module(newModule)
+
+        if (this.mockModule) {
+          this.prepareFields()
+        }
+      },
+    },
+  },
+
   created () {
     if (this.resetFilterOnCreated || !this.startEmpty) {
       this.$emit('input', [this.createDefaultFilterGroup(undefined, this.startEmpty ? undefined : this.resolvedSelectedField)])
@@ -247,14 +270,38 @@ export default {
   },
 
   methods: {
-    getField (name = '') {
-      const field = name ? (this.mock.module.fields.find(f => f.name === name) || this.mock.module.systemFields().find(f => f.name === name)) : undefined
+    prepareFields () {
+      const fields = []
 
-      return field ? { ...field } : undefined
+      this.fields.forEach(f => {
+        if (f.kind === 'Record') {
+          f.options.prefilter = ''
+        }
+
+        if (f.kind === 'DateTime') {
+          f.options.onlyFutureValues = false
+          f.options.onlyPastValues = false
+        }
+
+        if (f.kind === 'Number') {
+          f.options.min = undefined
+          f.options.max = undefined
+        }
+
+        fields.push(f)
+
+        if (f.kind === 'DateTime' || f.kind === 'Number') {
+          fields.push({ ...f, name: `${f.name}-start` })
+          fields.push({ ...f, name: `${f.name}-end` })
+        }
+      })
+
+      this.mockModule.fields = fields
     },
 
     onChange (fieldName, groupIndex, index) {
-      const field = this.getField(fieldName)
+      const field = this.getField(fieldName, this.mockModule)
+
       const filterExists = !!(
         this.value[groupIndex] || { filter: [] }
       ).filter[index]
@@ -270,7 +317,6 @@ export default {
 
         this.$emit('input', value)
       }
-      this.$emit('prevent-close')
     },
 
     onValueChange () {
@@ -353,29 +399,6 @@ export default {
       }
     },
 
-    updateFilterProperties (filter) {
-      if (this.isBetweenOperator(filter.operator)) {
-        filter.record.values[`${filter.name}-start`] =
-          filter.record.values[`${filter.name}-start`]
-        filter.record.values[`${filter.name}-end`] =
-          filter.record.values[`${filter.name}-end`]
-
-        const field = this.mock.module.fields.find(
-          (f) => f.name === filter.name,
-        )
-
-        this.mock.module.fields.push({ ...field, name: `${filter.name}-end` })
-        this.mock.module.fields.push({
-          ...field,
-          name: `${filter.name}-start`,
-        })
-      }
-    },
-
-    isBetweenOperator (op) {
-      return ['BETWEEN', 'NOT BETWEEN'].includes(op)
-    },
-
     deleteFilter (groupIndex, index) {
       let value = this.value
       const filterExists = !!(
@@ -401,19 +424,6 @@ export default {
 
         this.$emit('input', value)
       }
-
-      this.$emit('prevent-close')
-    },
-
-    createDefaultFilter (condition, field = {}) {
-      return {
-        condition,
-        name: field.name,
-        operator: field.isMulti ? 'IN' : '=',
-        value: undefined,
-        kind: field.kind,
-        record: new compose.Record(this.mock.module, {}),
-      }
     },
 
     getOptionKey ({ name }) {
@@ -430,7 +440,6 @@ export default {
       }
 
       this.$emit('input', value)
-      this.$emit('prevent-close')
     },
 
     createDefaultFilterGroup (groupCondition = undefined, field) {
@@ -442,14 +451,14 @@ export default {
 
     addGroup () {
       const value = this.value
-      value[value.length - 1].groupCondition =
-        'AND'
-      value.push(
-        this.createDefaultFilterGroup(undefined, this.resolvedSelectedField),
-      )
+      value[value.length - 1].groupCondition = 'AND'
+      value.push(this.createDefaultFilterGroup(undefined, this.resolvedSelectedField))
 
       this.$emit('input', value)
-      this.$emit('prevent-close')
+    },
+
+    setDefaultValues () {
+      this.mockModule = undefined
     },
   },
 }

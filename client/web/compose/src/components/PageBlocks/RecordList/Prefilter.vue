@@ -39,7 +39,7 @@
         <filter-toolbox
           v-model="filterGroup"
           :module="module"
-          :mock.sync="mock"
+          :namespace="namespace"
           reset-filter-on-created
           start-empty
         />
@@ -69,13 +69,15 @@
 
 <script>
 import { components } from '@cortezaproject/corteza-vue'
-import { compose, validator } from '@cortezaproject/corteza-js'
+import { compose } from '@cortezaproject/corteza-js'
 import {
   getRecordListFilterSql,
   trimChar,
+  isBetweenOperator,
 } from 'corteza-webapp-compose/src/lib/record-filter.js'
 import FilterToolbox from 'corteza-webapp-compose/src/components/Common/FilterToolbox.vue'
 import autocomplete from 'corteza-webapp-compose/src/mixins/autocomplete.js'
+import recordFilter from 'corteza-webapp-compose/src/mixins/record-filter.js'
 
 const { CInputExpression } = components
 
@@ -91,7 +93,10 @@ export default {
     CInputExpression,
   },
 
-  mixins: [autocomplete],
+  mixins: [
+    autocomplete,
+    recordFilter,
+  ],
 
   props: {
     options: {
@@ -129,36 +134,9 @@ export default {
     },
   },
 
-  created () {
-    // Change all module fields to single value to keep multi value fields and single value
-    const module = JSON.parse(JSON.stringify(this.module || {}))
-
-    module.fields = [
-      ...[...module.fields].map((f) => {
-        f.multi = f.isMulti
-        f.isMulti = false
-
-        // Disable edge case options
-        if (f.kind === 'DateTime') {
-          f.options.onlyFutureValues = false
-          f.options.onlyPastValues = false
-        }
-
-        return f
-      }),
-      ...this.module.systemFields().map((sf) => {
-        return { ...sf, label: this.$t(`field:system.${sf.name}`) }
-      }),
-    ]
-
-    this.mock = {
-      namespace: this.namespace,
-      module,
-      errors: new validator.Validated(),
-    }
-  },
-
   methods: {
+    isBetweenOperator,
+
     saveFilter (filter) {
       if (filter && filter[0] && !filter[0].filter[0].name) {
         return
@@ -176,39 +154,8 @@ export default {
       return name
     },
 
-    processFilter (filterGroup = this.value) {
-      return filterGroup.map(({ groupCondition, filter = [], name }) => {
-        filter = filter.map(({ record, ...f }) => {
-          if (!f.name || !record) {
-            return undefined
-          }
-
-          if (this.isBetweenOperator(f.operator)) {
-            f.value = {
-              start: this.getField(f.name).isSystem
-                ? record[`${f.name}-start`]
-                : record.values[`${f.name}-start`],
-              end: this.getField(f.name).isSystem
-                ? record[`${f.name}-end`]
-                : record.values[`${f.name}-end`],
-            }
-          } else {
-            f.value = record.values[f.name] || record[f.name]
-          }
-
-          return f
-        })
-
-        return { groupCondition, filter, name }
-      })
-    },
-
-    isBetweenOperator (op) {
-      return ['BETWEEN', 'NOT BETWEEN'].includes(op)
-    },
-
     parseFilter (filterGroup = this.filterGroup) {
-      const filter = this.processFilter(filterGroup)
+      const filter = this.processFilter(filterGroup, this.module)
 
       const filterSqlArray = filter
         .map(({ groupCondition, filter = [] }) => {
