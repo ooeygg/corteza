@@ -36,10 +36,18 @@ func (h *AuthHandlers) securityProc(req *request.AuthReq) error {
 			return err
 		} else {
 			t := translator(req, "auth")
-			req.NewAlerts = append(req.NewAlerts, request.Alert{
-				Type: "primary",
-				Text: t("security.totp-disabled"),
-			})
+
+			if enable {
+				req.NewAlerts = append(req.NewAlerts, request.Alert{
+					Type: "primary",
+					Text: t("security.template.mfa.email.enabled"),
+				})
+			} else {
+				req.NewAlerts = append(req.NewAlerts, request.Alert{
+					Type: "primary",
+					Text: t("security.template.mfa.email.disabled"),
+				})
+			}
 
 			// Make sure we update User's data in the session
 			req.AuthUser.User = user

@@ -178,7 +178,7 @@ func (h AuthHandlers) mfaTotpDisableProc(req *request.AuthReq) (err error) {
 	if err == nil {
 		req.NewAlerts = append(req.NewAlerts, request.Alert{
 			Type: "primary",
-			Text: t("mfa-totp.alerts.text-MFA_disabled"),
+			Text: t("mfa-totp.alerts.text-MFA-disabled"),
 		})
 
 		// Make sure we update User's data in the session

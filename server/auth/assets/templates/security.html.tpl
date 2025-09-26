@@ -25,12 +25,12 @@
 			{{ if .settings.MultiFactor.TOTP.Enabled }}
 			<div class="py-4">
 				<h6>{{ tr "security.template.mfa.totp.title" }}</h6>
-				<div class="row">
-					<div class="col-10 pt-2">
+				<div class="d-flex pt-2">
+					<div>
 						{{ if .totpEnforced }}
-						<i class="bi bi-check-circle text-success h5 mr-1"></i>
+						  <i class="bi bi-check-circle text-success h5 mr-1"></i>
 						{{ else }}
-						<i class="bi bi-exclamation-circle-fill text-danger h5 mr-1"></i>
+						  <i class="bi bi-exclamation-circle-fill text-danger h5 mr-1"></i>
 						{{ end }}
 						{{ if .totpEnforced }}
 							{{ tr "security.template.mfa.totp.enforced" }}
@@ -38,17 +38,18 @@
 							{{ tr "security.template.mfa.totp.disabled" }}
 						{{ end }}
 					</div>
-					<div class="col-md-2 col-sm-12">
+
+					<div class="ml-auto">
 						{{ if .totpEnforced }}
 							{{ if not .settings.MultiFactor.TOTP.Enforced }}
-							<button
-								data-test-id="button-disable-totp"
-								name="action"
-								value="disableTOTP"
-								class="btn btn-danger float-right"
-							>
-								{{ tr "security.template.mfa.totp.disable" }}
-							</button>
+                <button
+                  data-test-id="button-disable-totp"
+                  name="action"
+                  value="disableTOTP"
+                  class="btn btn-danger float-right"
+                >
+                  {{ tr "security.template.mfa.totp.disable" }}
+                </button>
 							{{ end }}
 						{{ else }}
 							<button
@@ -68,20 +69,22 @@
 			{{ if .settings.MultiFactor.EmailOTP.Enabled }}
 			<div class="pt-4 pb-1">
 				<h6>{{ tr "security.template.mfa.email.title" }}</h6>
-				<div class="row">
-					<div class="col-10 pt-2">
-                    {{ if .emailOtpEnforced }}
-                    <i class="bi bi-check-circle text-success h5 mr-1"></i>
-                    {{ else }}
-                    <i class="bi bi-exclamation-circle-fill text-danger h5 mr-1"></i>
-                    {{ end }}
-					{{ if .emailOtpEnforced }}
-						{{ tr "security.template.mfa.email.enforced" }}
-					{{ else }}
-						{{ tr "security.template.mfa.email.disabled" }}
-					{{ end }}
+				<div class="d-flex align-items-center pt-2">
+					<div>
+            {{ if .emailOtpEnforced }}
+              <i class="bi bi-check-circle text-success h5 mr-1"></i>
+            {{ else }}
+              <i class="bi bi-exclamation-circle-fill text-danger h5 mr-1"></i>
+            {{ end }}
+
+            {{ if .emailOtpEnforced }}
+              {{ tr "security.template.mfa.email.enforced" }}
+            {{ else }}
+              {{ tr "security.template.mfa.email.disabled" }}
+            {{ end }}
 					</div>
-					<div class="col-md-2 col-sm-12">
+
+					<div class="ml-auto">
 					{{ if .emailOtpEnforced }}
 						{{ if not .settings.MultiFactor.EmailOTP.Enforced }}
 						<button

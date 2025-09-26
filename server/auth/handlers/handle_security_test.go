@@ -155,5 +155,5 @@ func Test_securityProcDisableEmailOTPSuccess(t *testing.T) {
 	err := authHandlers.securityProc(authReq)
 
 	rq.NoError(err)
-	rq.Equal([]request.Alert{{Type: "primary", Text: "security.totp-disabled", Html: ""}}, authReq.NewAlerts)
+	rq.Equal([]request.Alert{{Type: "primary", Text: "security.template.mfa.email.disabled", Html: ""}}, authReq.NewAlerts)
 }
