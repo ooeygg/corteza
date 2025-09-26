@@ -961,10 +961,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@cortezaproject/corteza-js@^2024.9.5-dev.1":
-  version "2024.9.5-dev.1"
-  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-js/-/corteza-js-2024.9.5-dev.1.tgz#3a905a6f4ceef75bc6c507819ec5fbae699bc233"
-  integrity sha512-05LfZ6Y3hTM6ClOf1qV1WIfNoZ5flgetwlNrblynsKB7h/1Xqnzn5n+Wi4R34YIkIJUvONa31HjuXyyznir36w==
+"@cortezaproject/corteza-js@^2024.9.5-rc.1":
+  version "2024.9.5-rc.1"
+  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-js/-/corteza-js-2024.9.5-rc.1.tgz#274f00ab851b04a3eab971e2339b477ef6907d8f"
+  integrity sha512-vweKBiUfLFbbKyWPcCQsxx3XTTDa39v3iw/GBclV/Ahmxm9PBlCR3oiou8IkcVD1YWxumwV9EuP+PZYxvXfoRA==
   dependencies:
     axios "^1.8.3"
     hex-rgb "^5.0.0"
@@ -975,12 +975,12 @@
     numeral "^2.0.6"
     pino "^9.6.0"
 
-"@cortezaproject/corteza-vue@^2024.9.5-dev.1":
-  version "2024.9.5-dev.1"
-  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-vue/-/corteza-vue-2024.9.5-dev.1.tgz#4c267f074428a117e495ea7a66e145e6d962d4db"
-  integrity sha512-qOTOQl9EN711WdPds/0M8nFeqx2FwNEtr+HRbptHdIHB3crYwOaOiNKcFPmPUsUTIewblpW3bNEiy60bNIvcfQ==
+"@cortezaproject/corteza-vue@^2024.9.5-rc.1":
+  version "2024.9.5-rc.1"
+  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-vue/-/corteza-vue-2024.9.5-rc.1.tgz#5261d5b1db3ef2b2b667106320f9438bfc249b0d"
+  integrity sha512-k9VM+CSkMDW6NJWb9GlHJ/juJoSc27F/LPNkD2VZKD7QxDa7xIk2xQvgW3/jqtTIB4yFqTO+/TbD/1ZCR8eEgA==
   dependencies:
-    "@cortezaproject/corteza-js" "^2024.9.5-dev.1"
+    "@cortezaproject/corteza-js" "^2024.9.5-rc.1"
     "@fortawesome/fontawesome-svg-core" "^6.7.2"
     "@fortawesome/free-solid-svg-icons" "^6.7.2"
     "@fortawesome/vue-fontawesome" "^2.0.10"
@@ -989,6 +989,7 @@
     "@tiptap/core" "^3.3.0"
     "@tiptap/extension-list" "^3.3.0"
     "@tiptap/extension-mention" "^3.3.0"
+    "@tiptap/extension-placeholder" "^3.3.1"
     "@tiptap/extension-table" "^3.3.0"
     "@tiptap/extension-text-align" "^3.3.0"
     "@tiptap/extension-text-style" "^3.3.0"
@@ -2096,6 +2097,11 @@
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-paragraph/-/extension-paragraph-3.3.1.tgz#f3cfd3815dd26c9302d4ae1fd46857769ed16060"
   integrity sha512-RX9y0UCB5oOtMCYkVnkYGDtJCLrPrzBkC50GhIIs9zdTNq+42qwijG4QictCxZw97LU7IBQ/GodtoIgll1wXXQ==
+
+"@tiptap/extension-placeholder@^3.3.1":
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-placeholder/-/extension-placeholder-3.6.1.tgz#26a62e688c88fc768eeedc35a14529629ddc1ca3"
+  integrity sha512-AhNI+75OqoJKtt5SChzacbPco9jnfV9rkHCF4yVenlK0Z3IQ/iOgAjLUbYqveXzNmLdhyt7lZn3yaCPXwCldJA==
 
 "@tiptap/extension-strike@^3.3.1":
   version "3.3.1"
@@ -4907,7 +4913,7 @@ escodegen@^2.0.0:
     source-map "~0.6.1"
 
 "eslint-config-corteza-client@file:../../../lib/eslint-client":
-  version "2024.9.5-dev.1"
+  version "2024.9.5-rc.1"
 
 eslint-config-standard@^17.0.0:
   version "17.1.0"
