@@ -118,10 +118,13 @@ jobs:
           docker compose config > /tmp/docker-compose.corteza.yaml
           cd ../corteza-e2e-cypress && docker compose config > /tmp/docker-compose.corteza-e2e.yaml
 
-      - name: Cache Docker images
-        uses: ScribeMD/docker-cache@0.3.7
-        with:
-          key: docker-${{ runner.os }}-${{ hashFiles('/tmp/docker-compose.corteza.yaml', '/tmp/docker-compose.corteza-e2e.yaml') }}
+      # - name: Cache Docker images
+      #   uses: ScribeMD/docker-cache@0.3.7
+      #   with:
+      #     key: docker-${{ runner.os }}-${{ hashFiles('/tmp/docker-compose.corteza.yaml', '/tmp/docker-compose.corteza-e2e.yaml') }}
+      #     # Only cache Corteza-specific images, not common base images already on runners
+      #     images: |
+      #       cypress/included:13.5.0
 
       - name: Run server and db
         working-directory: corteza
