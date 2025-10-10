@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { compose, NoID } from '@cortezaproject/corteza-js'
 import { fetchID } from 'corteza-webapp-compose/src/lib/block'
 import PageBlock from 'corteza-webapp-compose/src/components/PageBlocks'
@@ -68,7 +68,6 @@ export default {
     ...mapGetters({
       getPageByID: 'page/getByID',
       getModuleByID: 'module/getByID',
-      updateRecordSet: 'record/updateRecords',
     }),
 
     dialogClass () {
@@ -96,6 +95,10 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      updateRecordSet: 'record/updateRecords',
+    }),
+
     magnifyPageBlock ({ blockID, block } = {}) {
       this.customBlock = block
       const magnifiedBlockID = blockID || (block || {}).blockID

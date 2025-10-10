@@ -7,7 +7,7 @@
       class="mt-1"
     >
       <span
-        :class="{ 'text-warning': error.kind.includes('warning') }"
+        :class="{ 'text-secondary': error.meta.isWarning }"
       >
         {{ $t(error.message, { interpolation: { escapeValue: false }, value: error.meta.value}) }}
       </span>

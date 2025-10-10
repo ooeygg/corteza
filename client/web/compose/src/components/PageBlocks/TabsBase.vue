@@ -287,13 +287,13 @@ export default {
       if (!errors) {
         this.$set(this.tabErrors[index], id, undefined)
       } else {
-        const errorKind = errors.set.some(error => error.kind.includes('error')) ? 'error' : 'warning'
+        const errorKind = errors.set.some(error => error.meta.isWarning) ? 'warning' : 'error'
         this.$set(this.tabErrors[index], id, errorKind)
       }
     },
 
     hasTabErrors (index) {
-      if (!this.tabErrors[index]) {
+      if (this.mode === 'base' || !this.tabErrors[index]) {
         return false
       }
 
@@ -304,7 +304,7 @@ export default {
       const errorKinds = Object.values(this.tabErrors[index]).filter(error => !!error)
 
       if (errorKinds.length > 0) {
-        return errorKinds.includes('error') ? 'text-danger' : 'text-warning'
+        return errorKinds.includes('error') ? 'text-danger' : 'text-secondary'
       } else {
         return undefined
       }

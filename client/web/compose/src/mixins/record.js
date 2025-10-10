@@ -44,8 +44,8 @@ export default {
 
   watch: {
     'record.valueErrors': {
-      handler ({ set = [] } = {}) {
-        this.errors.push(...set)
+      handler () {
+        this.setWarnings()
       },
     },
 
@@ -153,10 +153,9 @@ export default {
           const { details = undefined } = err
 
           if (!!details && Array.isArray(details) && details.length > 0) {
-            this.errors = new validator.Validated()
-            this.errors.push(...details)
+            this.errors.push(...details.filter(d => !d.kind.includes('warning')))
 
-            throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorsFields() }))
+            throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorFields() }))
           }
 
           throw err
@@ -164,37 +163,37 @@ export default {
           record = new compose.Record(this.module, r)
         }).then(() => this.dispatchUiEvent('afterFormSubmit', record, { $records: records }))
         .then(() => {
-          setTimeout(() => {
-            if (record.valueErrors.set) {
-              this.initialRecordState = record.clone()
+          if (record.valueErrors.set) {
+            this.record = record.clone()
+            this.initialRecordState = record.clone()
+            this.setWarnings()
+            this.$root.$emit('refetch-records', { recordID: record.recordID })
+            this.toastWarning(this.$t('notification:record.validationWarnings', { errors: this.errors, fields: this.getValidationErrorFields({ includeWarnings: true }) }))
+
+            this.processing = false
+          } else {
+            this.initialRecordState = this.record.clone()
+
+            if (this.inModal) {
+              this.$emit('handle-record-redirect', { recordID: record.recordID, recordPageID: this.page.pageID, edit: false })
+
+              // If we are in a modal we need to refresh blocks/records not in modal
               this.$root.$emit('refetch-records', { recordID: record.recordID })
-              this.toastWarning(this.$t('notification:record.validationWarnings', { fields: this.getValidationErrorsFields({ errors: record.valueErrors, includeWarnings: true }) }))
-
-              this.processing = false
             } else {
-              this.initialRecordState = this.record.clone()
+              // Refresh blocks that are related to the updated records
+              const relatedRecords = [
+                this.module.moduleID,
+                ...new Set(records.filter(r => r.module.moduleID !== this.module.moduleID).map(r => r.module.moduleID)),
+              ]
+              relatedRecords.forEach(moduleID => this.$root.$emit('module-records-updated', { moduleID }))
 
-              if (this.inModal) {
-                this.$emit('handle-record-redirect', { recordID: record.recordID, recordPageID: this.page.pageID, edit: false })
-
-                // If we are in a modal we need to refresh blocks/records not in modal
-                this.$root.$emit('refetch-records', { recordID: record.recordID })
-              } else {
-                // Refresh blocks that are related to the updated records
-                const relatedRecords = [
-                  this.module.moduleID,
-                  ...new Set(records.filter(r => r.module.moduleID !== this.module.moduleID).map(r => r.module.moduleID)),
-                ]
-                relatedRecords.forEach(moduleID => this.$root.$emit('module-records-updated', { moduleID }))
-
-                this.$router.push({ name: route, params: { ...this.$route.params, recordID: record.recordID, edit: false } })
-              }
-
-              if (this.page.meta.notifications.enabled) {
-                this.toastSuccess(this.$t(`notification:record.${isNew ? 'create' : 'update'}Success`))
-              }
+              this.$router.push({ name: route, params: { ...this.$route.params, recordID: record.recordID, edit: false } })
             }
-          }, 500)
+
+            if (this.page.meta.notifications.enabled) {
+              this.toastSuccess(this.$t(`notification:record.${isNew ? 'create' : 'update'}Success`))
+            }
+          }
         }).catch(e => {
           this.processing = false
           this.toastErrorHandler(this.$t(`notification:record.${isNew ? 'create' : 'update'}Failed`))(e)
@@ -226,11 +225,13 @@ export default {
           }
         }).catch(err => {
           this.processing = false
-          const { details = undefined } = err
-          if (!!details && Array.isArray(details) && details.length > 0) {
-            this.errors.push(...details)
 
-            throw new Error(this.$t('notification:record.validationErrors'))
+          const { details = undefined } = err
+
+          if (!!details && Array.isArray(details) && details.length > 0) {
+            this.errors.push(...details.filter(d => !d.kind.includes('warning')))
+
+            throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorFields() }))
           }
 
           throw err
@@ -239,7 +240,10 @@ export default {
         }).then(() => this.dispatchUiEvent('afterFormSubmit', record))
         .then(() => {
           if (record.valueErrors.set) {
-            this.toastWarning(this.$t('notification:record.validationWarnings'))
+            this.record = record.clone()
+            this.initialRecordState = record.clone()
+            this.setWarnings()
+            this.toastWarning(this.$t('notification:record.validationWarnings', { fields: this.getValidationErrorFields({ includeWarnings: true }) }))
             this.processing = false
           } else {
             this.initialRecordState = this.record.clone()
@@ -289,6 +293,7 @@ export default {
       this.processing = true
 
       const values = []
+
       this.fields.forEach(f => {
         const { name, isMulti, isSystem } = this.getField(f)
         const value = isSystem ? this.record[name] : this.record.values[name]
@@ -324,11 +329,12 @@ export default {
         .$ComposeAPI.recordPatch({ moduleID, namespaceID, values, query })
         .catch(err => {
           const { details = undefined } = err
+
           if (!!details && Array.isArray(details) && details.length > 0) {
             this.errors = new validator.Validated()
             this.errors.push(...details)
 
-            throw new Error(this.$t('notification:record.validationErrors'))
+            throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorFields() }))
           }
 
           throw err
@@ -345,14 +351,14 @@ export default {
         })
     }, 500),
 
-    getValidationErrorsFields ({ errors = this.errors, includeWarnings = false, includeErrors = true } = {}) {
-      const { set = [] } = errors || {}
+    getValidationErrorFields ({ includeWarnings = false, includeErrors = true } = {}) {
+      const { set = [] } = this.errors || {}
 
-      const fields = new Set(set.filter(d => {
+      const fields = new Set(set.filter(({ meta = {} } = {}) => {
         if (includeWarnings) {
-          return d.kind.includes('warning')
+          return meta.isWarning
         } else if (includeErrors) {
-          return d.kind.includes('error')
+          return !meta.isWarning
         }
 
         return true
@@ -419,7 +425,7 @@ export default {
       await this.dispatchUiEvent('onFormSubmitError')
       vRunner()
       if (!this.errors.valid()) {
-        throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorsFields() }))
+        throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorFields() }))
       }
     },
 
@@ -438,8 +444,16 @@ export default {
 
       this.errors = this.validator.run(this.record)
       if (!this.errors.valid()) {
-        throw new Error(this.$t('notification:record.validationErrors'))
+        throw new Error(this.$t('notification:record.validationErrors', { fields: this.getValidationErrorFields() }))
       }
+    },
+
+    setWarnings () {
+      const { set = [] } = this.record.valueErrors || {}
+      this.errors.push(...set.map(e => {
+        e.meta.isWarning = true
+        return e
+      }))
     },
 
     resetErrors () {
