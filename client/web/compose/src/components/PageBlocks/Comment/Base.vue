@@ -435,7 +435,16 @@ export default {
 
     startAutoRefresh () {
       this.commentRefreshInterval = setInterval(() => {
-        if (!this.showNewestFirst && (this.filter.nextPage || this.autoFetching || this.submitting)) {
+        // Skip auto-refresh if:
+        // - Already fetching
+        // - Currently submitting a comment
+        // - Currently loading more messages via pagination
+        if (this.autoFetching || this.submitting || this.loadingMore) {
+          return
+        }
+
+        // For oldest-first mode, only auto-refresh if we're at the latest page (no nextPage)
+        if (!this.showNewestFirst && this.filter.nextPage) {
           return
         }
 
@@ -492,7 +501,7 @@ export default {
       const wasAtBottom = this.isScrollAtBottom()
 
       return this.fetchCommentRecords(this.roModule, filter, false).then(newComments => {
-        this.comments = this.mergeMessageGroups(this.comments, newComments, false)
+        this.comments = this.mergeMessageGroups(this.comments, newComments, true)
 
         // Auto-scroll to bottom if scroll was at bottom before the update
         if (wasAtBottom) {
@@ -505,41 +514,37 @@ export default {
 
     mergeMessageGroups (existing, newGroups, showNewestFirst = this.showNewestFirst) {
       if (!existing.length || !newGroups.length) {
-        return showNewestFirst ? [...newGroups, ...existing] : [...existing, ...newGroups]
+        return showNewestFirst ? [...existing, ...newGroups] : [...newGroups, ...existing]
       }
 
       const [existingGroup, newGroup] = showNewestFirst
-        ? [existing[0], newGroups[newGroups.length - 1]]
-        : [existing[existing.length - 1], newGroups[0]]
+        ? [existing[existing.length - 1], newGroups[0]]
+        : [existing[0], newGroups[newGroups.length - 1]]
 
       if (existingGroup.date === newGroup.date) {
         if (showNewestFirst) {
-          existingGroup.messages = [...newGroup.messages, ...existingGroup.messages]
-        } else {
           // Merge messages from newGroup into existingGroup
           newGroup.messages.forEach(newMessage => {
             const lastExistingMessage = existingGroup.messages[existingGroup.messages.length - 1]
 
             // If the last message in existing group has the same author, merge the comments
-            if (!showNewestFirst && lastExistingMessage && lastExistingMessage.authorId === newMessage.authorId) {
-              lastExistingMessage.comments = showNewestFirst
-                ? [...newMessage.comments, ...lastExistingMessage.comments]
-                : [...lastExistingMessage.comments, ...newMessage.comments]
+            if (lastExistingMessage && lastExistingMessage.authorId === newMessage.authorId) {
+              lastExistingMessage.comments = [...lastExistingMessage.comments, ...newMessage.comments]
             } else {
               // Add as a new message group
-              existingGroup.messages = showNewestFirst
-                ? [...existingGroup.messages, newMessage]
-                : [newMessage, ...existingGroup.messages]
+              existingGroup.messages.push(newMessage)
             }
           })
+        } else {
+          existingGroup.messages = [...newGroup.messages, ...existingGroup.messages]
         }
 
-        showNewestFirst ? newGroups.pop() : newGroups.shift()
+        showNewestFirst ? newGroups.shift() : newGroups.pop()
       }
 
       return showNewestFirst
-        ? [...newGroups, ...existing]
-        : [...existing, ...newGroups]
+        ? [...existing, ...newGroups]
+        : [...newGroups, ...existing]
     },
 
     getAuthor (userID) {
@@ -569,7 +574,7 @@ export default {
       const currentScrollHeight = container ? container.scrollHeight : 0
 
       this.fetchCommentRecords(this.roModule, this.expandFilter()).then(newGroups => {
-        this.comments = this.mergeMessageGroups(this.comments, newGroups)
+        this.comments = this.mergeMessageGroups(this.comments, newGroups, !this.showNewestFirst)
       }).finally(() => {
         this.$nextTick(() => {
           if (container && this.showNewestFirst) {
