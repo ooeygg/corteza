@@ -504,11 +504,11 @@ endpoints:
     path: "/"
     parameters:
       post:
-      - { type: "string",              name: "handle",                      title: "Handle for user group" }
-      - { type: "[]string",            name: "members",                     title: "user group member IDs" }
-      - { type: uint64,                name: selfID,       required: false, title: Parent user group ID }
-      - { type: "*types.UserGroupMeta",name: "meta",                        title: "Meta",           parser: "types.ParseUserGroupMeta" }
-      - { type: "map[string]string",   name: "labels",                      title: "Labels",         parser: "label.ParseStrings" }
+      - { type: "string",                 name: "handle",                      title: "Handle for user group" }
+      - { type: "[]string",               name: "members",                     title: "user group member IDs" }
+      - { type: "*types.UserGroupConfig",  name: "config",                      title: "Config",           parser: "types.ParseUserGroupConfig" }
+      - { type: "*types.UserGroupMeta",   name: "meta",                        title: "Meta",             parser: "types.ParseUserGroupMeta" }
+      - { type: "map[string]string",      name: "labels",                      title: "Labels",           parser: "label.ParseStrings" }
   - name: update
     method: PUT
     title: Update user group details
@@ -519,7 +519,7 @@ endpoints:
       post:
       - { type: "string",             name: "handle",     required: false, title: "Handle for user group" }
       - { type: "[]string",           name: "members",    required: false, title: "user group member IDs" }
-      - { type: uint64,               name: selfID,       required: false, title: Parent user group ID }
+      - { type: "*types.UserGroupConfig", name: "config",                   title: "Config",           parser: "types.ParseUserGroupConfig" }
       - { type: "*types.UserGroupMeta",name: "meta",                       title: "Meta",            parser: "types.ParseUserGroupMeta" }
       - { type: "map[string]string",  name: "labels",                      title: "Labels",          parser: "label.ParseStrings" }
       - { type: "*time.Time", name: updatedAt, required: false, title: Last update (or creation) date }

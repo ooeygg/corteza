@@ -16,19 +16,11 @@ user_group: {
 				omitGetter: true
 			}
 
-			self_id: {
-				ident: "selfID",
-				goType: "uint64",
-				dal: { type: "Ref", refModelResType: "corteza::system:user-group" }
-				sortable: true
-				envoy: {
-					store: {
-						filterRefField: "ParentID"
-					}
-					yaml: {
-						identKeyAlias: ["parent"]
-					}
-				}
+			config: {
+				goType: "*types.UserGroupConfig"
+				dal: { type: "JSON", defaultEmptyObject: true }
+				omitSetter: true
+				omitGetter: true
 			}
 
 			archived_at: schema.SortableTimestampNilField

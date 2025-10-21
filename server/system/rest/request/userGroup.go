@@ -100,10 +100,10 @@ type (
 		// user group member IDs
 		Members []string
 
-		// SelfID POST parameter
+		// Config POST parameter
 		//
-		// Parent user group ID
-		SelfID uint64 `json:",string"`
+		// Config
+		Config *types.UserGroupConfig
 
 		// Meta POST parameter
 		//
@@ -132,10 +132,10 @@ type (
 		// user group member IDs
 		Members []string
 
-		// SelfID POST parameter
+		// Config POST parameter
 		//
-		// Parent user group ID
-		SelfID uint64 `json:",string"`
+		// Config
+		Config *types.UserGroupConfig
 
 		// Meta POST parameter
 		//
@@ -357,7 +357,7 @@ func (r UserGroupCreate) Auditable() map[string]interface{} {
 	return map[string]interface{}{
 		"handle":  r.Handle,
 		"members": r.Members,
-		"selfID":  r.SelfID,
+		"config":  r.Config,
 		"meta":    r.Meta,
 		"labels":  r.Labels,
 	}
@@ -374,8 +374,8 @@ func (r UserGroupCreate) GetMembers() []string {
 }
 
 // Auditable returns all auditable/loggable parameters
-func (r UserGroupCreate) GetSelfID() uint64 {
-	return r.SelfID
+func (r UserGroupCreate) GetConfig() *types.UserGroupConfig {
+	return r.Config
 }
 
 // Auditable returns all auditable/loggable parameters
@@ -416,8 +416,13 @@ func (r *UserGroupCreate) Fill(req *http.Request) (err error) {
 				}
 			}
 
-			if val, ok := req.MultipartForm.Value["selfID"]; ok && len(val) > 0 {
-				r.SelfID, err = payload.ParseUint64(val[0]), nil
+			if val, ok := req.MultipartForm.Value["config[]"]; ok {
+				r.Config, err = types.ParseUserGroupConfig(val)
+				if err != nil {
+					return err
+				}
+			} else if val, ok := req.MultipartForm.Value["config"]; ok {
+				r.Config, err = types.ParseUserGroupConfig(val)
 				if err != nil {
 					return err
 				}
@@ -470,8 +475,13 @@ func (r *UserGroupCreate) Fill(req *http.Request) (err error) {
 		//    }
 		//}
 
-		if val, ok := req.Form["selfID"]; ok && len(val) > 0 {
-			r.SelfID, err = payload.ParseUint64(val[0]), nil
+		if val, ok := req.Form["config[]"]; ok {
+			r.Config, err = types.ParseUserGroupConfig(val)
+			if err != nil {
+				return err
+			}
+		} else if val, ok := req.Form["config"]; ok {
+			r.Config, err = types.ParseUserGroupConfig(val)
 			if err != nil {
 				return err
 			}
@@ -516,7 +526,7 @@ func (r UserGroupUpdate) Auditable() map[string]interface{} {
 		"userGroupID": r.UserGroupID,
 		"handle":      r.Handle,
 		"members":     r.Members,
-		"selfID":      r.SelfID,
+		"config":      r.Config,
 		"meta":        r.Meta,
 		"labels":      r.Labels,
 		"updatedAt":   r.UpdatedAt,
@@ -539,8 +549,8 @@ func (r UserGroupUpdate) GetMembers() []string {
 }
 
 // Auditable returns all auditable/loggable parameters
-func (r UserGroupUpdate) GetSelfID() uint64 {
-	return r.SelfID
+func (r UserGroupUpdate) GetConfig() *types.UserGroupConfig {
+	return r.Config
 }
 
 // Auditable returns all auditable/loggable parameters
@@ -586,8 +596,13 @@ func (r *UserGroupUpdate) Fill(req *http.Request) (err error) {
 				}
 			}
 
-			if val, ok := req.MultipartForm.Value["selfID"]; ok && len(val) > 0 {
-				r.SelfID, err = payload.ParseUint64(val[0]), nil
+			if val, ok := req.MultipartForm.Value["config[]"]; ok {
+				r.Config, err = types.ParseUserGroupConfig(val)
+				if err != nil {
+					return err
+				}
+			} else if val, ok := req.MultipartForm.Value["config"]; ok {
+				r.Config, err = types.ParseUserGroupConfig(val)
 				if err != nil {
 					return err
 				}
@@ -647,8 +662,13 @@ func (r *UserGroupUpdate) Fill(req *http.Request) (err error) {
 		//    }
 		//}
 
-		if val, ok := req.Form["selfID"]; ok && len(val) > 0 {
-			r.SelfID, err = payload.ParseUint64(val[0]), nil
+		if val, ok := req.Form["config[]"]; ok {
+			r.Config, err = types.ParseUserGroupConfig(val)
+			if err != nil {
+				return err
+			}
+		} else if val, ok := req.Form["config"]; ok {
+			r.Config, err = types.ParseUserGroupConfig(val)
 			if err != nil {
 				return err
 			}

@@ -671,14 +671,14 @@ type (
 
 	// auxUserGroup is an auxiliary structure used for transporting to/from RDBMS store
 	auxUserGroup struct {
-		ID         uint64                    `db:"id"`
-		Handle     string                    `db:"handle"`
-		Meta       *systemType.UserGroupMeta `db:"meta"`
-		SelfID     uint64                    `db:"self_id"`
-		ArchivedAt *time.Time                `db:"archived_at"`
-		CreatedAt  time.Time                 `db:"created_at"`
-		UpdatedAt  *time.Time                `db:"updated_at"`
-		DeletedAt  *time.Time                `db:"deleted_at"`
+		ID         uint64                      `db:"id"`
+		Handle     string                      `db:"handle"`
+		Meta       *systemType.UserGroupMeta   `db:"meta"`
+		Config     *systemType.UserGroupConfig `db:"config"`
+		ArchivedAt *time.Time                  `db:"archived_at"`
+		CreatedAt  time.Time                   `db:"created_at"`
+		UpdatedAt  *time.Time                  `db:"updated_at"`
+		DeletedAt  *time.Time                  `db:"deleted_at"`
 	}
 )
 
@@ -3125,7 +3125,7 @@ func (aux *auxUserGroup) encode(res *systemType.UserGroup) (_ error) {
 	aux.ID = res.ID
 	aux.Handle = res.Handle
 	aux.Meta = res.Meta
-	aux.SelfID = res.SelfID
+	aux.Config = res.Config
 	aux.ArchivedAt = res.ArchivedAt
 	aux.CreatedAt = res.CreatedAt
 	aux.UpdatedAt = res.UpdatedAt
@@ -3141,7 +3141,7 @@ func (aux auxUserGroup) decode() (res *systemType.UserGroup, _ error) {
 	res.ID = aux.ID
 	res.Handle = aux.Handle
 	res.Meta = aux.Meta
-	res.SelfID = aux.SelfID
+	res.Config = aux.Config
 	res.ArchivedAt = aux.ArchivedAt
 	res.CreatedAt = aux.CreatedAt
 	res.UpdatedAt = aux.UpdatedAt
@@ -3157,7 +3157,7 @@ func (aux *auxUserGroup) scan(row scanner) error {
 		&aux.ID,
 		&aux.Handle,
 		&aux.Meta,
-		&aux.SelfID,
+		&aux.Config,
 		&aux.ArchivedAt,
 		&aux.CreatedAt,
 		&aux.UpdatedAt,

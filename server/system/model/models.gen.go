@@ -2827,14 +2827,11 @@ var UserGroup = &dal.Model{
 		},
 
 		&dal.Attribute{
-			Ident: "SelfID", Sortable: true,
-			Type: &dal.TypeRef{
-				RefAttribute: "id",
-				RefModel: &dal.ModelRef{
-					ResourceType: "corteza::system:user-group",
-				},
+			Ident: "Config",
+			Type: &dal.TypeJSON{
+				DefaultValue: "{}",
 			},
-			Store: &dal.CodecAlias{Ident: "self_id"},
+			Store: &dal.CodecAlias{Ident: "config"},
 		},
 
 		&dal.Attribute{

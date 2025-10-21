@@ -30,12 +30,25 @@ type (
 	}
 
 	groupNode struct {
-		id       id.ID
-		handle   string
-		selfID   id.ID
-		children []*groupNode
+		id     id.ID
+		handle string
+
+		// Nodes this one is parent of
+		children []groupNodeConnection
+		// Slice of paths this node was provided (this node -> parents)
+		paths []GroupNodePath
 
 		roles []id.ID
+	}
+
+	GroupNodePath struct {
+		SelfID id.ID
+		Label  string
+	}
+
+	groupNodeConnection struct {
+		node  *groupNode
+		label string
 	}
 
 	GroupMembers struct {
@@ -45,13 +58,13 @@ type (
 )
 
 // ConvUserGroup creates internal structures for the org tree
-func ConvUserGroup(id id.ID, handle string, selfID id.ID, members, roles []id.ID) GroupMembers {
+func ConvUserGroup(id id.ID, handle string, members, roles []id.ID, paths []GroupNodePath) GroupMembers {
 	return GroupMembers{
 		group: &groupNode{
 			id:     id,
 			handle: handle,
-			selfID: selfID,
 			roles:  roles,
+			paths:  paths,
 		},
 
 		members: members,
@@ -107,14 +120,16 @@ func (svc *orgTree) Rebuild(gm ...GroupMembers) (err error) {
 	return
 }
 
-func (svc *orgTree) AddNode(id id.ID, handle string, selfID id.ID) (err error) {
-	svc.logger.Debug("adding node", zap.Any("id", id.Value()), zap.String("handle", handle), zap.Any("selfID", selfID.Value()))
+func (svc *orgTree) AddNode(id id.ID, handle string, paths ...GroupNodePath) (err error) {
+	svc.logger.Debug("adding node", zap.Any("id", id.Value()), zap.String("handle", handle), zap.Any("paths", formatPaths(paths)))
 
-	err = svc.addNode(&groupNode{
+	n := &groupNode{
 		id:     id,
 		handle: handle,
-		selfID: selfID,
-	})
+		paths:  paths,
+	}
+
+	err = svc.addNode(n)
 	if err != nil {
 		return
 	}
@@ -139,12 +154,17 @@ func (svc *orgTree) addNode(node *groupNode) (err error) {
 		return
 	}
 
-	i, n := svc.findNode(node.selfID)
-	if i < 0 {
-		return fmt.Errorf("cannot insert node %v (%s): parent node %v not found", node.id.Value(), node.handle, node.selfID.Value())
-	}
+	for _, p := range node.paths {
+		i, n := svc.findNode(p.SelfID)
+		if i < 0 {
+			return fmt.Errorf("cannot add node path: parent node %v not found", p.SelfID)
+		}
 
-	n.children = append(n.children, node)
+		n.children = append(n.children, groupNodeConnection{
+			node:  node,
+			label: p.Label,
+		})
+	}
 
 	svc.branchIndex[node.id] = node
 	svc.groupMemberIndex[node.id] = []id.ID{}
@@ -152,30 +172,33 @@ func (svc *orgTree) addNode(node *groupNode) (err error) {
 	return
 }
 
-func (svc *orgTree) UpdateNode(idx id.ID, handle string, selfID id.ID) (err error) {
-	svc.logger.Debug("updating node", zap.Any("id", idx.Value()), zap.String("handle", handle), zap.Any("selfID", selfID.Value()))
+func (svc *orgTree) UpdateNode(idx id.ID, handle string, paths ...GroupNodePath) (err error) {
+	svc.logger.Debug("updating node", zap.Any("id", idx.Value()), zap.String("handle", handle), zap.Any("paths", formatPaths(paths)))
 
 	i, n := svc.findNode(idx)
 	if i < 0 {
 		return fmt.Errorf("cannot update node %v (%s): not indexed", idx.Value(), handle)
 	}
 
-	oldSelfID := n.selfID
+	oldPaths := n.paths
 
 	n.handle = handle
-	n.selfID = selfID
+	n.paths = paths
 
 	if svc.branchIndex == nil {
 		svc.branchIndex = make(map[id.ID]*groupNode)
 	}
 
-	if !oldSelfID.Equal(id.MustNumID(0)) {
-		i = svc.isInSlice(svc.branchIndex[oldSelfID].children, idx)
-		svc.branchIndex[oldSelfID].children = append(svc.branchIndex[oldSelfID].children[:i], svc.branchIndex[oldSelfID].children[i+1:]...)
+	for _, op := range oldPaths {
+		i = svc.isInConnections(svc.branchIndex[op.SelfID].children, idx)
+		svc.branchIndex[op.SelfID].children = append(svc.branchIndex[op.SelfID].children[:i], svc.branchIndex[op.SelfID].children[i+1:]...)
 	}
 
-	if !selfID.Equal(id.MustNumID(0)) {
-		svc.branchIndex[selfID].children = append(svc.branchIndex[selfID].children, n)
+	for _, p := range paths {
+		svc.branchIndex[p.SelfID].children = append(svc.branchIndex[p.SelfID].children, groupNodeConnection{
+			node:  n,
+			label: p.Label,
+		})
 	}
 
 	return
@@ -198,7 +221,7 @@ func (svc *orgTree) RemoveNode(id id.ID) (err error) {
 	}
 
 	for _, n := range svc.root.inline() {
-		i := svc.isInSlice(n.children, id)
+		i := svc.isInConnections(n.children, id)
 		if i < 0 {
 			continue
 		}
@@ -236,7 +259,7 @@ func (svc *orgTree) IsAbove(childUser, parentUser id.ID) bool {
 }
 
 // MemberBranch returns the branch belonging to the user
-func (svc *orgTree) MemberBranch(user id.ID) (group []*groupNode, err error) {
+func (svc *orgTree) MemberBranch(user id.ID, paths ...string) (group []*groupNode, err error) {
 	if svc == nil {
 		return
 	}
@@ -255,7 +278,7 @@ func (svc *orgTree) MemberBranch(user id.ID) (group []*groupNode, err error) {
 		return nil, fmt.Errorf("group %s not found in subtree index", aux.id.Value())
 	}
 
-	return ss.inline(), nil
+	return ss.inline(paths...), nil
 }
 
 func (svc *orgTree) AddGroupRole(group id.ID, roles ...id.ID) (err error) {
@@ -371,7 +394,7 @@ func buildOrgTree(gg ...*groupNode) (root *groupNode, index map[id.ID]*groupNode
 	for _, g := range gg {
 		mapped[g.id] = g
 
-		if g.selfID.IsZero() {
+		if len(g.paths) == 0 {
 			if root != nil {
 				return nil, nil, errors.New("multiple root nodes detected")
 			}
@@ -381,16 +404,21 @@ func buildOrgTree(gg ...*groupNode) (root *groupNode, index map[id.ID]*groupNode
 	}
 
 	for _, g := range gg {
-		if g.selfID.IsZero() {
+		if len(g.paths) == 0 {
 			continue
 		}
 
-		parent, ok := mapped[g.selfID]
-		if !ok {
-			return nil, nil, fmt.Errorf("node %s parent %s not found", g.id.Value(), g.selfID.Value())
-		}
+		for _, p := range g.paths {
+			parent, ok := mapped[p.SelfID]
+			if !ok {
+				return nil, nil, fmt.Errorf("node %s parent %s not found", g.id.Value(), p.SelfID.Value())
+			}
 
-		parent.children = append(parent.children, g)
+			parent.children = append(parent.children, groupNodeConnection{
+				label: p.Label,
+				node:  g,
+			})
+		}
 	}
 
 	index = make(map[id.ID]*groupNode, len(gg))
@@ -402,11 +430,36 @@ func buildOrgTree(gg ...*groupNode) (root *groupNode, index map[id.ID]*groupNode
 }
 
 // inline converts the subtree in a slice using BFS
-func (root *groupNode) inline() []*groupNode {
+func (root *groupNode) inline(paths ...string) []*groupNode {
 	if root == nil {
 		return nil
 	}
 
+	// Helper to check if a connection should be included based on path
+	//
+	// - It we don't specify any path, all nodes are used
+	// - If a connection label is empty, the node is included regardless of defined paths
+	// - If a connection defines a label, it must occur in the requested paths slice
+	inclConnection := func(c groupNodeConnection) bool {
+		if len(paths) == 0 {
+			return true
+		}
+
+		if c.label == "" {
+			return true
+		}
+
+		for _, pth := range paths {
+			if c.label == pth {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	// outSeen helps us filter out duplicates
+	outSeen := make(map[id.ID]bool, 4)
 	out := make([]*groupNode, 0)
 	fifo := make([]*groupNode, 0)
 
@@ -414,9 +467,26 @@ func (root *groupNode) inline() []*groupNode {
 	i := 0
 	for {
 		n := fifo[i]
-		fifo = append(fifo, n.children...)
+		if outSeen[n.id] {
+			if i+1 >= len(fifo) {
+				break
+			}
+
+			i++
+
+			continue
+		}
+
+		for _, c := range n.children {
+			if !inclConnection(c) {
+				continue
+			}
+
+			fifo = append(fifo, c.node)
+		}
 
 		out = append(out, n)
+		outSeen[n.id] = true
 
 		if i+1 >= len(fifo) {
 			break
@@ -428,17 +498,30 @@ func (root *groupNode) inline() []*groupNode {
 	return out
 }
 
+func formatPaths(paths []GroupNodePath) []map[string]any {
+	out := make([]map[string]any, 0, len(paths))
+
+	for _, p := range paths {
+		out = append(out, map[string]any{
+			"selfID": p.SelfID,
+			"label":  p.Label,
+		})
+	}
+
+	return out
+}
+
 func (n *groupNode) format() map[string]any {
 	out := map[string]any{
 		"id":     n.id.Value(),
 		"handle": n.handle,
-		"selfID": n.selfID.Value(),
+		"paths":  n.formatPaths(),
 		"roles":  id.StringifySlice(n.roles...),
 	}
 
 	cc := make([]id.ID, 0, len(n.children))
 	for _, c := range n.children {
-		cc = append(cc, c.id)
+		cc = append(cc, c.node.id)
 	}
 
 	out["children"] = id.StringifySlice(cc...)
@@ -468,9 +551,9 @@ func (svc *orgTree) findNode(id id.ID) (i int, n *groupNode) {
 	return
 }
 
-func (svc *orgTree) isInSlice(ss []*groupNode, id id.ID) int {
+func (svc *orgTree) isInConnections(ss []groupNodeConnection, id id.ID) int {
 	for i, s := range ss {
-		if s.id.Equal(id) {
+		if s.node.id.Equal(id) {
 			return i
 		}
 	}

@@ -15,7 +15,7 @@ type (
 		ID     uint64 `json:"userGroupID,string"`
 		Handle string `json:"handle"`
 
-		SelfID uint64 `json:"selfID,string"`
+		Config *UserGroupConfig `json:"config"`
 
 		IsRoot bool `json:"isRoot"`
 
@@ -26,6 +26,15 @@ type (
 		UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 		ArchivedAt *time.Time `json:"archivedAt,omitempty"`
 		DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	}
+
+	UserGroupConfig struct {
+		Paths []UserGroupPath `json:"path"`
+	}
+
+	UserGroupPath struct {
+		SelfID uint64 `json:"selfID,string"`
+		Label  string `json:"label"`
 	}
 
 	UserGroupMeta struct {
@@ -90,3 +99,6 @@ func (set UserGroupSet) FindByHandle(handle string) *UserGroup {
 
 func (vv *UserGroupMeta) Scan(src any) error           { return sql.ParseJSON(src, vv) }
 func (vv *UserGroupMeta) Value() (driver.Value, error) { return json.Marshal(vv) }
+
+func (vv *UserGroupConfig) Scan(src any) error           { return sql.ParseJSON(src, vv) }
+func (vv *UserGroupConfig) Value() (driver.Value, error) { return json.Marshal(vv) }

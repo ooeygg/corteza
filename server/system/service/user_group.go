@@ -67,8 +67,8 @@ type (
 		UpdateUserGroups(rr ...rbac.GroupMembers) (err error)
 		AssignGroupMembers(group id.ID, members ...id.ID) (err error)
 
-		AddNode(id id.ID, handle string, selfID id.ID) (err error)
-		UpdateNode(id id.ID, handle string, selfID id.ID) (err error)
+		AddNode(id id.ID, handle string, paths ...rbac.GroupNodePath) (err error)
+		UpdateNode(id id.ID, handle string, paths ...rbac.GroupNodePath) (err error)
 		RemoveNode(id id.ID) (err error)
 	}
 
@@ -100,7 +100,7 @@ func (svc userGroup) Activate(ctx context.Context) (err error) {
 	}
 
 	for _, g := range groups {
-		if g.SelfID == 0 {
+		if len(g.Config.Paths) == 0 {
 			svc.rootUserGroup = g.ID
 		}
 
@@ -127,8 +127,16 @@ func (svc userGroup) Activate(ctx context.Context) (err error) {
 			members[i] = id.MustNumID(m.ID)
 		}
 
+		pp := []rbac.GroupNodePath{}
+		for _, p := range g.Config.Paths {
+			pp = append(pp, rbac.GroupNodePath{
+				SelfID: id.MustNumID(p.SelfID),
+				Label:  p.Label,
+			})
+		}
+
 		// @todo we need to reload this on specific changes
-		gMembers = append(gMembers, rbac.ConvUserGroup(id.MustNumID(g.ID), g.Handle, id.MustNumID(g.SelfID), members, rr))
+		gMembers = append(gMembers, rbac.ConvUserGroup(id.MustNumID(g.ID), g.Handle, members, rr, pp))
 	}
 
 	err = svc.rbac.UpdateUserGroups(gMembers...)
@@ -330,7 +338,15 @@ func (svc userGroup) Create(ctx context.Context, new *types.UserGroup) (r *types
 
 		r = new
 
-		err = svc.rbac.AddNode(id.MustNumID(new.ID), new.Handle, id.MustNumID(new.SelfID))
+		pp := []rbac.GroupNodePath{}
+		for _, p := range new.Config.Paths {
+			pp = append(pp, rbac.GroupNodePath{
+				SelfID: id.MustNumID(p.SelfID),
+				Label:  p.Label,
+			})
+		}
+
+		err = svc.rbac.AddNode(id.MustNumID(new.ID), new.Handle, pp...)
 		if err != nil {
 			return
 		}
@@ -363,7 +379,7 @@ func (svc userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *types
 			return UserGroupErrNotAllowedToUpdate()
 		}
 
-		if upd.SelfID == 0 {
+		if len(upd.Config.Paths) == 0 {
 			return UserGroupErrMissingSelfID()
 		}
 
@@ -405,7 +421,15 @@ func (svc userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *types
 			r.Labels = upd.Labels
 		}
 
-		err = svc.rbac.UpdateNode(id.MustNumID(r.ID), r.Handle, id.MustNumID(r.SelfID))
+		pp := []rbac.GroupNodePath{}
+		for _, p := range r.Config.Paths {
+			pp = append(pp, rbac.GroupNodePath{
+				SelfID: id.MustNumID(p.SelfID),
+				Label:  p.Label,
+			})
+		}
+
+		err = svc.rbac.UpdateNode(id.MustNumID(r.ID), r.Handle, pp...)
 		if err != nil {
 			return
 		}
@@ -500,7 +524,15 @@ func (svc userGroup) Undelete(ctx context.Context, userGroupID uint64) (err erro
 			return
 		}
 
-		err = svc.rbac.AddNode(id.MustNumID(upd.ID), upd.Handle, id.MustNumID(upd.SelfID))
+		pp := []rbac.GroupNodePath{}
+		for _, p := range upd.Config.Paths {
+			pp = append(pp, rbac.GroupNodePath{
+				SelfID: id.MustNumID(p.SelfID),
+				Label:  p.Label,
+			})
+		}
+
+		err = svc.rbac.AddNode(id.MustNumID(upd.ID), upd.Handle, pp...)
 		if err != nil {
 			return
 		}
@@ -633,10 +665,18 @@ func (svc userGroup) isValidStructure(ctx context.Context, g *types.UserGroup) (
 }
 
 func (svc userGroup) checkSelfID(ctx context.Context, g *types.UserGroup) bool {
-	if g.SelfID == g.ID {
-		return false
+	for _, p := range g.Config.Paths {
+		// Can't point to itself
+		if p.SelfID == g.ID {
+			return false
+		}
+
+		// The pointed to selfID exists
+		_, err := svc.FindByID(ctx, p.SelfID)
+		if err != nil {
+			return false
+		}
 	}
 
-	_, err := svc.FindByID(ctx, g.SelfID)
-	return err == nil
+	return true
 }

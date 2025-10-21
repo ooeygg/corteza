@@ -321,11 +321,12 @@ func (svc *service) RemoveGroupMembers(group id.ID, members ...id.ID) (err error
 	return svc.orgTree.RemoveGroupMembers(group, members...)
 }
 
-func (svc *service) AddNode(id id.ID, handle string, selfID id.ID) (err error) {
-	return svc.orgTree.AddNode(id, handle, selfID)
+func (svc *service) AddNode(id id.ID, handle string, paths ...GroupNodePath) (err error) {
+	return svc.orgTree.AddNode(id, handle, paths...)
 }
-func (svc *service) UpdateNode(id id.ID, handle string, selfID id.ID) (err error) {
-	return svc.orgTree.UpdateNode(id, handle, selfID)
+
+func (svc *service) UpdateNode(id id.ID, handle string, paths ...GroupNodePath) (err error) {
+	return svc.orgTree.UpdateNode(id, handle, paths...)
 }
 func (svc *service) RemoveNode(id id.ID) (err error) {
 	return svc.orgTree.RemoveNode(id)

@@ -24292,8 +24292,6 @@ func (Store) sortableUserGroupFields() map[string]string {
 		"deletedat":   "deleted_at",
 		"handle":      "handle",
 		"id":          "id",
-		"self_id":     "self_id",
-		"selfid":      "self_id",
 		"updated_at":  "updated_at",
 		"updatedat":   "updated_at",
 	}
@@ -24328,8 +24326,6 @@ func (s *Store) collectUserGroupCursorValues(res *systemType.UserGroup, cc ...*f
 				case "handle":
 					hasUnique = true
 					return res.Handle
-				case "selfID":
-					return res.SelfID
 				case "archivedAt":
 					return res.ArchivedAt
 				case "createdAt":

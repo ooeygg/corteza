@@ -174,7 +174,6 @@ func defaultUserGroup(ctx context.Context, log *zap.Logger, s store.UserGroups, 
 	g := &types.UserGroup{
 		ID:     id.Next(),
 		Handle: authOpt.DefaultUserGroup,
-		SelfID: 0,
 		Meta: &types.UserGroupMeta{
 			Short:       "Default User Group",
 			Description: "The default user group",

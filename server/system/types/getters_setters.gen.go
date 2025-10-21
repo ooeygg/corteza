@@ -714,8 +714,6 @@ func (r *UserGroup) GetValue(name string, pos uint) (any, error) {
 		return r.Handle, nil
 	case "id", "ID":
 		return r.ID, nil
-	case "selfID", "SelfID":
-		return r.SelfID, nil
 	case "updatedAt", "UpdatedAt":
 		return r.UpdatedAt, nil
 
@@ -739,8 +737,6 @@ func (r *UserGroup) SetValue(name string, pos uint, value any) (err error) {
 		return cast2.String(value, &r.Handle)
 	case "id", "ID":
 		return cast2.Uint64(value, &r.ID)
-	case "selfID", "SelfID":
-		return cast2.Uint64(value, &r.SelfID)
 	case "updatedAt", "UpdatedAt":
 		return cast2.TimePtr(value, &r.UpdatedAt)
 

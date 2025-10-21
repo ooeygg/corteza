@@ -88,7 +88,7 @@ func (ctrl UserGroup) Create(ctx context.Context, r *request.UserGroupCreate) (i
 		userGroup = &types.UserGroup{
 			Handle: r.Handle,
 			Labels: r.Labels,
-			SelfID: r.SelfID,
+			Config: r.Config,
 			Meta:   r.Meta,
 		}
 	)
@@ -112,11 +112,11 @@ func (ctrl UserGroup) Update(ctx context.Context, r *request.UserGroupUpdate) (i
 		err       error
 		userGroup = &types.UserGroup{
 			ID:        r.UserGroupID.Number(),
-			SelfID:    r.SelfID,
 			Handle:    r.Handle,
 			Labels:    r.Labels,
 			UpdatedAt: r.UpdatedAt,
 			Meta:      r.Meta,
+			Config:    r.Config,
 		}
 	)
 
