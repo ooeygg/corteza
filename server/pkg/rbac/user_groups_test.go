@@ -26,37 +26,105 @@ func TestGroupMembership(t *testing.T) {
 }
 
 func TestMemberBranch(t *testing.T) {
-	svc, err := testPrepState(t)
-	require.NoError(t, err)
-	require.NotNil(t, svc)
+	// @todo add some test cases for named paths; they use the same underlying fnc so I'm skipping for now
+	t.Run("unnamed paths", func(t *testing.T) {
+		svc, err := testPrepState(t)
+		require.NoError(t, err)
+		require.NotNil(t, svc)
 
-	mm, err := svc.MemberBranch(id.MustNumID(102))
-	require.NoError(t, err)
-	require.Len(t, mm, 4)
-	require.Equal(t, id.MustNumID(1), mm[0].id)
-	require.Equal(t, id.MustNumID(2), mm[1].id)
-	require.Equal(t, id.MustNumID(3), mm[2].id)
-	require.Equal(t, id.MustNumID(4), mm[3].id)
+		mm, err := svc.MemberBranch(id.MustNumID(102))
+		require.NoError(t, err)
+		require.Len(t, mm, 4)
+		require.Equal(t, id.MustNumID(1), mm[0].id)
+		require.Equal(t, id.MustNumID(2), mm[1].id)
+		require.Equal(t, id.MustNumID(3), mm[2].id)
+		require.Equal(t, id.MustNumID(4), mm[3].id)
+	})
 }
 
 func TestIsAbove(t *testing.T) {
-	svc, err := testPrepState(t)
-	require.NoError(t, err)
+	t.Run("unnamed", func(t *testing.T) {
+		svc, err := testPrepState(t)
+		require.NoError(t, err)
 
-	t.Run("yes, child", func(t *testing.T) {
-		require.True(t, svc.IsAbove(id.MustNumID(121), id.MustNumID(101)))
+		t.Run("yes, child", func(t *testing.T) {
+			require.True(t, svc.IsAbove(id.MustNumID(121), id.MustNumID(101)))
+		})
+
+		t.Run("yes, grandchild", func(t *testing.T) {
+			require.True(t, svc.IsAbove(id.MustNumID(141), id.MustNumID(101)))
+		})
+
+		t.Run("no, same lvl", func(t *testing.T) {
+			require.False(t, svc.IsAbove(id.MustNumID(101), id.MustNumID(102)))
+		})
+
+		t.Run("no, below", func(t *testing.T) {
+			require.False(t, svc.IsAbove(id.MustNumID(101), id.MustNumID(121)))
+		})
 	})
 
-	t.Run("yes, grandchild", func(t *testing.T) {
-		require.True(t, svc.IsAbove(id.MustNumID(141), id.MustNumID(101)))
-	})
+	t.Run("named", func(t *testing.T) {
+		svc, err := mkOrgTree()
+		require.NoError(t, err)
 
-	t.Run("no, same lvl", func(t *testing.T) {
-		require.False(t, svc.IsAbove(id.MustNumID(101), id.MustNumID(102)))
-	})
+		err = svc.AddNode(id.MustNumID(101), "root")
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(101), id.MustNumID(101))
+		require.NoError(t, err)
 
-	t.Run("no, below", func(t *testing.T) {
-		require.False(t, svc.IsAbove(id.MustNumID(101), id.MustNumID(121)))
+		//
+
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPpn(id.MustNumID(101), "a")...)
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(201), id.MustNumID(201))
+		require.NoError(t, err)
+
+		err = svc.AddNode(id.MustNumID(202), "c2", mkPpn(id.MustNumID(101), "a", id.MustNumID(101), "b")...)
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(202), id.MustNumID(202))
+		require.NoError(t, err)
+
+		err = svc.AddNode(id.MustNumID(203), "c3", mkPp(id.MustNumID(101))...)
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(203), id.MustNumID(203))
+		require.NoError(t, err)
+
+		//
+
+		err = svc.AddNode(id.MustNumID(301), "cc1", mkPpn(id.MustNumID(201), "a")...)
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(301), id.MustNumID(301))
+		require.NoError(t, err)
+
+		err = svc.AddNode(id.MustNumID(302), "cc2", mkPpn(id.MustNumID(202), "a")...)
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(302), id.MustNumID(302))
+		require.NoError(t, err)
+
+		err = svc.AddNode(id.MustNumID(303), "cc3", mkPpn(id.MustNumID(101), "a")...)
+		require.NoError(t, err)
+		err = svc.AssignGroupMembers(id.MustNumID(303), id.MustNumID(303))
+		require.NoError(t, err)
+
+		// ---
+
+		t.Run("yes, child, labeled path", func(t *testing.T) {
+			require.True(t, svc.IsAbove(id.MustNumID(201), id.MustNumID(101), "a"))
+		})
+
+		t.Run("yes, child, has labeled path but looking generic", func(t *testing.T) {
+			require.True(t, svc.IsAbove(id.MustNumID(201), id.MustNumID(101)))
+		})
+
+		t.Run("no, child, wrong labeled path", func(t *testing.T) {
+			require.False(t, svc.IsAbove(id.MustNumID(201), id.MustNumID(101), "b"))
+		})
+
+		t.Run("yes, grandchild, labeled path", func(t *testing.T) {
+			require.True(t, svc.IsAbove(id.MustNumID(302), id.MustNumID(101), "a"))
+		})
+
 	})
 }
 
@@ -65,10 +133,10 @@ func TestAddGroupRole(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.AddGroupRole(id.MustNumID(101), id.MustNumID(991))
@@ -85,10 +153,10 @@ func TestAddGroupRole(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.AddGroupRole(id.MustNumID(101), id.MustNumID(991), id.MustNumID(991))
@@ -105,10 +173,10 @@ func TestAddGroupRole(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.AddGroupRole(id.MustNumID(101), id.MustNumID(991))
@@ -132,10 +200,10 @@ func TestRemoveGroupRole(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.AddGroupRole(id.MustNumID(101), id.MustNumID(991))
@@ -154,10 +222,10 @@ func TestRemoveGroupRole(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.AddGroupRole(id.MustNumID(101), id.MustNumID(991), id.MustNumID(992), id.MustNumID(993))
@@ -179,7 +247,7 @@ func TestAddNode(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(1), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(1), "root")
 		require.NoError(t, err)
 
 		ii := svc.root.inline()
@@ -192,16 +260,16 @@ func TestAddNode(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(202), "c2", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(202), "c2", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(301), "c3", id.MustNumID(201))
+		err = svc.AddNode(id.MustNumID(301), "c3", mkPp(id.MustNumID(201))...)
 		require.NoError(t, err)
 
 		// ---
@@ -215,39 +283,145 @@ func TestAddNode(t *testing.T) {
 	})
 }
 
+func TestMultiPath(t *testing.T) {
+	svc, err := mkOrgTree()
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(101), "root")
+	require.NoError(t, err)
+
+	// lvl 2 roots
+
+	err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(202), "c2", mkPp(id.MustNumID(101))...)
+	require.NoError(t, err)
+
+	// Multi path child
+	err = svc.AddNode(id.MustNumID(301), "cc1", mkPp(id.MustNumID(201), id.MustNumID(202))...)
+	require.NoError(t, err)
+
+	// Check
+
+	gg := svc.branchIndex[id.MustNumID(201)].inline()
+	require.Len(t, gg, 2)
+
+	require.Equal(t, id.MustNumID(201), gg[0].id)
+	require.Equal(t, id.MustNumID(301), gg[1].id)
+
+	gg = svc.branchIndex[id.MustNumID(202)].inline()
+	require.Len(t, gg, 2)
+
+	require.Equal(t, id.MustNumID(202), gg[0].id)
+	require.Equal(t, id.MustNumID(301), gg[1].id)
+}
+
+func TestNamedPaths(t *testing.T) {
+	svc, err := mkOrgTree()
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(101), "root")
+	require.NoError(t, err)
+
+	//
+
+	err = svc.AddNode(id.MustNumID(201), "c1", mkPpn(id.MustNumID(101), "a")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(202), "c2", mkPpn(id.MustNumID(101), "b")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(203), "c3", mkPpn(id.MustNumID(101), "")...)
+	require.NoError(t, err)
+
+	//
+
+	err = svc.AddNode(id.MustNumID(311), "cc11", mkPpn(id.MustNumID(201), "a", id.MustNumID(201), "b")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(312), "cc12", mkPpn(id.MustNumID(201), "")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(321), "cc21", mkPpn(id.MustNumID(202), "")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(331), "cc31", mkPpn(id.MustNumID(203), "a")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(332), "cc32", mkPpn(id.MustNumID(203), "b")...)
+	require.NoError(t, err)
+
+	//
+
+	err = svc.AddNode(id.MustNumID(401), "ccc01", mkPpn(id.MustNumID(311), "")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(402), "ccc02", mkPpn(id.MustNumID(312), "b")...)
+	require.NoError(t, err)
+
+	err = svc.AddNode(id.MustNumID(403), "ccc03", mkPpn(id.MustNumID(332), "")...)
+	require.NoError(t, err)
+
+	//
+	//
+	//
+
+	t.Run("201 any path", func(t *testing.T) {
+		bb := svc.branchIndex[id.MustNumID(201)].inline()
+		require.Len(t, bb, 5)
+
+		require.Equal(t, id.MustNumID(201), bb[0].id)
+		require.Equal(t, id.MustNumID(311), bb[1].id)
+		require.Equal(t, id.MustNumID(312), bb[2].id)
+		require.Equal(t, id.MustNumID(401), bb[3].id)
+		require.Equal(t, id.MustNumID(402), bb[4].id)
+	})
+
+	t.Run("201 a path", func(t *testing.T) {
+		bb := svc.branchIndex[id.MustNumID(201)].inline("a")
+		require.Len(t, bb, 4)
+
+		require.Equal(t, id.MustNumID(201), bb[0].id)
+		require.Equal(t, id.MustNumID(311), bb[1].id)
+		require.Equal(t, id.MustNumID(312), bb[2].id)
+		require.Equal(t, id.MustNumID(401), bb[3].id)
+	})
+
+}
+
 func TestUpdateNode(t *testing.T) {
 	t.Run("update without move", func(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.UpdateNode(id.MustNumID(101), "root edited", id.MustNumID(0))
+		err = svc.UpdateNode(id.MustNumID(101), "root edited")
 		require.NoError(t, err)
 
 		require.Equal(t, id.MustNumID(101), svc.root.id)
 		require.Equal(t, "root edited", svc.root.handle)
-		require.Equal(t, id.MustNumID(0), svc.root.selfID)
 	})
 
 	t.Run("change parent", func(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(202), "c2", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(202), "c2", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(301), "c3", id.MustNumID(201))
+		err = svc.AddNode(id.MustNumID(301), "c3", mkPp(id.MustNumID(201))...)
 		require.NoError(t, err)
 
-		err = svc.UpdateNode(id.MustNumID(301), "c3 edited", id.MustNumID(202))
+		err = svc.UpdateNode(id.MustNumID(301), "c3 edited", mkPp(id.MustNumID(202))...)
 		require.NoError(t, err)
 
 		checkInline(t, svc.branchIndex[id.MustNumID(201)], id.MustNumID(201))
@@ -258,10 +432,10 @@ func TestUpdateNode(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.UpdateNode(id.MustNumID(999), "root edited", id.MustNumID(0))
+		err = svc.UpdateNode(id.MustNumID(999), "root edited", mkPp(id.MustNumID(0))...)
 		require.Error(t, err)
 	})
 }
@@ -271,10 +445,10 @@ func TestRemoveNode(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.RemoveNode(id.MustNumID(201))
@@ -288,13 +462,13 @@ func TestRemoveNode(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(301), "c2", id.MustNumID(201))
+		err = svc.AddNode(id.MustNumID(301), "c2", mkPp(id.MustNumID(201))...)
 		require.NoError(t, err)
 
 		err = svc.RemoveNode(id.MustNumID(201))
@@ -305,24 +479,15 @@ func TestRemoveNode(t *testing.T) {
 		svc, err := mkOrgTree()
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(101), "root", id.MustNumID(0))
+		err = svc.AddNode(id.MustNumID(101), "root")
 		require.NoError(t, err)
 
-		err = svc.AddNode(id.MustNumID(201), "c1", id.MustNumID(101))
+		err = svc.AddNode(id.MustNumID(201), "c1", mkPp(id.MustNumID(101))...)
 		require.NoError(t, err)
 
 		err = svc.RemoveNode(id.MustNumID(999))
 		require.Error(t, err)
 	})
-}
-
-func checkInline(t *testing.T, node *groupNode, ii ...id.ID) {
-	nn := node.inline()
-	require.Len(t, nn, len(ii))
-
-	for i, n := range nn {
-		require.Equal(t, ii[i], n.id)
-	}
 }
 
 func TestAssignGroupMembers(t *testing.T) {
@@ -363,7 +528,7 @@ func TestAssignGroupMembers(t *testing.T) {
 				group: &groupNode{
 					id:     id.MustNumID(2),
 					handle: "subgroup",
-					selfID: id.MustNumID(1),
+					paths:  mkPp(id.MustNumID(1)),
 				},
 			},
 		)
@@ -438,7 +603,7 @@ func TestBuildOrgTree(t *testing.T) {
 	})
 
 	t.Run("just root", func(t *testing.T) {
-		out, _, err := buildOrgTree(&groupNode{id: id.MustNumID(1), handle: "root", selfID: id.MustNumID(0)})
+		out, _, err := buildOrgTree(&groupNode{id: id.MustNumID(1), handle: "root"})
 		require.NoError(t, err)
 
 		nodes := out.inline()
@@ -448,8 +613,8 @@ func TestBuildOrgTree(t *testing.T) {
 
 	t.Run("multiple root error", func(t *testing.T) {
 		_, _, err := buildOrgTree(
-			&groupNode{id: id.MustNumID(1), handle: "root1", selfID: id.MustNumID(0)},
-			&groupNode{id: id.MustNumID(2), handle: "root2", selfID: id.MustNumID(0)},
+			&groupNode{id: id.MustNumID(1), handle: "root1"},
+			&groupNode{id: id.MustNumID(2), handle: "root2"},
 		)
 		require.Error(t, err)
 		require.EqualError(t, err, "multiple root nodes detected")
@@ -457,8 +622,8 @@ func TestBuildOrgTree(t *testing.T) {
 
 	t.Run("missing parent error", func(t *testing.T) {
 		_, _, err := buildOrgTree(
-			&groupNode{id: id.MustNumID(1), handle: "root1", selfID: id.MustNumID(0)},
-			&groupNode{id: id.MustNumID(2), handle: "child1", selfID: id.MustNumID(99)},
+			&groupNode{id: id.MustNumID(1), handle: "root1"},
+			&groupNode{id: id.MustNumID(2), handle: "child1", paths: mkPp(id.MustNumID(99))},
 		)
 		require.Error(t, err)
 		require.EqualError(t, err, `node "2" parent "99" not found`)
@@ -466,13 +631,13 @@ func TestBuildOrgTree(t *testing.T) {
 
 	t.Run("build tree", func(t *testing.T) {
 		out, _, err := buildOrgTree(
-			&groupNode{id: id.MustNumID(1), handle: "root", selfID: id.MustNumID(0)},
-			&groupNode{id: id.MustNumID(2), handle: "child1", selfID: id.MustNumID(1)},
-			&groupNode{id: id.MustNumID(3), handle: "child2", selfID: id.MustNumID(1)},
-			&groupNode{id: id.MustNumID(4), handle: "child1_grandchild1", selfID: id.MustNumID(2)},
-			&groupNode{id: id.MustNumID(5), handle: "child1_grandchild2", selfID: id.MustNumID(2)},
-			&groupNode{id: id.MustNumID(6), handle: "child2_grandchild1", selfID: id.MustNumID(3)},
-			&groupNode{id: id.MustNumID(7), handle: "child1_grandchild2_ggrandchild1", selfID: id.MustNumID(5)},
+			&groupNode{id: id.MustNumID(1), handle: "root"},
+			&groupNode{id: id.MustNumID(2), handle: "child1", paths: mkPp(id.MustNumID(1))},
+			&groupNode{id: id.MustNumID(3), handle: "child2", paths: mkPp(id.MustNumID(1))},
+			&groupNode{id: id.MustNumID(4), handle: "child1_grandchild1", paths: mkPp(id.MustNumID(2))},
+			&groupNode{id: id.MustNumID(5), handle: "child1_grandchild2", paths: mkPp(id.MustNumID(2))},
+			&groupNode{id: id.MustNumID(6), handle: "child2_grandchild1", paths: mkPp(id.MustNumID(3))},
+			&groupNode{id: id.MustNumID(7), handle: "child1_grandchild2_ggrandchild1", paths: mkPp(id.MustNumID(5))},
 		)
 		require.NoError(t, err)
 
@@ -528,22 +693,61 @@ func testPrepState(t *testing.T) (svc *orgTree, err error) {
 		group: &groupNode{
 			id:     id.MustNumID(2),
 			handle: "subgroup1",
-			selfID: id.MustNumID(1),
+			paths:  mkPp(id.MustNumID(1)),
 		},
 		members: []id.ID{id.MustNumID(121), id.MustNumID(122), id.MustNumID(123)},
 	}, GroupMembers{
 		group: &groupNode{
 			id:     id.MustNumID(3),
 			handle: "subgroup2",
-			selfID: id.MustNumID(1),
+			paths:  mkPp(id.MustNumID(1)),
 		},
 		members: []id.ID{id.MustNumID(131)},
 	}, GroupMembers{
 		group: &groupNode{
 			id:     id.MustNumID(4),
 			handle: "subgroup1_subgroup1",
-			selfID: id.MustNumID(2),
+			paths:  mkPp(id.MustNumID(2)),
 		},
 		members: []id.ID{id.MustNumID(141), id.MustNumID(142)},
 	})
+}
+
+func mkPp(ii ...id.ID) []GroupNodePath {
+	out := make([]GroupNodePath, len(ii))
+	for i, x := range ii {
+		out[i] = GroupNodePath{
+			SelfID: x,
+		}
+	}
+
+	return out
+}
+
+func mkPpn(ii ...any) []GroupNodePath {
+	if len(ii)%2 != 0 {
+		panic("number of things not even")
+	}
+
+	out := make([]GroupNodePath, 0, len(ii))
+	for i := 0; i < len(ii); i += 2 {
+		id := ii[i].(id.ID)
+		label := ii[i+1].(string)
+
+		out = append(out, GroupNodePath{
+			SelfID: id,
+			Label:  label,
+		})
+	}
+
+	return out
+}
+
+func checkInline(t *testing.T, node *groupNode, ii ...id.ID) {
+	nn := node.inline()
+	require.Len(t, nn, len(ii))
+
+	for i, n := range nn {
+		require.Equal(t, ii[i], n.id)
+	}
 }

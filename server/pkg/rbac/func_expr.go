@@ -9,10 +9,13 @@ import (
 func AllFunctions() []gval.Language {
 	return []gval.Language{
 		gval.Function("isDescendantOf", isDescendantOf),
+		gval.Function("isDescendantOfR", isDescendantOfR),
+		gval.Function("isDescendantOfW", isDescendantOfW),
+		gval.Function("isDescendantOfRW", isDescendantOfRW),
 	}
 }
 
-func isDescendantOf(userID any, resourceOwner any) bool {
+func isDescendantOf(userID any, resourceOwner any, paths ...string) bool {
 	if gRBAC == nil {
 		return false
 	}
@@ -27,6 +30,18 @@ func isDescendantOf(userID any, resourceOwner any) bool {
 		return false
 	}
 
-	out := gRBAC.orgTree.IsAbove(owner, user)
+	out := gRBAC.orgTree.IsAbove(owner, user, paths...)
 	return out
+}
+
+func isDescendantOfR(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "read")
+}
+
+func isDescendantOfW(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "write")
+}
+
+func isDescendantOfRW(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "read", "write")
 }

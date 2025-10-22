@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/cortezaproject/corteza/server/pkg/id"
+	"go.uber.org/zap"
 )
 
 func BenchmarkBuildOrgTree(b *testing.B) {
@@ -18,35 +19,35 @@ func BenchmarkBuildOrgTree(b *testing.B) {
 			group: &groupNode{
 				id:     id.MustNumID(2),
 				handle: "2",
-				selfID: id.MustNumID(1),
+				paths:  mkPp(id.MustNumID(1)),
 			},
 		},
 		{
 			group: &groupNode{
 				id:     id.MustNumID(3),
 				handle: "3",
-				selfID: id.MustNumID(1),
+				paths:  mkPp(id.MustNumID(1)),
 			},
 		},
 		{
 			group: &groupNode{
 				id:     id.MustNumID(4),
 				handle: "4",
-				selfID: id.MustNumID(1),
+				paths:  mkPp(id.MustNumID(1)),
 			},
 		},
 		{
 			group: &groupNode{
 				id:     id.MustNumID(5),
 				handle: "5",
-				selfID: id.MustNumID(1),
+				paths:  mkPp(id.MustNumID(1)),
 			},
 		},
 		{
 			group: &groupNode{
 				id:     id.MustNumID(6),
 				handle: "6",
-				selfID: id.MustNumID(1),
+				paths:  mkPp(id.MustNumID(1)),
 			},
 		},
 
@@ -54,19 +55,19 @@ func BenchmarkBuildOrgTree(b *testing.B) {
 			group: &groupNode{
 				id:     id.MustNumID(7),
 				handle: "7",
-				selfID: id.MustNumID(2),
+				paths:  mkPp(id.MustNumID(2)),
 			},
 		},
 		{
 			group: &groupNode{
 				id:     id.MustNumID(8),
 				handle: "8",
-				selfID: id.MustNumID(3),
+				paths:  mkPp(id.MustNumID(3)),
 			},
 		},
 	}
 
-	svc := &orgTree{}
+	svc := &orgTree{logger: zap.NewNop()}
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {

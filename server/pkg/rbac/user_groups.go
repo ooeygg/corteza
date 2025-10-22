@@ -245,11 +245,11 @@ func (svc *orgTree) GroupMembers(group id.ID) (members []id.ID) {
 }
 
 // IsAbove checks if parentUser is above the childUser
-func (svc *orgTree) IsAbove(childUser, parentUser id.ID) bool {
+func (svc *orgTree) IsAbove(childUser, parentUser id.ID, paths ...string) bool {
 	childGroup := svc.memberGroupIndex[childUser]
 	parentGroup := svc.memberGroupIndex[parentUser]
 
-	for _, c := range parentGroup.inline()[1:] {
+	for _, c := range parentGroup.inline(paths...)[1:] {
 		if c.id.Equal(childGroup.id) {
 			return true
 		}
@@ -515,7 +515,7 @@ func (n *groupNode) format() map[string]any {
 	out := map[string]any{
 		"id":     n.id.Value(),
 		"handle": n.handle,
-		"paths":  n.formatPaths(),
+		"paths":  formatPaths(n.paths),
 		"roles":  id.StringifySlice(n.roles...),
 	}
 
