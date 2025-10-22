@@ -1,9 +1,10 @@
 <template>
   <b-table-simple
+    v-if="mockModule"
     borderless
     class="mb-0"
   >
-    <template v-for="(filterGroup, groupIndex) in value">
+    <template v-for="(filterGroup, groupIndex) in internalFilter">
       <template v-if="filterGroup.filter.length">
         <b-tr
           v-for="(filter, index) in filterGroup.filter"
@@ -13,7 +14,7 @@
           <b-td style="width: 250px;">
             <c-input-select
               v-model="filter.name"
-              :options="fieldOptions"
+              :options="fields"
               :get-option-key="getOptionKey"
               :clearable="false"
               :placeholder="$t('recordList.filter.fieldPlaceholder')"
@@ -24,26 +25,26 @@
           </b-td>
 
           <b-td
-            v-if="getField(filter.name, mockModule)"
+            v-if="getPreparedField(filter.name)"
             style="width: 250px;"
-            :class="{ 'px-2': getField(filter.name, mockModule) }"
+            :class="{ 'px-2': getPreparedField(filter.name) }"
           >
             <b-form-select
-              v-if="getField(filter.name, mockModule)"
+              v-if="getPreparedField(filter.name)"
               v-model="filter.operator"
-              :options="getOperators(filter.kind, getField(filter.name, mockModule))"
+              :options="getOperators(filter.kind, getPreparedField(filter.name))"
               class="d-flex field-operator w-100"
             />
           </b-td>
 
           <b-td
-            v-if="getField(filter.name, mockModule)"
-            :key="`${getField(filter.name, mockModule)?.fieldID}-${filter.name}`"
+            v-if="getPreparedField(filter.name)"
+            :key="`${getPreparedField(filter.name)?.fieldID}-${filter.name}`"
           >
             <template v-if="isBetweenOperator(filter.operator)">
-              <template v-if="getField(`${filter.name}-start`, mockModule)">
+              <template v-if="getPreparedField(`${filter.name}-start`)">
                 <field-editor
-                  :field="getField(`${filter.name}-start`, mockModule)"
+                  :field="getPreparedField(`${filter.name}-start`)"
                   :record="filter.record"
                   :module="mockModule"
                   :namespace="namespace"
@@ -56,7 +57,7 @@
                   {{ $t("general.label.and") }}
                 </div>
                 <field-editor
-                  :field="getField(`${filter.name}-end`, mockModule)"
+                  :field="getPreparedField(`${filter.name}-end`)"
                   :record="filter.record"
                   :module="mockModule"
                   :namespace="namespace"
@@ -70,7 +71,7 @@
 
             <template v-else>
               <field-editor
-                :field="getField(filter.name, mockModule)"
+                :field="getPreparedField(filter.name)"
                 :errors="errors"
                 :record="filter.record"
                 :module="mockModule"
@@ -83,7 +84,7 @@
           </b-td>
 
           <b-td
-            v-if="getField(filter.name, mockModule)"
+            v-if="getPreparedField(filter.name)"
             style="width: 1%;"
           >
             <b-button
@@ -129,7 +130,7 @@
           >
             <div class="group-separator">
               <b-button
-                v-if="groupIndex === (value.length - 1)"
+                v-if="groupIndex === (internalFilter.length - 1)"
                 variant="outline-primary"
                 class="btn-add-group d-block py-2 px-3 m-auto bg-white  "
                 @click="addGroup()"
@@ -157,7 +158,7 @@
 <script>
 import { compose, validator } from '@cortezaproject/corteza-js'
 import FieldEditor from 'corteza-webapp-compose/src/components/ModuleFields/Editor'
-import recordFilter from 'corteza-webapp-compose/src/mixins/record-filter.js'
+import { isBetweenOperator } from 'corteza-webapp-compose/src/lib/record-filter.js'
 
 export default {
   i18nOptions: {
@@ -170,12 +171,11 @@ export default {
     FieldEditor,
   },
 
-  mixins: [recordFilter],
-
   props: {
+    // Raw filter data (without Record objects) - same format as parent components use
     value: {
       type: Array,
-      required: true,
+      default: undefined,
     },
 
     module: {
@@ -191,11 +191,6 @@ export default {
     selectedField: {
       type: Object,
       default: undefined,
-    },
-
-    resetFilterOnCreated: {
-      type: Boolean,
-      default: false,
     },
 
     startEmpty: {
@@ -214,21 +209,21 @@ export default {
       errors: new validator.Validated(),
 
       mockModule: undefined,
+      preparedFields: [],
+
+      // Internal filter format (with Record objects) for editing
+      internalFilter: [],
+
+      // Flag to prevent circular updates when loading external data
+      isLoadingExternalData: false,
     }
   },
 
   computed: {
-    fieldOptions () {
-      return this.fields.map(({ name, label }) => ({
-        name,
-        label: label || name,
-      }))
-    },
-
     fields () {
       return [
-        ...[...this.module.fields].sort((a, b) => (a.label || a.name).localeCompare(b.label || b.name)),
-        ...this.module.systemFields().map((sf) => {
+        ...[...this.mockModule.fields].sort((a, b) => (a.label || a.name).localeCompare(b.label || b.name)),
+        ...this.mockModule.systemFields().map((sf) => {
           sf.label = this.$t(`field:system.${sf.name}`)
           return sf
         }),
@@ -246,7 +241,7 @@ export default {
     },
 
     showAddCondition () {
-      return this.value.length >= 1 && this.value[0].filter[0].name
+      return this.internalFilter.length >= 1 && this.internalFilter[0].filter[0].name
     },
   },
 
@@ -261,19 +256,130 @@ export default {
         }
       },
     },
-  },
 
-  created () {
-    if (this.resetFilterOnCreated || !this.startEmpty) {
-      this.$emit('input', [this.createDefaultFilterGroup(undefined, this.startEmpty ? undefined : this.resolvedSelectedField)])
-    }
+    value: {
+      immediate: true,
+      deep: true,
+      handler (rawFilter, oldValue) {
+        let internal = []
+
+        if (!rawFilter) {
+          internal = [this.createDefaultFilterGroup()]
+        } else {
+          internal = this.rawFilterToInternal(rawFilter)
+
+          if (!internal.length) {
+            internal = [this.createDefaultFilterGroup(undefined, this.startEmpty ? undefined : this.resolvedSelectedField)]
+          } else {
+            this.isLoadingExternalData = true
+          }
+        }
+
+        this.internalFilter = internal
+
+        this.$nextTick(() => {
+          this.isLoadingExternalData = false
+        })
+      },
+    },
+
+    internalFilter: {
+      deep: true,
+      handler (internalFilter) {
+        if (this.isLoadingExternalData) {
+          return
+        }
+
+        this.$emit('input', this.processInternalFilter(internalFilter))
+      },
+    },
   },
 
   methods: {
+    isBetweenOperator,
+
+    /**
+     * Converts raw filter data (without Record objects) to internal format (with Record objects)
+     * Used when loading filter data from parent component
+     */
+    rawFilterToInternal (recordListFilter = []) {
+      if (!recordListFilter.length || !this.mockModule) {
+        return []
+      }
+
+      return recordListFilter.map(({ groupCondition, filter = [], name }) => {
+        filter = filter.map(({ value, ...f } = {}) => {
+          f.record = new compose.Record(this.mockModule, {})
+
+          if (this.isBetweenOperator(f.operator)) {
+            const field = this.getPreparedField(f.name)
+            if (field && field.isSystem) {
+              f.record[`${f.name}-start`] = value?.start
+              f.record[`${f.name}-end`] = value?.end
+            } else {
+              f.record.values[`${f.name}-start`] = value?.start
+              f.record.values[`${f.name}-end`] = value?.end
+            }
+          } else if (Object.keys(f.record.values).includes(f.name)) {
+            f.record.values[f.name] = value
+          } else if (Object.keys(f.record).includes(f.name)) {
+            // If its a system field add value to root of record
+            f.record[f.name] = value
+          }
+
+          return f
+        })
+
+        return { groupCondition, filter, name }
+      })
+    },
+
+    /**
+     * Processes internal filter format (with Record objects) to output format (without Record objects)
+     * Used when emitting filter data to parent component
+     */
+    processInternalFilter (filter = []) {
+      if (!filter.length || !this.mockModule) {
+        return []
+      }
+
+      return filter.map(({ groupCondition, filter = [], name }) => {
+        filter = filter.map(({ record, ...f }) => {
+          if (!f.name || !record) {
+            return undefined
+          }
+
+          if (this.isBetweenOperator(f.operator)) {
+            const field = this.getPreparedField(f.name)
+
+            if (field) {
+              f.value = {
+                start: field.isSystem ? record[`${f.name}-start`] : record.values[`${f.name}-start`],
+                end: field.isSystem ? record[`${f.name}-end`] : record.values[`${f.name}-end`],
+              }
+            }
+          } else if (Object.keys(record.values).includes(f.name)) {
+            f.value = record.values[f.name]
+          } else if (Object.keys(record).includes(f.name)) {
+            f.value = record[f.name]
+          }
+
+          return f
+        })
+
+        return { groupCondition, filter, name }
+      })
+    },
+
     prepareFields () {
       const fields = []
 
       this.fields.forEach(f => {
+        if (f.isMulti) {
+          f.isMulti = false
+          f.multi = true
+        }
+
         if (f.kind === 'Record') {
           f.options.prefilter = ''
         }
@@ -296,31 +402,27 @@ export default {
         }
       })
 
-      this.mockModule.fields = fields
+      this.preparedFields = fields
     },
 
     onChange (fieldName, groupIndex, index) {
-      const field = this.getField(fieldName, this.mockModule)
+      const field = this.getPreparedField(fieldName)
 
       const filterExists = !!(
-        this.value[groupIndex] || { filter: [] }
+        this.internalFilter[groupIndex] || { filter: [] }
       ).filter[index]
       if (field && filterExists) {
-        const value = this.value
-        const tempFilter = [...value]
-        tempFilter[groupIndex].filter[index].kind = field.kind
-        tempFilter[groupIndex].filter[index].name = field.name
-        tempFilter[groupIndex].filter[index].value = undefined
-        tempFilter[groupIndex].filter[index].operator = field.multi
+        this.internalFilter[groupIndex].filter[index].kind = field.kind
+        this.internalFilter[groupIndex].filter[index].name = field.name
+        this.internalFilter[groupIndex].filter[index].value = undefined
+        this.internalFilter[groupIndex].filter[index].operator = field.multi
           ? 'IN'
           : '='
-
-        this.$emit('input', value)
       }
     },
 
     onValueChange () {
-      this.$emit('prevent-close')
+      this.$emit('value-change')
     },
 
     getOperators (kind, field) {
@@ -400,46 +502,60 @@ export default {
     },
 
     deleteFilter (groupIndex, index) {
-      let value = this.value
       const filterExists = !!(
-        value[groupIndex] || { filter: [] }
+        this.internalFilter[groupIndex] || { filter: [] }
       ).filter[index]
 
       if (filterExists) {
         // Delete filter from filterGroup
-        value[groupIndex].filter.splice(index, 1)
+        this.internalFilter[groupIndex].filter.splice(index, 1)
 
         // If filter was last in filterGroup, delete filterGroup
-        if (!value[groupIndex].filter.length) {
-          value.splice(groupIndex, 1)
+        if (!this.internalFilter[groupIndex].filter.length) {
+          this.internalFilter.splice(groupIndex, 1)
 
           // If no more filterGroups, add default back
-          if (!value.length) {
-            value = [this.createDefaultFilterGroup()]
-          } else if (groupIndex === value.length) {
+          if (!this.internalFilter.length) {
+            this.internalFilter = [this.createDefaultFilterGroup()]
+          } else if (groupIndex === this.internalFilter.length) {
             // Reset first filterGroup groupCondition if last filterGroup was deleted
-            value[groupIndex - 1].groupCondition = undefined
+            this.internalFilter[groupIndex - 1].groupCondition = undefined
           }
         }
-
-        this.$emit('input', value)
       }
+
+      this.$emit('value-change')
     },
 
     getOptionKey ({ name }) {
       return name
     },
 
-    addFilter (groupIndex) {
-      const value = this.value
+    getPreparedField (name = '') {
+      if (!this.preparedFields.length) {
+        return undefined
+      }
 
-      if ((value[groupIndex] || {}).filter) {
-        value[groupIndex].filter.push(
+      return this.preparedFields.find(f => f.name === name)
+    },
+
+    addFilter (groupIndex) {
+      if ((this.internalFilter[groupIndex] || {}).filter) {
+        this.internalFilter[groupIndex].filter.push(
           this.createDefaultFilter('AND', this.resolvedSelectedField),
         )
       }
+    },
 
-      this.$emit('input', value)
+    createDefaultFilter (condition, field = {}) {
+      return {
+        condition,
+        name: field.name,
+        operator: field.isMulti ? 'IN' : '=',
+        value: undefined,
+        kind: field.kind,
+        record: new compose.Record(this.mockModule, {}),
+      }
     },
 
     createDefaultFilterGroup (groupCondition = undefined, field) {
@@ -450,11 +566,9 @@ export default {
     },
 
     addGroup () {
-      const value = this.value
-      value[value.length - 1].groupCondition = 'AND'
-      value.push(this.createDefaultFilterGroup(undefined, this.resolvedSelectedField))
-
-      this.$emit('input', value)
+      this.internalFilter[this.internalFilter.length - 1].groupCondition = 'AND'
+      this.internalFilter.push(this.createDefaultFilterGroup(undefined, this.resolvedSelectedField))
+      this.$emit('value-change')
     },
 
     setDefaultValues () {

@@ -24,8 +24,8 @@
       boundary="window"
       boundary-padding="2"
       :target="popoverTarget"
-      @show="onOpen"
       @hide="onHide"
+      @show="onOpen"
     >
       <b-card
         no-body
@@ -39,8 +39,7 @@
             :module="module"
             :namespace="namespace"
             :selected-field="selectedField"
-            start-empty
-            @prevent-close="onValueChange"
+            @value-change="preventClose"
           />
         </b-card-body>
 
@@ -84,9 +83,7 @@
 </template>
 
 <script>
-import { compose } from '@cortezaproject/corteza-js'
 import FilterToolbox from 'corteza-webapp-compose/src/components/Common/FilterToolbox.vue'
-import recordFilter from 'corteza-webapp-compose/src/mixins/record-filter.js'
 
 export default {
   i18nOptions: {
@@ -96,8 +93,6 @@ export default {
   components: {
     FilterToolbox,
   },
-
-  mixins: [recordFilter],
 
   props: {
     target: {
@@ -172,6 +167,16 @@ export default {
     },
   },
 
+  watch: {
+    recordListFilter: {
+      immediate: true,
+      deep: true,
+      handler (recordListFilter) {
+        this.componentFilter = [...recordListFilter]
+      },
+    },
+  },
+
   beforeDestroy () {
     this.setDefaultValues()
   },
@@ -187,7 +192,11 @@ export default {
       }
     },
 
-    onValueChange () {
+    onOpen () {
+      this.componentFilter = [...this.recordListFilter]
+    },
+
+    preventClose () {
       this.preventPopoverClose = true
 
       setTimeout(() => {
@@ -195,52 +204,9 @@ export default {
       }, 100)
     },
 
-    addFilter (groupIndex) {
-      if ((this.componentFilter[groupIndex] || {}).filter) {
-        this.componentFilter[groupIndex].filter.push(this.createDefaultFilter('AND', this.selectedField))
-      }
-    },
-
     resetFilter () {
-      this.componentFilter = [this.createDefaultFilterGroup()]
+      this.componentFilter = undefined
       this.$emit('reset')
-    },
-
-    onOpen () {
-      // Create record and fill its values property if value exists
-      this.componentFilter = this.recordListFilter
-        .filter(({ filter = [] }) => filter.some(f => f.name))
-        .map(({ groupCondition, filter = [], name }) => {
-          filter = filter.map(({ value, ...f }) => {
-            f.record = new compose.Record(this.module, {})
-
-            if (this.isBetweenOperator(f.operator)) {
-              if (this.getField(f.name, this.module).isSystem) {
-                f.record[`${f.name}-start`] = value.start
-                f.record[`${f.name}-end`] = value.end
-              } else {
-                f.record.values[`${f.name}-start`] = value.start
-                f.record.values[`${f.name}-end`] = value.end
-              }
-            } else if (Object.keys(f.record.values).includes(f.name)) {
-              f.record.values[f.name] = value
-            } else if (Object.keys(f.record).includes(f.name)) {
-              // If its a system field add value to root of record
-              f.record[f.name] = value
-            }
-
-            return f
-          })
-
-          return { groupCondition, filter, name }
-        })
-
-      // If no filterGroups, add default
-      if (!this.componentFilter.length) {
-        this.componentFilter.push(this.createDefaultFilterGroup(undefined, this.selectedField))
-      } else if (this.selectedField && !this.inFilter) {
-        this.addFilter(0)
-      }
     },
 
     onSave (close = true, type = 'filter') {
@@ -249,7 +215,7 @@ export default {
       }
 
       setTimeout(() => {
-        this.$emit(type, this.processFilter(this.componentFilter, this.module))
+        this.$emit(type, this.componentFilter.filter(({ filter = [] }) => filter.filter((f = {}) => !!f.name).length > 0))
       }, 100)
     },
 

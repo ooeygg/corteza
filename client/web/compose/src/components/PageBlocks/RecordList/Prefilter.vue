@@ -73,11 +73,9 @@ import { compose } from '@cortezaproject/corteza-js'
 import {
   getRecordListFilterSql,
   trimChar,
-  isBetweenOperator,
 } from 'corteza-webapp-compose/src/lib/record-filter.js'
 import FilterToolbox from 'corteza-webapp-compose/src/components/Common/FilterToolbox.vue'
 import autocomplete from 'corteza-webapp-compose/src/mixins/autocomplete.js'
-import recordFilter from 'corteza-webapp-compose/src/mixins/record-filter.js'
 
 const { CInputExpression } = components
 
@@ -95,7 +93,6 @@ export default {
 
   mixins: [
     autocomplete,
-    recordFilter,
   ],
 
   props: {
@@ -135,8 +132,6 @@ export default {
   },
 
   methods: {
-    isBetweenOperator,
-
     saveFilter (filter) {
       if (filter && filter[0] && !filter[0].filter[0].name) {
         return
@@ -148,6 +143,7 @@ export default {
 
     toggleFilterInputType () {
       this.textInput = !this.textInput
+      this.filterGroup = []
     },
 
     getOptionKey ({ name }) {
@@ -155,9 +151,7 @@ export default {
     },
 
     parseFilter (filterGroup = this.filterGroup) {
-      const filter = this.processFilter(filterGroup, this.module)
-
-      const filterSqlArray = filter
+      const filterSqlArray = filterGroup
         .map(({ groupCondition, filter = [] }) => {
           groupCondition = groupCondition ? ` ${groupCondition} ` : ''
           filter = getRecordListFilterSql(filter)
