@@ -281,6 +281,60 @@ func TestAddNode(t *testing.T) {
 		checkInline(t, svc.branchIndex[id.MustNumID(202)], id.MustNumID(202))
 		checkInline(t, svc.branchIndex[id.MustNumID(301)], id.MustNumID(301))
 	})
+
+	t.Run("check path management", func(t *testing.T) {
+		svc, err := mkOrgTree()
+		require.NoError(t, err)
+
+		// Add initial stuff
+		err = svc.AddNode(id.MustNumID(101), "root")
+		require.NoError(t, err)
+
+		err = svc.AddNode(id.MustNumID(201), "c1", GroupNodePath{SelfID: id.MustNumID(101)})
+		require.NoError(t, err)
+		err = svc.AddNode(id.MustNumID(202), "c2", GroupNodePath{SelfID: id.MustNumID(101)})
+		require.NoError(t, err)
+
+		err = svc.AddNode(id.MustNumID(301), "cc1", GroupNodePath{SelfID: id.MustNumID(201)})
+		require.NoError(t, err)
+
+		require.Len(t, svc.branchIndex[id.MustNumID(101)].parents, 0)
+		require.Len(t, svc.branchIndex[id.MustNumID(101)].children, 2)
+		require.Equal(t, id.MustNumID(201), svc.branchIndex[id.MustNumID(101)].children[0].node.id)
+		require.Equal(t, id.MustNumID(202), svc.branchIndex[id.MustNumID(101)].children[1].node.id)
+
+		require.Len(t, svc.branchIndex[id.MustNumID(201)].parents, 1)
+		require.Len(t, svc.branchIndex[id.MustNumID(201)].children, 1)
+		require.Equal(t, id.MustNumID(301), svc.branchIndex[id.MustNumID(201)].children[0].node.id)
+		require.Equal(t, id.MustNumID(101), svc.branchIndex[id.MustNumID(201)].parents[0].node.id)
+
+		// Change c2 connection
+
+		err = svc.UpdateNode(id.MustNumID(202), "ccc2 edit", GroupNodePath{SelfID: id.MustNumID(301)})
+		require.NoError(t, err)
+
+		require.Len(t, svc.branchIndex[id.MustNumID(101)].parents, 0)
+		require.Len(t, svc.branchIndex[id.MustNumID(101)].children, 1)
+		require.Equal(t, id.MustNumID(201), svc.branchIndex[id.MustNumID(101)].children[0].node.id)
+
+		require.Len(t, svc.branchIndex[id.MustNumID(301)].parents, 1)
+		require.Len(t, svc.branchIndex[id.MustNumID(301)].children, 1)
+		require.Equal(t, id.MustNumID(201), svc.branchIndex[id.MustNumID(301)].parents[0].node.id)
+		require.Equal(t, id.MustNumID(202), svc.branchIndex[id.MustNumID(301)].children[0].node.id)
+
+		require.Len(t, svc.branchIndex[id.MustNumID(202)].parents, 1)
+		require.Len(t, svc.branchIndex[id.MustNumID(202)].children, 0)
+		require.Equal(t, id.MustNumID(301), svc.branchIndex[id.MustNumID(202)].parents[0].node.id)
+
+		// Remove c2 node
+
+		err = svc.RemoveNode(id.MustNumID(202))
+		require.NoError(t, err)
+
+		require.Len(t, svc.branchIndex[id.MustNumID(301)].parents, 1)
+		require.Len(t, svc.branchIndex[id.MustNumID(301)].children, 0)
+		require.Equal(t, id.MustNumID(201), svc.branchIndex[id.MustNumID(301)].parents[0].node.id)
+	})
 }
 
 func TestMultiPath(t *testing.T) {

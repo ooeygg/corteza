@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cortezaproject/corteza/server/pkg/id"
+	"github.com/cortezaproject/corteza/server/pkg/stack"
 	"go.uber.org/zap"
 )
 
@@ -35,6 +36,11 @@ type (
 
 		// Nodes this one is parent of
 		children []groupNodeConnection
+		// Nodes this one is child of
+		//
+		// Used to simplify lookup
+		parents []groupNodeConnection
+
 		// Slice of paths this node was provided (this node -> parents)
 		paths []GroupNodePath
 
@@ -134,7 +140,7 @@ func (svc *orgTree) AddNode(id id.ID, handle string, paths ...GroupNodePath) (er
 		return
 	}
 
-	return err
+	return
 }
 
 func (svc *orgTree) addNode(node *groupNode) (err error) {
@@ -162,6 +168,11 @@ func (svc *orgTree) addNode(node *groupNode) (err error) {
 
 		n.children = append(n.children, groupNodeConnection{
 			node:  node,
+			label: p.Label,
+		})
+
+		node.parents = append(node.parents, groupNodeConnection{
+			node:  n,
 			label: p.Label,
 		})
 	}
@@ -192,11 +203,19 @@ func (svc *orgTree) UpdateNode(idx id.ID, handle string, paths ...GroupNodePath)
 	for _, op := range oldPaths {
 		i = svc.isInConnections(svc.branchIndex[op.SelfID].children, idx)
 		svc.branchIndex[op.SelfID].children = append(svc.branchIndex[op.SelfID].children[:i], svc.branchIndex[op.SelfID].children[i+1:]...)
+
+		i = svc.isInConnections(svc.branchIndex[idx].parents, op.SelfID)
+		svc.branchIndex[idx].parents = append(svc.branchIndex[idx].parents[:i], svc.branchIndex[idx].parents[i+1:]...)
 	}
 
 	for _, p := range paths {
 		svc.branchIndex[p.SelfID].children = append(svc.branchIndex[p.SelfID].children, groupNodeConnection{
 			node:  n,
+			label: p.Label,
+		})
+
+		svc.branchIndex[idx].parents = append(svc.branchIndex[idx].parents, groupNodeConnection{
+			node:  svc.branchIndex[p.SelfID],
 			label: p.Label,
 		})
 	}
@@ -249,9 +268,52 @@ func (svc *orgTree) IsAbove(childUser, parentUser id.ID, paths ...string) bool {
 	childGroup := svc.memberGroupIndex[childUser]
 	parentGroup := svc.memberGroupIndex[parentUser]
 
-	for _, c := range parentGroup.inline(paths...)[1:] {
-		if c.id.Equal(childGroup.id) {
+	return svc.isAbove(parentGroup, childGroup, paths...)
+}
+
+// isAbove checks if parent is above child based on the hierarchy
+//
+// The check goes bottom up as the number of paths will (in most cases) always be lower.
+func (svc *orgTree) isAbove(parent, child *groupNode, paths ...string) (ok bool) {
+	checkConnection := func(c groupNodeConnection) bool {
+		if len(paths) == 0 {
 			return true
+		}
+
+		if c.label == "" {
+			return true
+		}
+
+		for _, pth := range paths {
+			if c.label == pth {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	stack := stack.Stack[*groupNode]{}
+	for _, p := range child.parents {
+		if !checkConnection(p) {
+			continue
+		}
+
+		stack.Push(p.node)
+	}
+
+	for !stack.Empty() {
+		n := stack.Pop()
+		if n.id.Equal(parent.id) {
+			return true
+		}
+
+		for _, c := range n.parents {
+			if !checkConnection(c) {
+				continue
+			}
+
+			stack.Push(c.node)
 		}
 	}
 
@@ -417,6 +479,11 @@ func buildOrgTree(gg ...*groupNode) (root *groupNode, index map[id.ID]*groupNode
 			parent.children = append(parent.children, groupNodeConnection{
 				label: p.Label,
 				node:  g,
+			})
+
+			g.parents = append(g.parents, groupNodeConnection{
+				node:  parent,
+				label: p.Label,
 			})
 		}
 	}

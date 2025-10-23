@@ -30,7 +30,8 @@ func (s *Stack[T]) Pop() (out T) {
 	return
 }
 
-func (s *Stack[T]) Len() int { return s.len }
-func (s *Stack[T]) Cap() int { return cap(s.data) }
+func (s *Stack[T]) Empty() bool { return s.Len() == 0 }
+func (s *Stack[T]) Len() int    { return s.len }
+func (s *Stack[T]) Cap() int    { return cap(s.data) }
 
 func (s *Stack[T]) Data() []T { return s.data[:s.len] }
