@@ -86,7 +86,7 @@ export default {
     },
 
     getUserGroupByID (userGroupID) {
-      if (this.preselectDefault && (!userGroupID || userGroupID === NoID)) {
+      if (!userGroupID || userGroupID === NoID) {
         this.userGroup.value = this.userGroup.options.find(({ isRoot }) => !!isRoot)
 
         this.$emit('input', this.userGroup.value?.userGroupID)

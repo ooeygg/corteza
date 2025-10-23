@@ -461,7 +461,6 @@
             <c-input-user-group
               v-model="resource.security.userGroup"
               :placeholder="$t('security.defaultUserGroup.placeholder')"
-              :clearable="true"
             />
           </b-form-group>
         </b-col>
