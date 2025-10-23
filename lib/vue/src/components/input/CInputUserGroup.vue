@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { NoID } from '@cortezaproject/corteza-js'
+import { NoID, system } from '@cortezaproject/corteza-js'
 import { debounce } from 'lodash'
 
 export default {
@@ -30,6 +30,11 @@ export default {
     placeholder: {
       type: String,
       default: '',
+    },
+
+    preselectDefault: {
+      type: Boolean,
+      default: false,
     },
   },
 
@@ -71,7 +76,7 @@ export default {
       return this.$SystemAPI
         .userGroupList(this.userGroup.filter)
         .then(({ set }) => {
-          this.userGroup.options = set.map((m) => Object.freeze(m))
+          this.userGroup.options = set.map((m) => new system.UserGroup(m))
         })
         .finally(() => {
           setTimeout(() => {
@@ -81,10 +86,8 @@ export default {
     },
 
     getUserGroupByID (userGroupID) {
-      if (!userGroupID || userGroupID === NoID) {
-        this.userGroup.value = this.userGroup.options.find(
-          ({ selfID }) => selfID === NoID,
-        )
+      if (this.preselectDefault && (!userGroupID || userGroupID === NoID)) {
+        this.userGroup.value = this.userGroup.options.find(({ isRoot }) => !!isRoot)
 
         this.$emit('input', this.userGroup.value?.userGroupID)
         return
@@ -94,13 +97,6 @@ export default {
 
       if (userGroup) {
         this.userGroup.value = userGroup
-      } else {
-        return this.$SystemAPI.userGroupRead({ userGroupID }).then((userGroup) => {
-          this.userGroup.options.push(Object.freeze(userGroup))
-          this.userGroup.value = this.userGroup.options.find(
-            ({ selfID }) => selfID === NoID,
-          )
-        })
       }
     },
 

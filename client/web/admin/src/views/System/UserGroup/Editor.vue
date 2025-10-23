@@ -171,6 +171,23 @@ export default {
   },
 
   methods: {
+    fetchUserGroup () {
+      this.incLoader()
+
+      this.$SystemAPI
+        .userGroupRead({ userGroupID: this.userGroupID })
+        .then((r) => {
+          this.userGroup = new system.UserGroup(r)
+          this.initialUserGroupState = this.userGroup.clone()
+        })
+        .catch(
+          this.toastErrorHandler(this.$t('notification:userGroup.fetch.error')),
+        )
+        .finally(() => {
+          this.decLoader()
+        })
+    },
+
     async fetchUserGroupRoles () {
       this.incLoader()
       return this.$SystemAPI
@@ -195,23 +212,6 @@ export default {
           this.groupMembers.initial = [...set]
         })
         .catch(this.toastErrorHandler(this.$t('notification:user.roles.error')))
-        .finally(() => {
-          this.decLoader()
-        })
-    },
-
-    fetchUserGroup () {
-      this.incLoader()
-
-      this.$SystemAPI
-        .userGroupRead({ userGroupID: this.userGroupID })
-        .then((r) => {
-          this.userGroup = new system.UserGroup(r)
-          this.initialUserGroupState = this.userGroup.clone()
-        })
-        .catch(
-          this.toastErrorHandler(this.$t('notification:userGroup.fetch.error')),
-        )
         .finally(() => {
           this.decLoader()
         })

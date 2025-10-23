@@ -50,24 +50,6 @@
       <b-row>
         <b-col
           cols="12"
-          lg="6"
-        >
-          <b-form-group
-            :label="$t('parent')"
-            label-class="text-primary"
-          >
-            <c-input-user-group
-              v-model="userGroup.selfID"
-              :placeholder="$t('parent')"
-              :clearable="false"
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-
-      <b-row>
-        <b-col
-          cols="12"
         >
           <b-form-group
             :label="$t('meta.description')"
@@ -85,6 +67,79 @@
         :id="userGroup.userGroupID"
         :resource="userGroup"
       />
+
+      <template v-if="!isRoot">
+        <hr>
+
+        <div v-if="!isRoot">
+          <h5 class="mb-3">
+            {{ $t('parents.title') }}
+          </h5>
+
+          <c-form-table-wrapper
+            :labels="{
+              addButton: $t('general:label.add')
+            }"
+            class="my-3"
+            @add-item="addParent"
+          >
+            <b-table-simple
+              v-if="userGroup.config.path"
+              borderless
+              small
+              responsive
+            >
+              <b-thead>
+                <b-tr>
+                  <b-th class="text-primary">
+                    {{ $t('parents.parent.label') }}
+                  </b-th>
+                  <b-th class="text-primary">
+                    {{ $t('parents.label.label') }}
+                  </b-th>
+                  <b-th v-if="userGroup.config.path.length > 1" />
+                </b-tr>
+              </b-thead>
+              <b-tbody>
+                <b-tr
+                  v-for="(parent, i) in userGroup.config.path"
+                  :key="i"
+                >
+                  <b-td
+                    class="align-middle"
+                    style="min-width: 250px;"
+                  >
+                    <c-input-user-group
+                      v-model="parent.selfID"
+                      :placeholder="$t('parents.parent.placeholder')"
+                      :preselect-default="i === 0"
+                    />
+                  </b-td>
+                  <b-td
+                    class="align-middle"
+                    style="min-width: 200px;"
+                  >
+                    <b-form-input
+                      v-model="parent.label"
+                      :placeholder="$t('parents.label.placeholder')"
+                    />
+                  </b-td>
+                  <b-td
+                    v-if="userGroup.config.path.length > 1"
+                    class="text-right align-middle"
+                    style="width: 1%"
+                  >
+                    <c-input-confirm
+                      show-icon
+                      @confirmed="deleteParent(i)"
+                    />
+                  </b-td>
+                </b-tr>
+              </b-tbody>
+            </b-table-simple>
+          </c-form-table-wrapper>
+        </div>
+      </template>
 
       <!--
         include hidden input to enable
@@ -139,7 +194,7 @@ import { handle, components } from '@cortezaproject/corteza-vue'
 const { CInputUserGroup } = components
 
 export default {
-  name: 'CUserEditorInfo',
+  name: 'CUserGroupEditorInfo',
 
   i18nOptions: {
     namespaces: 'system.user-groups',
@@ -173,23 +228,32 @@ export default {
   },
 
   computed: {
+    isRoot () {
+      return this.userGroup.isRoot
+    },
+
     getDeleteStatus () {
       return this.userGroup.deletedAt ? this.$t('undelete') : this.$t('delete')
     },
 
     userGroupID () {
-      if (this.$auth.userGroup) {
-        return this.$auth.userGroup.userGroupID
+      if (this.userGroup) {
+        return this.userGroup.userGroupID
       }
+
       return undefined
     },
 
     fresh () {
-      return !this.userGroup.userGroupID || this.userGroup.userGroupID === NoID
+      return !this.userGroupID || this.userGroupID === NoID
     },
 
     editable () {
       return this.fresh ? this.canCreate : this.userGroup.canUpdateUserGroup
+    },
+
+    nameState () {
+      return this.userGroup.meta.short ? null : false
     },
 
     handleState () {
@@ -197,7 +261,19 @@ export default {
     },
 
     saveDisabled () {
-      return !this.editable || [this.handleState].includes(false)
+      return !this.editable || [this.nameState, this.handleState, this.parentState].includes(false)
+    },
+
+    parentState () {
+      if (this.isRoot) {
+        return null
+      }
+
+      if (!this.userGroup.config.path || this.userGroup.config.path.length === 0) {
+        return false
+      }
+
+      return this.userGroup.config.path.every(parent => parent.selfID) ? null : false
     },
 
     deletedButtonStatusCypressId () {
@@ -206,6 +282,33 @@ export default {
 
     suspendButtonStatusCypressId () {
       return `button-${this.getSuspendStatus.toLowerCase()}`
+    },
+  },
+
+  watch: {
+    userGroupID: {
+      immediate: true,
+      handler () {
+        const { config = {} } = this.userGroup || {}
+        const { path = [] } = config || {}
+
+        if (!this.isRoot && path.length === 0) {
+          this.addParent()
+        }
+      },
+    },
+  },
+
+  methods: {
+    addParent () {
+      this.userGroup.config.path.push({
+        selfID: '',
+        label: '',
+      })
+    },
+
+    deleteParent (i) {
+      this.userGroup.config.path.splice(i, 1)
     },
   },
 }

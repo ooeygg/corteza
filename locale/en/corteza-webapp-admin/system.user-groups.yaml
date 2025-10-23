@@ -8,12 +8,19 @@ editor:
     placeholder-handle: handle (a - z, 0 - 9, underscore, dash)
     handle: Handle
     invalid-handle-characters: Should be at least 2 characters long. Can contain only letters, numbers, underscores and dots. Must end with letter or number
-    parent: Parent user group
     meta.short: Name *
     meta.description: Description
     title: Basic information
     undelete: Undelete
     updatedAt: Updated at
+    parents:
+      title: Parent User Groups
+      parent:
+        label: Parent
+        placeholder: Select parent user group
+      label:
+        label: Label
+        placeholder: Enter label for the relationship
   new: New User Group
   permissions: Permissions
   members:
@@ -22,7 +29,7 @@ editor:
     add: Add
     count: roles
     remove: Remove
-    title: Role membership
+    title: Role Membership
     unnamed: Unnamed role
   title:
     create: Create user group

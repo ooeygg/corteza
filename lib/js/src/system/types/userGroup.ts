@@ -18,16 +18,25 @@ const defaultMeta = {
   short: '',
 }
 
+interface Config {
+  path: {
+    selfID: string;
+    label: string;
+  }[];
+}
+
+const defaultConfig = {
+  path: [],
+}
+
 export class UserGroup {
   public userGroupID = NoID
   public handle = ''
-  public labels: object = {}
-
-  public meta: Meta = { ...defaultMeta }
-
-  public selfID = NoID
-
   public isRoot = false
+
+  public config: Config = { ...defaultConfig }
+  public meta: Meta = { ...defaultMeta }
+  public labels: object = {}
 
   public canGrant = false
   public canUpdateUserGroup = false
@@ -45,7 +54,7 @@ export class UserGroup {
   }
 
   apply (u?: PartialUserGroup): void {
-    Apply(this, u, CortezaID, 'userGroupID', 'selfID')
+    Apply(this, u, CortezaID, 'userGroupID')
     Apply(this, u, String, 'handle')
     Apply(this, u, ISO8601Date, 'createdAt', 'updatedAt', 'deletedAt', 'suspendedAt')
     Apply(this, u, Boolean, 'isRoot', 'canGrant', 'canUpdateUserGroup', 'canDeleteUserGroup', 'canManageMembersOnUserGroup')
@@ -55,6 +64,14 @@ export class UserGroup {
       if (AreStrings(u.roles)) {
         this.roles = u.roles
       }
+    }
+
+    if (IsOf(u, 'config')) {
+      this.config = { ...u.config }
+    }
+
+    if (!this.config) {
+      this.config = { ...defaultConfig }
     }
 
     if (IsOf(u, 'meta')) {
