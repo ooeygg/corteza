@@ -152,7 +152,7 @@
                   auto-complete
                   placeholder="(A > B) OR (A < C)"
                   class="mb-1"
-                  height="3.448rem"
+                  min-height="3.448rem"
                   :suggestion-params="recordAutoCompleteParams"
                 />
 
@@ -212,7 +212,7 @@
                   auto-complete
                   placeholder="v"
                   class="mb-1"
-                  height="3.448rem"
+                  min-height="3.448rem"
                   :suggestion-params="recordAutoCompleteParams"
                 />
 

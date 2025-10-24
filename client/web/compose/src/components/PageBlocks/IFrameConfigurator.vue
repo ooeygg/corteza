@@ -23,7 +23,6 @@
         auto-complete
         lang="text"
         :suggestion-params="recordAutoCompleteParams"
-        height="2.375rem"
         type="url"
       />
       <i18next

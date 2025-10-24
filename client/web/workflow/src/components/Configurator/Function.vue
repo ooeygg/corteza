@@ -307,7 +307,8 @@
       id="expression-editor"
       :visible="!!expressionEditor.currentExpression"
       :title="$t('editor:editor')"
-      size="lg"
+      size="xl"
+      scrollable
       :ok-title="$t('general:save')"
       :cancel-title="$t('general:cancel')"
       cancel-variant="light"
@@ -319,7 +320,7 @@
       <expression-editor
         v-model="currentExpressionValue"
         :lang="expressionEditor.lang"
-        height="500"
+        min-height="80vh"
         font-size="18px"
         show-line-numbers
         :border="false"

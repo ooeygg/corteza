@@ -282,7 +282,6 @@
                     auto-complete
                     :placeholder="$t('record.fieldConditions.placeholder')"
                     :suggestion-params="visibilityAutoCompleteParams"
-                    height="2.375rem"
                     class="flex-grow-1"
                   />
                 </b-input-group>

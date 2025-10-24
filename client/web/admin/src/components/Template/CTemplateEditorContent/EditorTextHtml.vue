@@ -4,11 +4,12 @@
     data-test-id="template-html-editor"
     name="editor/html"
     lang="html"
-    height="400px"
+    min-height="400px"
     show-line-numbers
     highlight-active-line
     show-print-margin
     :border="false"
+    resizable
   />
 </template>
 

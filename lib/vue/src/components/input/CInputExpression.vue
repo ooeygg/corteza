@@ -32,9 +32,9 @@ export default {
       default: 'text',
     },
 
-    height: {
+    minHeight: {
       type: String,
-      default: '80px',
+      default: '2.35rem',
     },
 
     showLineNumbers: {
@@ -85,6 +85,11 @@ export default {
     placeholder: {
       type: String,
       default: '',
+    },
+
+    resizable: {
+      type: Boolean,
+      default: true,
     },
   },
 

@@ -33,7 +33,6 @@
         auto-complete
         :suggestion-params="recordAutoCompleteParams"
         :page="page"
-        height="2.375rem"
       />
       <i18next
         path="block:interpolationFootnote"

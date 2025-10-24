@@ -133,8 +133,7 @@
                 v-model="theme.customCSS"
                 auto-complete
                 lang="css"
-                height="400px"
-                font-size="14px"
+                min-height="400px"
                 show-line-numbers
                 :show-popout="true"
                 :auto-complete-suggestions="customCssAutocompleteVal"
@@ -151,8 +150,8 @@
       v-model="customCSSModal.show"
       :title="$t('custom-css')"
       cancel-variant="light"
-      size="lg"
-      centered
+      size="xl"
+      scrollable
       :ok-title="$t('general:label.saveAndClose')"
       :cancel-title="$t('general:label.cancel')"
       body-class="p-0"
@@ -163,8 +162,7 @@
         v-model="customCSSModal.value"
         auto-complete
         lang="css"
-        height="500px"
-        font-size="14px"
+        min-height="80vh"
         show-line-numbers
         :border="false"
         :show-popout="false"

@@ -8,7 +8,7 @@
       <template v-if="textInput">
         <c-input-expression
           v-model="options.prefilter"
-          height="3.688rem"
+          min-height="3.688rem"
           :suggestion-params="recordAutoCompleteParams"
         />
 

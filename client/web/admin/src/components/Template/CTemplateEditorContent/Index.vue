@@ -4,7 +4,7 @@
     <b-col
       cols="12"
       lg="3"
-      class="mb-3 mb-lg-0"
+      class="mb-3"
     >
       <editor-toolbox
         :template="template"
@@ -12,11 +12,61 @@
       />
     </b-col>
 
-    <!-- Content editor -->
+    <!-- Preview configuration -->
     <b-col
       cols="12"
       lg="9"
+      class="mb-3"
     >
+      <b-card
+        v-if="!template.partial"
+        body-class="p-0"
+        header-class="border-bottom"
+        footer-class="border-top d-flex justify-content-end flex-wrap flex-fill-child gap-1"
+      >
+        <!-- Partial templates can't be previewed -->
+        <c-ace-editor
+          v-model="previewData"
+          data-test-id="template-preview-output"
+          name="preview-data"
+          lang="json"
+          min-height="300px"
+          show-line-numbers
+          highlight-active-line
+          resizable
+          :border="false"
+        />
+
+        <template #header>
+          <h4 class="m-0">
+            {{ $t('preview.title') }}
+          </h4>
+        </template>
+
+        <template #footer>
+          <b-btn
+            v-if="canPreviewHTML"
+            data-test-id="button-preview-html-template"
+            variant="light"
+            @click="openPreview('html')"
+          >
+            {{ $t('preview.html') }}
+          </b-btn>
+
+          <b-btn
+            v-if="canPreviewPDF"
+            data-test-id="button-preview-pdf-template"
+            variant="light"
+            @click="openPreview('pdf')"
+          >
+            {{ $t('preview.pdf') }}
+          </b-btn>
+        </template>
+      </b-card>
+    </b-col>
+
+    <!-- Content editor -->
+    <b-col cols="12">
       <b-card
         body-class="p-0"
         header-class="d-flex align-items-center border-bottom"
@@ -51,54 +101,6 @@
             class="ml-auto"
             @submit="$emit('submit', template)"
           />
-        </template>
-      </b-card>
-
-      <!-- Preview configuration -->
-      <b-card
-        v-if="!template.partial"
-        body-class="p-0"
-        header-class="border-bottom"
-        footer-class="border-top d-flex justify-content-end flex-wrap flex-fill-child gap-1"
-        class="shadow-sm mt-3"
-      >
-        <!-- Partial templates can't be previewed -->
-        <c-ace-editor
-          v-model="previewData"
-          data-test-id="template-preview-output"
-          name="preview-data"
-          lang="json"
-          height="500px"
-          show-line-numbers
-          highlight-active-line
-          show-print-margin
-          :border="false"
-        />
-
-        <template #header>
-          <h4 class="m-0">
-            {{ $t('preview.title') }}
-          </h4>
-        </template>
-
-        <template #footer>
-          <b-btn
-            v-if="canPreviewHTML"
-            data-test-id="button-preview-html-template"
-            variant="light"
-            @click="openPreview('html')"
-          >
-            {{ $t('preview.html') }}
-          </b-btn>
-
-          <b-btn
-            v-if="canPreviewPDF"
-            data-test-id="button-preview-pdf-template"
-            variant="light"
-            @click="openPreview('pdf')"
-          >
-            {{ $t('preview.pdf') }}
-          </b-btn>
         </template>
       </b-card>
     </b-col>

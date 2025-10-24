@@ -4,9 +4,9 @@
     data-test-id="template-plain-text-editor"
     name="editor/plain_text"
     lang="plain_text"
-    height="400px"
-    font-size="14px"
+    min-height="400px"
     show-line-numbers
+    resizable
   />
 </template>
 

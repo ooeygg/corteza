@@ -42,7 +42,6 @@
 
       <b-col
         cols="12"
-        lg="6"
       >
         <b-form-group
           :label="$t('image.editor.label')"
@@ -53,12 +52,12 @@
             data-test-id="auth-bg-image-styling-editor"
             name="editor/css"
             lang="css"
-            height="300px"
-            font-size="14px"
+            min-height="500px"
             show-line-numbers
-            class="flex-fill w-100"
             auto-complete
             :auto-complete-suggestions="customCssAutocompleteVal"
+            resizable
+            class="flex-fill w-100"
           />
         </b-form-group>
       </b-col>

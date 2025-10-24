@@ -222,7 +222,7 @@
         :value="request.body"
         :border="false"
         lang="json"
-        height="400px"
+        min-height="400px"
         show-line-numbers
         read-only
       />

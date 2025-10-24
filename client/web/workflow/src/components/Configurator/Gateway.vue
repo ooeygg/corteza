@@ -35,7 +35,6 @@
           >
             <expression-editor
               v-model="edge.expr"
-              height="100"
               show-line-numbers
               :show-popout="false"
               @input="updateEdge(edge.id, $event)"

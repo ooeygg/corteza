@@ -25,6 +25,7 @@
             v-model="item.config.arguments[0].expr"
             font-size="18px"
             show-line-numbers
+            :show-popout="false"
             @input="valueChanged"
           />
         </b-form-group>

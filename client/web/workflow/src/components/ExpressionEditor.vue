@@ -5,13 +5,14 @@
     <c-ace-editor
       v-model="expressionValue"
       :lang="lang"
-      :height="height"
+      :min-height="minHeight"
       :show-line-numbers="showLineNumbers"
       :font-size="fontSize"
       :show-popout="showPopout"
       :auto-complete="autoComplete"
       :border="border"
       :auto-complete-suggestions="expressionAutoCompleteValues"
+      resizable
       v-on="$listeners"
     />
   </div>
@@ -39,9 +40,9 @@ export default {
       default: 'text',
     },
 
-    height: {
+    minHeight: {
       type: String,
-      default: '80',
+      default: '6rem',
     },
 
     showLineNumbers: {

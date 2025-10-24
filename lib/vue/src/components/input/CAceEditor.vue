@@ -1,6 +1,9 @@
 <template>
   <div
-    class="position-relative"
+    ref="container"
+    class="position-relative ace-editor-wrapper"
+    :class="{ 'resizable': resizable }"
+    :style="containerStyle"
   >
     <ace-editor
       ref="aceeditor"
@@ -9,7 +12,7 @@
       :mode="lang"
       theme="chrome"
       width="100%"
-      :height="height"
+      :height="effectiveHeight"
       :class="{ 'border-0 rounded-0': !border }"
       v-on="$listeners"
       @init="editorInit"
@@ -51,9 +54,9 @@ export default {
       default: 'text',
     },
 
-    height: {
+    minHeight: {
       type: String,
-      default: '80',
+      default: '2.35rem',
     },
 
     showLineNumbers: {
@@ -115,6 +118,21 @@ export default {
       type: String,
       default: '',
     },
+
+    resizable: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  data () {
+    return {
+      resizeObserver: null,
+      manualHeight: null,
+      contentHeight: null,
+      programmaticUpdate: false,
+      resizeTimeout: null,
+    }
   },
 
   computed: {
@@ -127,9 +145,144 @@ export default {
         this.$emit('update:value', value)
       },
     },
+
+    containerStyle () {
+      if (this.resizable) {
+        return {
+          minHeight: this.minHeight,
+          height: this.effectiveHeight,
+        }
+      }
+      return {}
+    },
+
+    effectiveHeight () {
+      if (this.resizable) {
+        // Use the larger of manual height, content height, or minimum height
+        const manualHeightPx = this.manualHeight ? this.parseHeight(this.manualHeight) : 0
+        const contentHeightPx = this.contentHeight ? this.parseHeight(this.contentHeight) : 0
+        const minHeightPx = this.parseHeight(this.minHeight)
+        
+        const maxHeight = Math.max(manualHeightPx, contentHeightPx, minHeightPx)
+        return `${maxHeight}px`
+      }
+      return this.minHeight
+    },
+  },
+
+  watch: {
+    value () {
+      if (this.resizable && this.$refs.aceeditor && this.$refs.aceeditor.editor) {
+        this.$nextTick(() => {
+          this.calculateContentHeight(this.$refs.aceeditor.editor)
+        })
+      }
+    },
+  },
+
+  mounted () {
+    if (this.resizable) {
+      this.setupResizeObserver()
+    }
+  },
+
+  beforeDestroy () {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+    }
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout)
+    }
   },
 
   methods: {
+    parseHeight (height) {
+      if (typeof height === 'number') return height
+      if (typeof height === 'string') {
+        // Remove 'px' and parse to number
+        return parseFloat(height.replace('px', '').replace('rem', '')) * (height.includes('rem') ? 16 : 1)
+      }
+      return 0
+    },
+
+    calculateContentHeight (editor) {
+      if (!editor) return
+
+      const session = editor.session
+      const lineCount = session.getLength()
+      const lineHeight = editor.renderer.lineHeight || 16
+      const padding = 14 // Top and bottom padding
+      
+      const contentHeight = (lineCount * lineHeight) + padding
+      
+      // Parse minHeight to ensure we don't go below it
+      const minHeightPx = this.parseHeight(this.minHeight)
+      const finalHeight = Math.max(contentHeight, minHeightPx)
+      
+      // Set flag to prevent ResizeObserver from reacting to this change
+      this.programmaticUpdate = true
+      this.contentHeight = `${finalHeight}px`
+      
+      // Clear the flag after a short delay
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.programmaticUpdate = false
+        }, 50)
+      })
+    },
+
+    setupResizeObserver () {
+      let lastHeight = null
+      let isInitialized = false
+      
+      this.resizeObserver = new ResizeObserver((entries) => {
+        // Skip if we're in the middle of a programmatic update
+        if (this.programmaticUpdate) {
+          return
+        }
+
+        for (const entry of entries) {
+          const newHeight = entry.contentRect.height
+          
+          // Skip the first observation (initialization)
+          if (!isInitialized) {
+            lastHeight = newHeight
+            isInitialized = true
+            return
+          }
+          
+          // Only update if height actually changed significantly (more than 2px to avoid rounding issues)
+          if (lastHeight !== null && Math.abs(lastHeight - newHeight) > 2) {
+            // Clear any pending timeout
+            if (this.resizeTimeout) {
+              clearTimeout(this.resizeTimeout)
+            }
+            
+            // Debounce the update slightly to prevent flickering
+            this.resizeTimeout = setTimeout(() => {
+              this.manualHeight = `${newHeight}px`
+              this.updateEditorSize()
+              lastHeight = newHeight
+            }, 10)
+          }
+        }
+      })
+
+      if (this.$refs.container) {
+        this.resizeObserver.observe(this.$refs.container)
+      }
+    },
+
+    updateEditorSize () {
+      // Force ace editor to resize
+      this.$nextTick(() => {
+        if (this.$refs.aceeditor && this.$refs.aceeditor.editor) {
+          const editor = this.$refs.aceeditor.editor
+          editor.resize()
+        }
+      })
+    },
+
     editorInit (editor) {
       import('brace/mode/text')
       import('brace/mode/html')
@@ -137,7 +290,6 @@ export default {
       import('brace/mode/scss')
       import('brace/mode/json')
       import('brace/mode/javascript')
-      import('brace/mode/json')
 
       import('brace/snippets/text')
       import('brace/snippets/html')
@@ -145,7 +297,6 @@ export default {
       import('brace/snippets/scss')
       import('brace/snippets/json')
       import('brace/snippets/javascript')
-      import('brace/snippets/json')
 
       import('brace/theme/chrome')
       import('brace/ext/language_tools')
@@ -164,8 +315,6 @@ export default {
         readOnly: this.readOnly,
         highlightActiveLine: this.highlightActiveLine,
         cursorStyle: 'smooth',
-        // // minLines: this.height,
-        // maxPixelHeight: 100,
 
         ...(this.autoComplete && {
           enableBasicAutocompletion: true,
@@ -180,6 +329,19 @@ export default {
 
       editor.on('input', this.updatePlaceholder)
       this.updatePlaceholder(undefined, editor)
+
+      // Calculate initial content height and listen for changes if resizable
+      if (this.resizable) {
+        // Calculate initial height
+        this.$nextTick(() => {
+          this.calculateContentHeight(editor)
+        })
+
+        // Recalculate on content change
+        editor.session.on('change', () => {
+          this.calculateContentHeight(editor)
+        })
+      }
 
       if (this.initExpressions) {
         this.processExpressionAutoComplete(editor)
@@ -224,55 +386,95 @@ export default {
     },
 
     processExpressionAutoComplete (editor) {
+      // Extract text context from current cursor position
+      const getTextContext = (pos) => {
+        const session = editor.session
+        const line = session.getLine(pos.row)
+        const lastSpaceIndex = Math.max(0, line.lastIndexOf(' '))
+        const textAfterSpace = line.slice(lastSpaceIndex, pos.column).trim()
+        const lastDotIndex = textAfterSpace.lastIndexOf('.')
+        const searchTextForCaption = lastDotIndex >= 0 ? textAfterSpace.slice(lastDotIndex + 1) : textAfterSpace
+        
+        return { line, textAfterSpace, searchTextForCaption }
+      }
+
+      // Check if suggestion matches search text
+      const matchesSuggestion = (suggestion, textAfterSpace, searchTextForCaption) => {
+        const suggestionValue = typeof suggestion === 'string' ? suggestion : suggestion.value
+        const suggestionCaption = typeof suggestion === 'string' ? suggestion : suggestion.caption
+        return suggestionValue.toLowerCase().startsWith(textAfterSpace.toLowerCase()) ||
+               suggestionCaption.toLowerCase().startsWith(searchTextForCaption.toLowerCase())
+      }
+
+      // Check and trigger autocomplete if there are matching suggestions
+      const checkAndTriggerAutocomplete = () => {
+        setTimeout(() => {
+          const pos = editor.getCursorPosition()
+          const { line, textAfterSpace, searchTextForCaption } = getTextContext(pos)
+          
+          // Don't trigger after closing braces
+          const charBeforeCursor = pos.column > 0 ? line[pos.column - 1] : ''
+          if (charBeforeCursor === '}' || charBeforeCursor === ')' || textAfterSpace.length === 0) {
+            return
+          }
+          
+          const context = this.getContext(editor, editor.session, pos)
+          const suggestions = this.getSuggestionsForContext(context)
+          const hasMatches = suggestions.some(s => matchesSuggestion(s, textAfterSpace, searchTextForCaption))
+          
+          if (hasMatches) {
+            editor.execCommand('startAutocomplete')
+          }
+        }, 10)
+      }
+      
       const staticWordCompleter = {
+        identifierRegexps: [/[${\w]+/],
         getCompletions: (editor, session, pos, prefix, callback) => {
           const context = this.getContext(editor, session, pos)
           const suggestions = this.getSuggestionsForContext(context)
+          const { textAfterSpace, searchTextForCaption } = getTextContext(pos)
+          
+          const filteredSuggestions = suggestions
+            .filter(s => matchesSuggestion(s, textAfterSpace, searchTextForCaption))
+            .map(suggestion => {
+              const caption = typeof suggestion === 'string' ? suggestion : suggestion.caption
+              const value = typeof suggestion === 'string' ? suggestion : suggestion.value
+              const captionMatch = caption.toLowerCase().indexOf(searchTextForCaption.toLowerCase())
+              
+              return {
+                caption,
+                value,
+                score: captionMatch === 0 ? 10000 : 1000,
+                meta: 'variable',
+                completer: {
+                  insertMatch: (insertEditor, data) => {
+                    insertEditor.jumpToMatching()
+                    const line = session.getLine(pos.row)
+                    const spaceIndex = line.lastIndexOf(' ')
+                    const startCol = spaceIndex > 0 ? spaceIndex + 1 : 0
 
-          callback(null, suggestions.map(suggestion => {
-            let caption = ''
-            let value = ''
-
-            if (typeof suggestion === 'string') {
-              caption = suggestion
-              value = suggestion
-            } else {
-              caption = suggestion.caption
-              value = suggestion.value
-            }
-
-            return {
-              caption,
-              value,
-              meta: 'variable',
-              completer: {
-                insertMatch: function (insertEditor, data) {
-                  const insertValue = data.value
-
-                  insertEditor.jumpToMatching()
-                  const line = session.getLine(pos.row)
-                  let lastSpaceIndex = line.lastIndexOf(' ') >= 0 ? line.lastIndexOf(' ') : 0
-
-                  if (lastSpaceIndex > 0) {
-                    lastSpaceIndex += 1
-                  }
-
-                  insertEditor.session.replace({
-                    start: { row: pos.row, column: lastSpaceIndex },
-                    end: { row: pos.row, column: pos.column },
-                  }, insertValue)
+                    insertEditor.session.replace({
+                      start: { row: pos.row, column: startCol },
+                      end: { row: pos.row, column: pos.column },
+                    }, data.value)
+                    
+                    checkAndTriggerAutocomplete()
+                  },
                 },
-              },
-            }
-          }))
+              }
+            })
+
+          callback(null, filteredSuggestions)
         },
       }
 
       editor.completers = [staticWordCompleter]
 
-      editor.commands.on('afterExec', function (e) {
+      // Only trigger autocomplete automatically when there's a partial match
+      editor.commands.on('afterExec', (e) => {
         if (['insertstring', 'Return'].includes(e.command.name) || /^[\w.($]$/.test(e.args)) {
-          editor.execCommand('startAutocomplete')
+          checkAndTriggerAutocomplete()
         }
       })
 
@@ -282,17 +484,13 @@ export default {
 
     getContext (editor, session, pos) {
       const line = session.getLine(pos.row)
-      const lastSpaceIndex = line.lastIndexOf(' ') >= 0 ? line.lastIndexOf(' ') : 0
-      const textBeforeCursor = line.slice(lastSpaceIndex, pos.column)
-      const context = textBeforeCursor.split('.').slice(0, -1).join('.').trim()
-
-      return context
+      const lastSpaceIndex = Math.max(0, line.lastIndexOf(' '))
+      const textBeforeCursor = line.slice(lastSpaceIndex, pos.column).trim()
+      return textBeforeCursor.split('.').slice(0, -1).join('.')
     },
 
     getSuggestionsForContext (context) {
-      const suggestions = this.autoCompleteSuggestions
-
-      return suggestions[context] || []
+      return this.autoCompleteSuggestions[context] || []
     },
   },
 }
@@ -304,10 +502,20 @@ export default {
   bottom: 0;
   right: 0;
 }
+
+.ace-editor-wrapper {
+  &.resizable {
+    resize: vertical;
+    overflow: auto;
+    
+    .ace_editor {
+      height: 100% !important;
+    }
+  }
+}
 </style>
 
 <style lang="scss">
-// Remove from server/assets/src/scss/main/18201141_custom_webapp.scss when all ace-editors use c-ace-editor
 .ace_editor {
   color: var(--black) !important;
   background-color: var(--white) !important;

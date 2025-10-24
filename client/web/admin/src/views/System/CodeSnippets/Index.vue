@@ -108,11 +108,11 @@
           <c-ace-editor
             v-model="modal.data.script"
             lang="javascript"
-            height="500px"
-            font-size="14px"
+            min-height="500px"
             show-line-numbers
             :border="false"
             :show-popout="false"
+            resizable
           />
         </b-form-group>
 

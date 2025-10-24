@@ -315,7 +315,6 @@
                             v-model="layout.meta.title"
                             auto-complete
                             :suggestion-params="recordAutoCompleteParams"
-                            height="2.375rem"
                             class="flex-grow-1"
                             @input="layout.meta.updated = true"
                           />
@@ -433,7 +432,6 @@
                 :state="layoutTitleState(layoutEditor.layout.meta.title)"
                 :suggestion-params="recordAutoCompleteParams"
                 :placeholder="$t('page-layout.title')"
-                height="2.375rem"
                 class="flex-grow-1"
                 @input="layoutEditor.layout.meta.updated = true"
               />
@@ -522,7 +520,6 @@
             auto-complete
             :placeholder="$t('page-layout.condition.placeholder')"
             :suggestion-params="visibilityAutoCompleteParams"
-            height="2.375rem"
             class="flex-grow-1"
           />
           <b-input-group-append>
