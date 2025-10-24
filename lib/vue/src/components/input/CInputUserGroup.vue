@@ -31,11 +31,6 @@ export default {
       type: String,
       default: '',
     },
-
-    preselectDefault: {
-      type: Boolean,
-      default: false,
-    },
   },
 
   data () {
