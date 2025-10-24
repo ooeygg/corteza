@@ -14,13 +14,13 @@ editor:
     undelete: Undelete
     updatedAt: Updated at
     parents:
-      title: Parent User Groups
+      title: This user group reports to
       parent:
-        label: Parent
+        label: Parent user group
         placeholder: Select parent user group
-      label:
-        label: Label
-        placeholder: Enter label for the relationship
+      name:
+        label: Relationship name
+        placeholder: Enter name for the relationship
   new: New User Group
   permissions: Permissions
   members:

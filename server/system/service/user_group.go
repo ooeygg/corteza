@@ -28,7 +28,7 @@ type (
 		user UserService
 		role RoleService
 
-		rootUserGroup uint64
+		rootUserGroup id.ID
 
 		store store.Storer
 	}
@@ -91,7 +91,7 @@ func UserGroup(rbac rbacUserGroupService) *userGroup {
 	}
 }
 
-func (svc userGroup) Activate(ctx context.Context) (err error) {
+func (svc *userGroup) Activate(ctx context.Context) (err error) {
 	gMembers := []rbac.GroupMembers{}
 
 	groups, _, err := svc.Find(ctx, types.UserGroupFilter{})
@@ -101,7 +101,7 @@ func (svc userGroup) Activate(ctx context.Context) (err error) {
 
 	for _, g := range groups {
 		if len(g.Config.Paths) == 0 {
-			svc.rootUserGroup = g.ID
+			svc.rootUserGroup = id.MustNumID(g.ID)
 		}
 
 		roles, _, err := svc.role.Find(ctx, types.RoleFilter{
@@ -131,7 +131,7 @@ func (svc userGroup) Activate(ctx context.Context) (err error) {
 		for _, p := range g.Config.Paths {
 			pp = append(pp, rbac.GroupNodePath{
 				SelfID: id.MustNumID(p.SelfID),
-				Label:  p.Label,
+				Name:   p.Name,
 			})
 		}
 
@@ -147,7 +147,7 @@ func (svc userGroup) Activate(ctx context.Context) (err error) {
 	return
 }
 
-func (svc userGroup) Find(ctx context.Context, filter types.UserGroupFilter) (rr types.UserGroupSet, f types.UserGroupFilter, err error) {
+func (svc *userGroup) Find(ctx context.Context, filter types.UserGroupFilter) (rr types.UserGroupSet, f types.UserGroupFilter, err error) {
 	var (
 		raProps = &userGroupActionProps{filter: &filter}
 	)
@@ -200,7 +200,7 @@ func (svc userGroup) Find(ctx context.Context, filter types.UserGroupFilter) (rr
 		}
 
 		for _, r := range rr {
-			r.IsRoot = r.ID == svc.rootUserGroup
+			r.IsRoot = id.MustNumID(r.ID).Equal(svc.rootUserGroup)
 		}
 
 		if err = label.Load(ctx, svc.store, toLabeledUserGroups(rr)...); err != nil {
@@ -213,7 +213,7 @@ func (svc userGroup) Find(ctx context.Context, filter types.UserGroupFilter) (rr
 	return rr, f, svc.recordAction(ctx, raProps, UserGroupActionSearch, err)
 }
 
-func (svc userGroup) FindByID(ctx context.Context, userGroupID uint64) (r *types.UserGroup, err error) {
+func (svc *userGroup) FindByID(ctx context.Context, userGroupID uint64) (r *types.UserGroup, err error) {
 	var (
 		raProps = &userGroupActionProps{userGroup: &types.UserGroup{ID: userGroupID}}
 	)
@@ -223,7 +223,7 @@ func (svc userGroup) FindByID(ctx context.Context, userGroupID uint64) (r *types
 			return err
 		}
 
-		r.IsRoot = r.ID == svc.rootUserGroup
+		r.IsRoot = id.MustNumID(r.ID).Equal(svc.rootUserGroup)
 
 		raProps.setUserGroup(r)
 		return nil
@@ -232,12 +232,12 @@ func (svc userGroup) FindByID(ctx context.Context, userGroupID uint64) (r *types
 	return r, svc.recordAction(ctx, raProps, UserGroupActionLookup, err)
 }
 
-func (svc userGroup) findByID(ctx context.Context, userGroupID uint64) (*types.UserGroup, error) {
+func (svc *userGroup) findByID(ctx context.Context, userGroupID uint64) (*types.UserGroup, error) {
 	r, err := loadUserGroup(ctx, svc.store, userGroupID)
 	return svc.proc(ctx, r, err)
 }
 
-func (svc userGroup) FindByHandle(ctx context.Context, h string) (r *types.UserGroup, err error) {
+func (svc *userGroup) FindByHandle(ctx context.Context, h string) (r *types.UserGroup, err error) {
 	var (
 		raProps = &userGroupActionProps{userGroup: &types.UserGroup{Handle: h}}
 	)
@@ -256,7 +256,7 @@ func (svc userGroup) FindByHandle(ctx context.Context, h string) (r *types.UserG
 }
 
 // FindByAny finds userGroup by given identifier (id, handle, name)
-func (svc userGroup) FindByAny(ctx context.Context, identifier interface{}) (r *types.UserGroup, err error) {
+func (svc *userGroup) FindByAny(ctx context.Context, identifier interface{}) (r *types.UserGroup, err error) {
 	if ID, ok := identifier.(uint64); ok {
 		return svc.FindByID(ctx, ID)
 	} else if strIdentifier, ok := identifier.(string); ok {
@@ -271,7 +271,7 @@ func (svc userGroup) FindByAny(ctx context.Context, identifier interface{}) (r *
 	}
 }
 
-func (svc userGroup) proc(ctx context.Context, r *types.UserGroup, err error) (*types.UserGroup, error) {
+func (svc *userGroup) proc(ctx context.Context, r *types.UserGroup, err error) (*types.UserGroup, error) {
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, UserGroupErrNotFound()
@@ -287,7 +287,7 @@ func (svc userGroup) proc(ctx context.Context, r *types.UserGroup, err error) (*
 	return r, nil
 }
 
-func (svc userGroup) Create(ctx context.Context, new *types.UserGroup) (r *types.UserGroup, err error) {
+func (svc *userGroup) Create(ctx context.Context, new *types.UserGroup) (r *types.UserGroup, err error) {
 	var (
 		raProps = &userGroupActionProps{userGroup: new}
 	)
@@ -297,15 +297,9 @@ func (svc userGroup) Create(ctx context.Context, new *types.UserGroup) (r *types
 			return UserGroupErrInvalidHandle()
 		}
 
-		// @todo !!!
-
-		// if new.SelfID == 0 {
-		// 	return UserGroupErrMissingSelfID()
-		// }
-
-		// if !svc.checkSelfID(ctx, new) {
-		// 	return UserGroupErrInvalidSelfID()
-		// }
+		if !svc.checkPaths(new) {
+			return UserGroupErrInvalidSelfID()
+		}
 
 		if !svc.isValidStructure(ctx, new) {
 			return UserGroupErrInvalidUpdateStructure()
@@ -342,7 +336,7 @@ func (svc userGroup) Create(ctx context.Context, new *types.UserGroup) (r *types
 		for _, p := range new.Config.Paths {
 			pp = append(pp, rbac.GroupNodePath{
 				SelfID: id.MustNumID(p.SelfID),
-				Label:  p.Label,
+				Name:   p.Name,
 			})
 		}
 
@@ -359,7 +353,7 @@ func (svc userGroup) Create(ctx context.Context, new *types.UserGroup) (r *types
 
 }
 
-func (svc userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *types.UserGroup, err error) {
+func (svc *userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *types.UserGroup, err error) {
 	var (
 		raProps = &userGroupActionProps{update: upd}
 	)
@@ -425,7 +419,7 @@ func (svc userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *types
 		for _, p := range r.Config.Paths {
 			pp = append(pp, rbac.GroupNodePath{
 				SelfID: id.MustNumID(p.SelfID),
-				Label:  p.Label,
+				Name:   p.Name,
 			})
 		}
 
@@ -442,7 +436,7 @@ func (svc userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *types
 	return r, svc.recordAction(ctx, raProps, UserGroupActionUpdate, err)
 }
 
-func (svc userGroup) UniqueCheck(ctx context.Context, r *types.UserGroup) (err error) {
+func (svc *userGroup) UniqueCheck(ctx context.Context, r *types.UserGroup) (err error) {
 	var (
 		raProps = &userGroupActionProps{userGroup: r}
 	)
@@ -457,7 +451,7 @@ func (svc userGroup) UniqueCheck(ctx context.Context, r *types.UserGroup) (err e
 	return nil
 }
 
-func (svc userGroup) Delete(ctx context.Context, userGroupID uint64) (err error) {
+func (svc *userGroup) Delete(ctx context.Context, userGroupID uint64) (err error) {
 	var (
 		r       *types.UserGroup
 		raProps = &userGroupActionProps{userGroup: &types.UserGroup{ID: userGroupID}}
@@ -497,7 +491,7 @@ func (svc userGroup) Delete(ctx context.Context, userGroupID uint64) (err error)
 	return svc.recordAction(ctx, raProps, UserGroupActionDelete, err)
 }
 
-func (svc userGroup) Undelete(ctx context.Context, userGroupID uint64) (err error) {
+func (svc *userGroup) Undelete(ctx context.Context, userGroupID uint64) (err error) {
 	var (
 		r, upd  *types.UserGroup
 		raProps = &userGroupActionProps{userGroup: &types.UserGroup{ID: userGroupID}}
@@ -528,7 +522,7 @@ func (svc userGroup) Undelete(ctx context.Context, userGroupID uint64) (err erro
 		for _, p := range upd.Config.Paths {
 			pp = append(pp, rbac.GroupNodePath{
 				SelfID: id.MustNumID(p.SelfID),
-				Label:  p.Label,
+				Name:   p.Name,
 			})
 		}
 
@@ -544,7 +538,7 @@ func (svc userGroup) Undelete(ctx context.Context, userGroupID uint64) (err erro
 	return svc.recordAction(ctx, raProps, UserGroupActionUndelete, err)
 }
 
-func (svc userGroup) MemberList(ctx context.Context, userGroupID uint64) (mm types.UserSet, err error) {
+func (svc *userGroup) MemberList(ctx context.Context, userGroupID uint64) (mm types.UserSet, err error) {
 	var (
 		r *types.UserGroup
 
@@ -577,7 +571,7 @@ func (svc userGroup) MemberList(ctx context.Context, userGroupID uint64) (mm typ
 }
 
 // MemberAdd adds member (user) to a userGroup
-func (svc userGroup) MemberAdd(ctx context.Context, userGroupID, memberID uint64) (err error) {
+func (svc *userGroup) MemberAdd(ctx context.Context, userGroupID, memberID uint64) (err error) {
 	var (
 		g *types.UserGroup
 		m *types.User
@@ -659,12 +653,12 @@ func toLabeledUserGroups(set []*types.UserGroup) []label.LabeledResource {
 	return ll
 }
 
-func (svc userGroup) isValidStructure(ctx context.Context, g *types.UserGroup) (ok bool) {
+func (svc *userGroup) isValidStructure(ctx context.Context, g *types.UserGroup) (ok bool) {
 	// @todo :)
 	return true
 }
 
-func (svc userGroup) checkSelfID(ctx context.Context, g *types.UserGroup) bool {
+func (svc *userGroup) checkSelfID(ctx context.Context, g *types.UserGroup) bool {
 	for _, p := range g.Config.Paths {
 		// Can't point to itself
 		if p.SelfID == g.ID {
@@ -676,6 +670,36 @@ func (svc userGroup) checkSelfID(ctx context.Context, g *types.UserGroup) bool {
 		if err != nil {
 			return false
 		}
+	}
+
+	return true
+}
+
+func (svc *userGroup) checkPaths(g *types.UserGroup) (ok bool) {
+	if id.MustNumID(g.ID).Equal(svc.rootUserGroup) {
+		return len(g.Config.Paths) == 0
+	}
+
+	if g.Config == nil {
+		g.Config = &types.UserGroupConfig{}
+	}
+
+	if len(g.Config.Paths) == 0 {
+		return false
+	}
+
+	names := make(map[string]bool, len(g.Config.Paths)/2)
+	for _, p := range g.Config.Paths {
+		if p.SelfID == 0 {
+			return false
+		}
+
+		// Do not allow duplicate paths
+		if names[p.Name] {
+			return false
+		}
+
+		names[p.Name] = true
 	}
 
 	return true

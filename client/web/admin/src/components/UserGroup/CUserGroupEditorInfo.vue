@@ -95,7 +95,7 @@
                     {{ $t('parents.parent.label') }}
                   </b-th>
                   <b-th class="text-primary">
-                    {{ $t('parents.label.label') }}
+                    {{ $t('parents.name.label') }}
                   </b-th>
                   <b-th v-if="userGroup.config.path.length > 1" />
                 </b-tr>
@@ -120,8 +120,8 @@
                     style="min-width: 200px;"
                   >
                     <b-form-input
-                      v-model="parent.label"
-                      :placeholder="$t('parents.label.placeholder')"
+                      v-model="parent.name"
+                      :placeholder="$t('parents.name.placeholder')"
                     />
                   </b-td>
                   <b-td
@@ -303,7 +303,7 @@ export default {
     addParent () {
       this.userGroup.config.path.push({
         selfID: '',
-        label: '',
+        name: '',
       })
     },
 

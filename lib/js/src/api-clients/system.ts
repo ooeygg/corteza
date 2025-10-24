@@ -1473,7 +1473,7 @@ export default class System {
     const {
       handle,
       members,
-      selfID,
+      config,
       meta,
       labels,
     } = (a as KV) || {}
@@ -1485,7 +1485,7 @@ export default class System {
     cfg.data = {
       handle,
       members,
-      selfID,
+      config,
       meta,
       labels,
     }
@@ -1514,7 +1514,7 @@ export default class System {
       userGroupID,
       handle,
       members,
-      selfID,
+      config,
       meta,
       labels,
       updatedAt,
@@ -1532,7 +1532,7 @@ export default class System {
     cfg.data = {
       handle,
       members,
-      selfID,
+      config,
       meta,
       labels,
       updatedAt,

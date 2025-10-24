@@ -21,7 +21,7 @@ const defaultMeta = {
 interface Config {
   path: {
     selfID: string;
-    label: string;
+    name: string;
   }[];
 }
 

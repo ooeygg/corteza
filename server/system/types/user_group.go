@@ -34,7 +34,7 @@ type (
 
 	UserGroupPath struct {
 		SelfID uint64 `json:"selfID,string"`
-		Label  string `json:"label"`
+		Name   string `json:"name"`
 	}
 
 	UserGroupMeta struct {

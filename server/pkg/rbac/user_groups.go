@@ -49,12 +49,12 @@ type (
 
 	GroupNodePath struct {
 		SelfID id.ID
-		Label  string
+		Name   string
 	}
 
 	groupNodeConnection struct {
-		node  *groupNode
-		label string
+		node *groupNode
+		name string
 	}
 
 	GroupMembers struct {
@@ -167,13 +167,13 @@ func (svc *orgTree) addNode(node *groupNode) (err error) {
 		}
 
 		n.children = append(n.children, groupNodeConnection{
-			node:  node,
-			label: p.Label,
+			node: node,
+			name: p.Name,
 		})
 
 		node.parents = append(node.parents, groupNodeConnection{
-			node:  n,
-			label: p.Label,
+			node: n,
+			name: p.Name,
 		})
 	}
 
@@ -210,13 +210,13 @@ func (svc *orgTree) UpdateNode(idx id.ID, handle string, paths ...GroupNodePath)
 
 	for _, p := range paths {
 		svc.branchIndex[p.SelfID].children = append(svc.branchIndex[p.SelfID].children, groupNodeConnection{
-			node:  n,
-			label: p.Label,
+			node: n,
+			name: p.Name,
 		})
 
 		svc.branchIndex[idx].parents = append(svc.branchIndex[idx].parents, groupNodeConnection{
-			node:  svc.branchIndex[p.SelfID],
-			label: p.Label,
+			node: svc.branchIndex[p.SelfID],
+			name: p.Name,
 		})
 	}
 
@@ -280,12 +280,12 @@ func (svc *orgTree) isAbove(parent, child *groupNode, paths ...string) (ok bool)
 			return true
 		}
 
-		if c.label == "" {
+		if c.name == "" {
 			return true
 		}
 
 		for _, pth := range paths {
-			if c.label == pth {
+			if c.name == pth {
 				return true
 			}
 		}
@@ -477,13 +477,13 @@ func buildOrgTree(gg ...*groupNode) (root *groupNode, index map[id.ID]*groupNode
 			}
 
 			parent.children = append(parent.children, groupNodeConnection{
-				label: p.Label,
-				node:  g,
+				name: p.Name,
+				node: g,
 			})
 
 			g.parents = append(g.parents, groupNodeConnection{
-				node:  parent,
-				label: p.Label,
+				node: parent,
+				name: p.Name,
 			})
 		}
 	}
@@ -505,19 +505,19 @@ func (root *groupNode) inline(paths ...string) []*groupNode {
 	// Helper to check if a connection should be included based on path
 	//
 	// - It we don't specify any path, all nodes are used
-	// - If a connection label is empty, the node is included regardless of defined paths
-	// - If a connection defines a label, it must occur in the requested paths slice
+	// - If a connection name is empty, the node is included regardless of defined paths
+	// - If a connection defines a name, it must occur in the requested paths slice
 	inclConnection := func(c groupNodeConnection) bool {
 		if len(paths) == 0 {
 			return true
 		}
 
-		if c.label == "" {
+		if c.name == "" {
 			return true
 		}
 
 		for _, pth := range paths {
-			if c.label == pth {
+			if c.name == pth {
 				return true
 			}
 		}
@@ -571,7 +571,7 @@ func formatPaths(paths []GroupNodePath) []map[string]any {
 	for _, p := range paths {
 		out = append(out, map[string]any{
 			"selfID": p.SelfID,
-			"label":  p.Label,
+			"name":   p.Name,
 		})
 	}
 

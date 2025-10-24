@@ -790,7 +790,7 @@ func mkPpn(ii ...any) []GroupNodePath {
 
 		out = append(out, GroupNodePath{
 			SelfID: id,
-			Label:  label,
+			Name:   label,
 		})
 	}
 

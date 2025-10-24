@@ -166,6 +166,14 @@ func (ctrl UserGroup) makePayload(ctx context.Context, r *types.UserGroup, err e
 		return nil, err
 	}
 
+	if r.Config == nil {
+		r.Config = &types.UserGroupConfig{}
+	}
+
+	if len(r.Config.Paths) == 0 {
+		r.Config.Paths = []types.UserGroupPath{}
+	}
+
 	return &userGroupPayload{
 		UserGroup: r,
 
