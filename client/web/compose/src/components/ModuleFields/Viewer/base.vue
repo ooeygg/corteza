@@ -39,6 +39,11 @@ export default {
       type: Boolean,
       default: false,
     },
+
+    disableClick: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   computed: {

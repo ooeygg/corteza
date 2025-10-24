@@ -5,7 +5,7 @@
       :key="index"
       :class="{ 'd-block': field.options.multiDelimiter === '\n' }"
     >
-      <span v-if="field.options.outputPlain">
+      <span v-if="field.options.outputPlain || disableClick">
         {{ fixUrl(v) }}{{ index !== formattedValue.length - 1 ? field.options.multiDelimiter : '' }}
       </span>
 

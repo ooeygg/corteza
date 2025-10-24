@@ -63,6 +63,7 @@
                 :field="labelField"
                 :record="option"
                 :namespace="namespace"
+                disable-click
                 value-only
               />
 
@@ -76,6 +77,7 @@
                 :field="labelField"
                 :record="option"
                 :namespace="namespace"
+                disable-click
                 value-only
               />
 
@@ -117,6 +119,7 @@
                 :field="labelField"
                 :record="option"
                 :namespace="namespace"
+                disable-click
                 value-only
               />
 
@@ -132,6 +135,7 @@
                 :field="labelField"
                 :record="option"
                 :namespace="namespace"
+                disable-click
                 value-only
               />
 
@@ -192,6 +196,7 @@
                 :field="labelField"
                 :record="option"
                 :namespace="namespace"
+                disable-click
                 value-only
               />
 
@@ -208,6 +213,7 @@
                 :field="labelField"
                 :record="getRecordByID(option.recordID)"
                 :namespace="namespace"
+                disable-click
                 value-only
               />
 
@@ -246,6 +252,7 @@
           :field="labelField"
           :record="getRecordByID(multipleSelected[ctx.index])"
           :namespace="namespace"
+          disable-click
           value-only
         />
       </template>
@@ -274,6 +281,7 @@
               :field="labelField"
               :record="option"
               :namespace="namespace"
+              disable-click
               value-only
             />
 
@@ -287,6 +295,7 @@
               :field="labelField"
               :record="getRecordByID(selected)"
               :namespace="namespace"
+              disable-click
               value-only
             />
 

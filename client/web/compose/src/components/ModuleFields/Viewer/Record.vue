@@ -10,22 +10,36 @@
       v-for="(v, index) of formattedValue"
       :key="v.id || index"
       :class="{ 'd-block': field.options.multiDelimiter === '\n', 'mt-1': field.options.multiDelimiter === '\n' && index !== 0 }"
-      @click.stop
     >
+      <template v-if="disableClick">
+        <field-viewer
+          v-if="v.record"
+          :field="labelField"
+          :record="v.record"
+          :namespace="namespace"
+          disable-click
+          value-only
+        />
+        <template v-else>
+          {{ v.id }}
+        </template>
+        {{ index !== formattedValue.length - 1 ? field.options.multiDelimiter : '' }}
+      </template>
+
       <a
-        v-if="['modal', 'newTab'].includes(extraOptions.recordSelectorDisplayOption)"
+        v-else-if="['modal', 'newTab'].includes(extraOptions.recordSelectorDisplayOption)"
         href="#"
         :class="{ 'text-decoration-none default-cursor': !v.to}"
         @click="(e) => onRecordSelectorClick(e, v.to)"
       >
-        <template v-if="v.record">
-          <field-viewer
-            :field="labelField"
-            :record="v.record"
-            :namespace="namespace"
-            value-only
-          />
-        </template>
+        <field-viewer
+          v-if="v.record"
+          :field="labelField"
+          :record="v.record"
+          :namespace="namespace"
+          disable-click
+          value-only
+        />
         <template v-else>
           {{ v.id }}
         </template>
@@ -37,14 +51,14 @@
         :to="v.to"
         :class="{ 'text-decoration-none default-cursor': !v.to}"
       >
-        <template v-if="v.record">
-          <field-viewer
-            :field="labelField"
-            :record="v.record"
-            :namespace="namespace"
-            value-only
-          />
-        </template>
+        <field-viewer
+          v-if="v.record"
+          :field="labelField"
+          :record="v.record"
+          :namespace="namespace"
+          disable-click
+          value-only
+        />
         <template v-else>
           {{ v.id }}
         </template>

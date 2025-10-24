@@ -5,7 +5,13 @@
       :key="index"
       :class="{ 'd-block': field.options.multiDelimiter === '\n' }"
     >
+      <span v-if="disableClick">
+        {{ c.value[0] }}, {{ c.value[1] }}
+        {{ index !== localValue.length - 1 ? field.options.multiDelimiter : '' }}
+      </span>
+
       <a
+        v-else
         class="text-nowrap text-primary pointer"
         @click.stop="openMap(index)"
       >
