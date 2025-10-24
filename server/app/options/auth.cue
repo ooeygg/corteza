@@ -216,7 +216,17 @@ auth: schema.#optionsGroup & {
 		default_user_group: {
 			defaultValue: "default-root"
 			description: """
-				Default user group all users are assigned to.
+				Default user group.
+				If default sub user group is not set, all users are assigned here.
+
+				Each user must belong to a user group if it wishes to use the system.
+				"""
+		}
+		default_sub_user_group: {
+			defaultValue: "default-sub-root"
+			description: """
+				Default sub-user group.
+				If default sub-user group is set, all users are assigned here.
 
 				Each user must belong to a user group if it wishes to use the system.
 				"""

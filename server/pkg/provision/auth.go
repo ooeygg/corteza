@@ -201,6 +201,33 @@ func defaultUserGroup(ctx context.Context, log *zap.Logger, s store.UserGroups, 
 		logger.Uint64("userGroupID", g.ID),
 	)
 
+	g = &types.UserGroup{
+		ID:     id.Next(),
+		Handle: authOpt.DefaultSubUserGroup,
+		Config: &types.UserGroupConfig{
+			Paths: []types.UserGroupPath{{
+				SelfID: g.ID,
+				Name:   "",
+			}},
+		},
+		Meta: &types.UserGroupMeta{
+			Short:       "Default Sub-User Group",
+			Description: "The default sub-user group",
+		},
+		CreatedAt: *now(),
+	}
+	err = store.CreateUserGroup(ctx, s, g)
+	if err != nil {
+		return err
+	}
+
+	log.Info(
+		"Added default sub-user group",
+		zap.String("name", g.Meta.Short),
+		zap.String("handle", g.Handle),
+		logger.Uint64("userGroupID", g.ID),
+	)
+
 	return nil
 }
 
@@ -211,9 +238,21 @@ func defaultAuthClient(ctx context.Context, log *zap.Logger, s store.Storer, aut
 		return nil
 	}
 
-	ug, err := store.LookupUserGroupByHandle(ctx, s, authOpt.DefaultUserGroup)
-	if err != nil {
-		return err
+	var (
+		ug  *types.UserGroup
+		err error
+	)
+
+	if authOpt.DefaultSubUserGroup != "" {
+		ug, err = store.LookupUserGroupByHandle(ctx, s, authOpt.DefaultSubUserGroup)
+		if err != nil {
+			return err
+		}
+	} else {
+		ug, err = store.LookupUserGroupByHandle(ctx, s, authOpt.DefaultUserGroup)
+		if err != nil {
+			return err
+		}
 	}
 
 	c := &types.AuthClient{
