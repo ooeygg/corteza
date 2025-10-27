@@ -3,15 +3,13 @@
     <b-button
       :id="`color-popover-${format.type}`"
       variant="link"
-      class="text-dark font-weight-bold text-decoration-none"
+      class="text-dark font-weight-bold text-decoration-none mb-1"
       @click.stop.prevent="showPicker"
     >
       <span
-        class="icon"
-        :class="typeStyle"
         :style="{
           backgroundColor: background ? selectedColor : 'transparent',
-          borderColor: background ? 'transparent' : selectedColor,
+          'border-bottom': background ? 'none' : `2px solid ${selectedColor}`,
         }"
       >
         A
@@ -57,12 +55,6 @@ export default {
     }
   },
 
-  computed: {
-    typeStyle () {
-      return `${this.format.type}-icon`
-    },
-  },
-
   methods: {
     getComputedColor (cssVar) {
       try {
@@ -91,20 +83,4 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-// Since we don't have icons for color related formatters,
-// this extra styling makes up for that
-.icon {
-  padding: 0 2px;
-
-  &.color-icon {
-    border-bottom: 2px solid var(--dark);
-  }
-
-  &.background-icon {
-    padding: 2px 3px;
-  }
-}
-</style>
 
