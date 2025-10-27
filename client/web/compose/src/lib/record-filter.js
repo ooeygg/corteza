@@ -3,6 +3,36 @@ import moment from 'moment'
 export const nonQueryableFieldNames = ['recordID']
 export const nonQueryableFieldKinds = ['Number', 'Record', 'User', 'Bool', 'DateTime', 'File', 'Geometry']
 
+/**
+ * Escapes special characters for Corteza QL string literals
+ *
+ * Corteza QL uses backslash-based escaping within string literals (delimited by single quotes).
+ * The QL lexer recognizes only two escape sequences:
+ * - \' for single quote
+ * - \\ for backslash
+ *
+ * For LIKE patterns, additional characters need escaping:
+ * - Backslashes need double escaping (once for QL, once for SQL LIKE)
+ * - % and _ are SQL LIKE wildcards and must be escaped to match literally
+*/
+export function escapeQlString (str, isLikePattern = false) {
+  let result = String(str)
+    // Escape backslashes first (must be done before quotes)
+    .replace(/\\/g, isLikePattern ? '\\\\\\\\' : '\\\\')
+    // Escape single quotes with backslash (QL syntax, not SQL's '')
+    .replace(/'/g, "\\'")
+
+  if (isLikePattern) {
+    result = result
+      // Escape % → \\% (the \\ becomes \ in QL, then \% in SQL means literal %)
+      .replace(/%/g, '\\\\%')
+      // Escape _ → \\_ (the \\ becomes \ in QL, then \_ in SQL means literal _)
+      .replace(/_/g, '\\\\_')
+  }
+
+  return result
+}
+
 // Generate record list sql query string based on filter object input
 
 export function getRecordListFilterSql (filter) {
@@ -139,24 +169,19 @@ export function getFieldFilter (name, kind, query = '', operator = '=') {
 
   // Since userID and recordID must be numbers, we check if query is number to avoid wrong queries
   if (['User', 'Record'].includes(kind) && !isNaN(numQuery)) {
-    return build(operator, name, `'${query}'`)
+    return build(operator, name, `'${escapeQlString(query)}'`)
   }
-
-  // To SQLish LIKE param
-  const strQuery = query
-    // replace * with %
-    .replace(/[*%]+/g, '%')
-    // Remove all trailing * and %
-    .replace(/[%]+$/, '')
-    // Remove all leading * and %
-    .replace(/^[%]+/, '')
 
   if (['String', 'Url', 'Select', 'Email'].includes(kind)) {
     if (operator === 'LIKE' || operator === 'NOT LIKE') {
-      return build(operator, name, `'%${strQuery}%'`)
+      const escapedQuery = escapeQlString(query, true)
+        // Convert user's * to % wildcard AFTER escaping (so literal % is already \%)
+        .replace(/\*/g, '%')
+
+      return build(operator, name, `'%${escapedQuery}%'`)
     }
 
-    return build(operator, name, `'${strQuery}'`)
+    return build(operator, name, `'${escapeQlString(query, false)}'`)
   }
 }
 
