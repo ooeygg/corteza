@@ -2357,6 +2357,13 @@ export default {
       this.recordListFilter = this.groupRecordListFilter
       this.recordListFilter[groupIndex].filter = (this.recordListFilter[groupIndex].filter || []).filter((_, index) => index !== filterIndex)
 
+      // If this was the last filter, reset to empty (same as resetFilter)
+      const hasAnyFilters = this.recordListFilter.some(group => group.filter && group.filter.length > 0)
+      if (!hasAnyFilters) {
+        this.onFilter()
+        return
+      }
+
       this.setStorageRecordListFilter()
       this.refresh(true)
     },
