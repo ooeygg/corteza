@@ -219,6 +219,22 @@
         <code>record.ownedBy == user.userID</code>
       </i18next>
 
+      <b-row class="mt-3">
+        <b-col cols="12">
+          <b-form-group
+            :label="$t('record.fieldConditions.clearAllOnHide')"
+            :description="$t('record.fieldConditions.clearAllOnHideDescription')"
+            label-class="text-primary"
+          >
+            <c-input-checkbox
+              v-model="options.clearConditionalFieldsOnHide"
+              switch
+              :labels="checkboxLabel"
+            />
+          </b-form-group>
+        </b-col>
+      </b-row>
+
       <c-form-table-wrapper
         :labels="{
           addButton: $t('general:label.add')
@@ -245,6 +261,18 @@
               >
                 {{ $t('record.fieldConditions.condition') }}
               </b-th>
+              <b-th
+                class="text-primary text-center"
+                style="width: 150px;"
+              >
+                <div class="d-flex align-items-center justify-content-center">
+                  {{ $t('record.fieldConditions.clearOnHide') }}
+                  <c-hint
+                    :tooltip="$t('record.fieldConditions.clearOnHideTooltip')"
+                    class="ml-1"
+                  />
+                </div>
+              </b-th>
               <b-th />
             </b-tr>
           </b-thead>
@@ -253,10 +281,7 @@
               v-for="(condition, i) in block.options.fieldConditions"
               :key="i"
             >
-              <b-td
-                class="align-middle"
-                style="width: 33%; min-width: 250px;"
-              >
+              <b-td style="width: 33%; min-width: 250px;">
                 <c-input-select
                   v-model="condition.field"
                   :options="block.options.fields"
@@ -267,6 +292,7 @@
                   :reduce="option => option.isSystem ? option.name : option.fieldID"
                 />
               </b-td>
+
               <b-td
                 class="align-middle"
                 style="min-width: 300px;"
@@ -286,9 +312,17 @@
                   />
                 </b-input-group>
               </b-td>
+              <b-td style="width: 20px;">
+                <div class="d-flex align-items-center justify-content-center">
+                  <c-input-checkbox
+                    v-model="condition.clearOnHide"
+                    switch
+                  />
+                </div>
+              </b-td>
               <b-td
-                class="text-right align-middle"
-                style="width: 100px;"
+                class="text-right"
+                style="width: 4rem;"
               >
                 <c-input-confirm
                   show-icon
@@ -406,6 +440,7 @@ export default {
       this.options.fieldConditions.push({
         field: undefined,
         condition: '',
+        clearOnHide: false,
       })
     },
 

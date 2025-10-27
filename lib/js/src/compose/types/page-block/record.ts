@@ -6,11 +6,13 @@ const kind = 'Record'
 interface FieldCondition {
   field: string;
   condition: string;
+  clearOnHide?: boolean;
 }
 
 interface Options {
   fields: unknown[];
   fieldConditions: FieldCondition[];
+  clearConditionalFieldsOnHide: boolean;
   recordSelectorShowAddRecordButton: boolean;
   magnifyOption: string;
   recordSelectorDisplayOption: string;
@@ -26,6 +28,7 @@ interface Options {
 const defaults: Readonly<Options> = Object.freeze({
   fields: [],
   fieldConditions: [],
+  clearConditionalFieldsOnHide: false,
   recordSelectorShowAddRecordButton: false,
   magnifyOption: '',
   recordSelectorDisplayOption: 'sameTab',
@@ -52,7 +55,7 @@ export class PageBlockRecord extends PageBlock {
     if (!o) return
 
     Apply(this.options, o, String, 'magnifyOption', 'recordSelectorDisplayOption', 'recordSelectorAddRecordDisplayOption', 'referenceField', 'referenceModuleID', 'recordFieldLayoutOption')
-    Apply(this.options, o, Boolean, 'recordSelectorShowAddRecordButton', 'inlineRecordEditEnabled', 'horizontalFieldLayoutEnabled', 'inlineRecordEditAllowAddField')
+    Apply(this.options, o, Boolean, 'recordSelectorShowAddRecordButton', 'inlineRecordEditEnabled', 'horizontalFieldLayoutEnabled', 'inlineRecordEditAllowAddField', 'clearConditionalFieldsOnHide')
 
     if (o.fields) {
       this.options.fields = o.fields
