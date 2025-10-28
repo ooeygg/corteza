@@ -401,6 +401,7 @@ func (svc *userGroup) Update(ctx context.Context, upd *types.UserGroup) (r *type
 		r.Handle = upd.Handle
 		r.Meta = upd.Meta
 		r.UpdatedAt = now()
+		r.Config = upd.Config
 
 		// Assign changed values
 		if err = store.UpdateUserGroup(ctx, svc.store, r); err != nil {
