@@ -12,6 +12,7 @@ import (
 	"github.com/cortezaproject/corteza/server/pkg/eventbus"
 	"github.com/cortezaproject/corteza/server/pkg/expr"
 	"github.com/cortezaproject/corteza/server/pkg/handle"
+	"github.com/cortezaproject/corteza/server/pkg/id"
 	"github.com/cortezaproject/corteza/server/pkg/label"
 	"github.com/cortezaproject/corteza/server/pkg/logger"
 	"github.com/cortezaproject/corteza/server/pkg/options"
@@ -31,8 +32,9 @@ type (
 		eventbus eventDispatcher
 		rbac     rbacRuleService
 
-		user UserService
-		auth roleAuth
+		user      UserService
+		userGroup UserGroupService
+		auth      roleAuth
 
 		store store.Storer
 
@@ -76,7 +78,9 @@ type (
 		Membership(ctx context.Context, userID uint64) (types.RoleMemberSet, error)
 		MemberList(ctx context.Context, roleID uint64) (types.RoleMemberSet, error)
 		MemberAdd(ctx context.Context, roleID, userID uint64) error
+		MemberAddGroup(ctx context.Context, roleID, userID uint64) error
 		MemberRemove(ctx context.Context, roleID, userID uint64) error
+		MemberRemoveGroup(ctx context.Context, roleID, userID uint64) error
 	}
 
 	eventbusRoleChangeRegistry interface {
@@ -89,6 +93,9 @@ type (
 
 	rbacRuleService interface {
 		CloneRulesByRoleID(ctx context.Context, roleID uint64, toRoleID ...uint64) error
+
+		AddGroupRole(group id.ID, roles ...id.ID) (err error)
+		RemoveGroupRole(group id.ID, roles ...id.ID) (err error)
 	}
 
 	roleAuth interface {
@@ -104,9 +111,10 @@ func Role(rbac rbacRuleService) *role {
 
 		actionlog: DefaultActionlog,
 
-		user:  DefaultUser,
-		auth:  DefaultAuth,
-		store: DefaultStore,
+		user:      DefaultUser,
+		userGroup: DefaultUserGroup,
+		auth:      DefaultAuth,
+		store:     DefaultStore,
 
 		system: make(map[string]bool),
 		closed: make(map[string]bool),
@@ -145,6 +153,20 @@ func (svc role) Find(ctx context.Context, filter types.RoleFilter) (rr types.Rol
 	var (
 		raProps = &roleActionProps{filter: &filter}
 	)
+
+	if filter.Resource == "" {
+		if filter.MemberID > 0 {
+			filter.Resource = fmt.Sprintf("corteza::system:user/%d", filter.MemberID)
+		}
+		if filter.UserGroupID > 0 {
+			filter.Resource = fmt.Sprintf("corteza::system:user-group/%d", filter.UserGroupID)
+		}
+	}
+
+	if filter.MemberID > 0 && filter.UserGroupID > 0 {
+		err = RoleErrSearchByMemberUserGroup()
+		return
+	}
 
 	// For each fetched item, store backend will check if it is valid or not
 	filter.Check = func(res *types.Role) (bool, error) {
@@ -627,7 +649,7 @@ func (svc role) CloneRules(ctx context.Context, roleID uint64, cloneToRoleID ...
 }
 
 func (svc role) Membership(ctx context.Context, userID uint64) (types.RoleMemberSet, error) {
-	mm, _, err := store.SearchRoleMembers(ctx, svc.store, types.RoleMemberFilter{UserID: userID})
+	mm, _, err := store.SearchRoleMembers(ctx, svc.store, types.RoleMemberFilter{Resource: fmt.Sprintf("corteza::system:user/%d", userID)})
 	return mm, err
 }
 
@@ -705,11 +727,67 @@ func (svc role) MemberAdd(ctx context.Context, roleID, memberID uint64) (err err
 			return RoleErrNotAllowedToManageMembers()
 		}
 
-		if err = store.CreateRoleMember(ctx, svc.store, &types.RoleMember{RoleID: r.ID, UserID: m.ID}); err != nil {
+		if err = store.CreateRoleMember(ctx, svc.store, &types.RoleMember{RoleID: r.ID, Resource: fmt.Sprintf("corteza::system:user/%d", m.ID)}); err != nil {
 			return
 		}
 
 		_ = svc.eventbus.WaitFor(ctx, event.RoleMemberAfterAdd(m, r))
+		return nil
+	}()
+
+	return svc.recordAction(ctx, raProps, RoleActionMemberAdd, err)
+}
+
+func (svc role) MemberAddGroup(ctx context.Context, roleID, userGroupID uint64) (err error) {
+	var (
+		r *types.Role
+
+		ug *types.UserGroup
+
+		raProps = &roleActionProps{
+			role:  &types.Role{ID: roleID},
+			group: &types.UserGroup{ID: userGroupID},
+		}
+	)
+
+	err = func() (err error) {
+		if roleID == 0 || userGroupID == 0 {
+			return RoleErrInvalidID()
+		}
+
+		if r, err = svc.findByID(ctx, roleID); err != nil {
+			return
+		}
+
+		raProps.setRole(r)
+
+		if svc.IsClosed(r) || svc.IsContextual(r) {
+			return RoleErrNotAllowedToManageMembers()
+		}
+
+		if ug, err = DefaultUserGroup.FindByID(ctx, userGroupID); err != nil {
+			return
+		}
+
+		raProps.setGroup(ug)
+
+		if err = svc.eventbus.WaitFor(ctx, event.RoleMemberBeforeAdd(nil, r)); err != nil {
+			return
+		}
+
+		if !svc.ac.CanManageMembersOnRole(ctx, r) {
+			return RoleErrNotAllowedToManageMembers()
+		}
+
+		if err = store.CreateRoleMember(ctx, svc.store, &types.RoleMember{RoleID: r.ID, Resource: fmt.Sprintf("corteza::system:user-group/%d", ug.ID)}); err != nil {
+			return
+		}
+
+		if err = svc.rbac.AddGroupRole(id.MustNumID(userGroupID), id.MustNumID(roleID)); err != nil {
+			return
+		}
+
+		_ = svc.eventbus.WaitFor(ctx, event.RoleMemberAfterAdd(nil, r))
 		return nil
 	}()
 
@@ -756,7 +834,7 @@ func (svc role) MemberRemove(ctx context.Context, roleID, memberID uint64) (err 
 			return RoleErrNotAllowedToManageMembers()
 		}
 
-		if err = store.DeleteRoleMember(ctx, svc.store, &types.RoleMember{RoleID: r.ID, UserID: m.ID}); err != nil {
+		if err = store.DeleteRoleMember(ctx, svc.store, &types.RoleMember{RoleID: r.ID, Resource: fmt.Sprintf("corteza::system:user/%d", m.ID)}); err != nil {
 			return
 		}
 
@@ -771,6 +849,71 @@ func (svc role) MemberRemove(ctx context.Context, roleID, memberID uint64) (err 
 		// }
 
 		_ = svc.eventbus.WaitFor(ctx, event.RoleMemberAfterRemove(m, r))
+		return nil
+	}()
+
+	return svc.recordAction(ctx, raProps, RoleActionMemberRemove, err)
+}
+
+// MemberRemove removes user group from a role
+func (svc role) MemberRemoveGroup(ctx context.Context, roleID, userGroupID uint64) (err error) {
+	var (
+		r       *types.Role
+		ug      *types.UserGroup
+		raProps = &roleActionProps{
+			role:  &types.Role{ID: roleID},
+			group: &types.UserGroup{ID: userGroupID},
+		}
+	)
+
+	err = func() (err error) {
+		if roleID == 0 || userGroupID == 0 {
+			return RoleErrInvalidID()
+		}
+
+		if r, err = svc.findByID(ctx, roleID); err != nil {
+			return
+		}
+
+		if svc.IsClosed(r) || svc.IsContextual(r) {
+			return RoleErrNotAllowedToManageMembers()
+		}
+
+		raProps.setRole(r)
+
+		if ug, err = DefaultUserGroup.FindByID(ctx, userGroupID); err != nil {
+			return
+		}
+
+		raProps.setGroup(ug)
+
+		if err = svc.eventbus.WaitFor(ctx, event.RoleMemberBeforeRemove(nil, r)); err != nil {
+			return
+		}
+
+		if !svc.ac.CanManageMembersOnRole(ctx, r) {
+			return RoleErrNotAllowedToManageMembers()
+		}
+
+		if err = store.DeleteRoleMember(ctx, svc.store, &types.RoleMember{RoleID: r.ID, Resource: fmt.Sprintf("corteza::system:user-group/%d", ug.ID)}); err != nil {
+			return
+		}
+
+		if err = svc.rbac.RemoveGroupRole(id.MustNumID(userGroupID), id.MustNumID(roleID)); err != nil {
+			return
+		}
+
+		// @todo skipping this for now,
+		//			AS per now PUT `/role/{roleID}` endpoint updates role and it's member with it but
+		//			only if one or more members are included in request otherwise we ignore it,
+		//			which causes issue in admin when we remove all the members from role.
+		//			we have to rework the role membership management logic in admin,
+		//			and use the dedicated endpoints for POST, DELETE role member.
+		// if err = svc.auth.RemoveAccessTokens(ctx, m); err != nil {
+		//	 return
+		// }
+
+		_ = svc.eventbus.WaitFor(ctx, event.RoleMemberAfterRemove(nil, r))
 		return nil
 	}()
 

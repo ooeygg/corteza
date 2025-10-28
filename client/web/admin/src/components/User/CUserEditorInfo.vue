@@ -63,6 +63,23 @@
             </b-form-invalid-feedback>
           </b-form-group>
         </b-col>
+
+        <b-col
+          cols="12"
+          lg="6"
+        >
+          <b-form-group
+            :label="$t('userGroup.label')"
+            :class="{ 'mb-0': !user.userID }"
+            label-class="text-primary"
+          >
+            <c-input-user-group
+              v-model="user.userGroupID"
+              :placeholder="$t('userGroup.placeholder')"
+              :clearable="false"
+            />
+          </b-form-group>
+        </b-col>
       </b-row>
 
       <c-system-fields
@@ -146,8 +163,8 @@
 
 <script>
 import { NoID } from '@cortezaproject/corteza-js'
-import { handle } from '@cortezaproject/corteza-vue'
-import { getSystemFields } from 'corteza-webapp-admin/src/lib/sysFields'
+import { handle, components } from '@cortezaproject/corteza-vue'
+const { CInputUserGroup } = components
 
 export default {
   name: 'CUserEditorInfo',
@@ -155,6 +172,10 @@ export default {
   i18nOptions: {
     namespaces: 'system.users',
     keyPrefix: 'editor.info',
+  },
+
+  components: {
+    CInputUserGroup,
   },
 
   props: {
@@ -222,10 +243,6 @@ export default {
 
     suspendButtonStatusCypressId () {
       return `button-${this.getSuspendStatus.toLowerCase()}`
-    },
-
-    systemFields () {
-      return getSystemFields(this.role)
     },
   },
 }

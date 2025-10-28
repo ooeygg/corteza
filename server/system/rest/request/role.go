@@ -47,6 +47,11 @@ type (
 		// Search roles for member
 		MemberID uint64 `json:",string"`
 
+		// UserGroupID GET parameter
+		//
+		// Search roles for user group
+		UserGroupID uint64 `json:",string"`
+
 		// RoleID GET parameter
 		//
 		// Search roles by ID
@@ -218,6 +223,18 @@ type (
 		RoleID uint64 `json:",string"`
 	}
 
+	RoleMemberAddGroup struct {
+		// RoleID PATH parameter
+		//
+		// Source Role ID
+		RoleID uint64 `json:",string"`
+
+		// UserGroupID PATH parameter
+		//
+		// User Group ID
+		UserGroupID uint64 `json:",string"`
+	}
+
 	RoleMemberAdd struct {
 		// RoleID PATH parameter
 		//
@@ -240,6 +257,18 @@ type (
 		//
 		// User ID
 		UserID uint64 `json:",string"`
+	}
+
+	RoleMemberRemoveGroup struct {
+		// RoleID PATH parameter
+		//
+		// Source Role ID
+		RoleID uint64 `json:",string"`
+
+		// UserGroupID PATH parameter
+		//
+		// User Group ID
+		UserGroupID uint64 `json:",string"`
 	}
 
 	RoleTriggerScript struct {
@@ -280,16 +309,17 @@ func NewRoleList() *RoleList {
 // Auditable returns all auditable/loggable parameters
 func (r RoleList) Auditable() map[string]interface{} {
 	return map[string]interface{}{
-		"query":      r.Query,
-		"memberID":   r.MemberID,
-		"roleID":     r.RoleID,
-		"deleted":    r.Deleted,
-		"archived":   r.Archived,
-		"labels":     r.Labels,
-		"limit":      r.Limit,
-		"incTotal":   r.IncTotal,
-		"pageCursor": r.PageCursor,
-		"sort":       r.Sort,
+		"query":       r.Query,
+		"memberID":    r.MemberID,
+		"userGroupID": r.UserGroupID,
+		"roleID":      r.RoleID,
+		"deleted":     r.Deleted,
+		"archived":    r.Archived,
+		"labels":      r.Labels,
+		"limit":       r.Limit,
+		"incTotal":    r.IncTotal,
+		"pageCursor":  r.PageCursor,
+		"sort":        r.Sort,
 	}
 }
 
@@ -301,6 +331,11 @@ func (r RoleList) GetQuery() string {
 // Auditable returns all auditable/loggable parameters
 func (r RoleList) GetMemberID() uint64 {
 	return r.MemberID
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleList) GetUserGroupID() uint64 {
+	return r.UserGroupID
 }
 
 // Auditable returns all auditable/loggable parameters
@@ -358,6 +393,12 @@ func (r *RoleList) Fill(req *http.Request) (err error) {
 		}
 		if val, ok := tmp["memberID"]; ok && len(val) > 0 {
 			r.MemberID, err = payload.ParseUint64(val[0]), nil
+			if err != nil {
+				return err
+			}
+		}
+		if val, ok := tmp["userGroupID"]; ok && len(val) > 0 {
+			r.UserGroupID, err = payload.ParseUint64(val[0]), nil
 			if err != nil {
 				return err
 			}
@@ -1155,6 +1196,53 @@ func (r *RoleMemberList) Fill(req *http.Request) (err error) {
 	return err
 }
 
+// NewRoleMemberAddGroup request
+func NewRoleMemberAddGroup() *RoleMemberAddGroup {
+	return &RoleMemberAddGroup{}
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleMemberAddGroup) Auditable() map[string]interface{} {
+	return map[string]interface{}{
+		"roleID":      r.RoleID,
+		"userGroupID": r.UserGroupID,
+	}
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleMemberAddGroup) GetRoleID() uint64 {
+	return r.RoleID
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleMemberAddGroup) GetUserGroupID() uint64 {
+	return r.UserGroupID
+}
+
+// Fill processes request and fills internal variables
+func (r *RoleMemberAddGroup) Fill(req *http.Request) (err error) {
+
+	{
+		var val string
+		// path params
+
+		val = chi.URLParam(req, "roleID")
+		r.RoleID, err = payload.ParseUint64(val), nil
+		if err != nil {
+			return err
+		}
+
+		val = chi.URLParam(req, "userGroupID")
+		r.UserGroupID, err = payload.ParseUint64(val), nil
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return err
+}
+
 // NewRoleMemberAdd request
 func NewRoleMemberAdd() *RoleMemberAdd {
 	return &RoleMemberAdd{}
@@ -1240,6 +1328,53 @@ func (r *RoleMemberRemove) Fill(req *http.Request) (err error) {
 
 		val = chi.URLParam(req, "userID")
 		r.UserID, err = payload.ParseUint64(val), nil
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return err
+}
+
+// NewRoleMemberRemoveGroup request
+func NewRoleMemberRemoveGroup() *RoleMemberRemoveGroup {
+	return &RoleMemberRemoveGroup{}
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleMemberRemoveGroup) Auditable() map[string]interface{} {
+	return map[string]interface{}{
+		"roleID":      r.RoleID,
+		"userGroupID": r.UserGroupID,
+	}
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleMemberRemoveGroup) GetRoleID() uint64 {
+	return r.RoleID
+}
+
+// Auditable returns all auditable/loggable parameters
+func (r RoleMemberRemoveGroup) GetUserGroupID() uint64 {
+	return r.UserGroupID
+}
+
+// Fill processes request and fills internal variables
+func (r *RoleMemberRemoveGroup) Fill(req *http.Request) (err error) {
+
+	{
+		var val string
+		// path params
+
+		val = chi.URLParam(req, "roleID")
+		r.RoleID, err = payload.ParseUint64(val), nil
+		if err != nil {
+			return err
+		}
+
+		val = chi.URLParam(req, "userGroupID")
+		r.UserGroupID, err = payload.ParseUint64(val), nil
 		if err != nil {
 			return err
 		}

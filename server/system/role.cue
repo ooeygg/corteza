@@ -35,6 +35,8 @@ role: {
 		struct: {
 			role_id: {goType: "[]uint64", ident: "roleID", storeIdent: "id" }
 			member_id: {goType: "uint64" }
+			user_group_id: {goType: "uint64" }
+			resource: {goType: "string" }
 			handle: {goType: "string"}
 			name: {goType: "string"}
 

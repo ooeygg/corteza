@@ -474,6 +474,11 @@ func (app *CortezaApp) Activate(ctx context.Context) (err error) {
 		return
 	}
 
+	err = app.InitExpr(ctx)
+	if err != nil {
+		return
+	}
+
 	if err = app.InitServices(ctx); err != nil {
 		return err
 	}

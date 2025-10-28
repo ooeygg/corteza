@@ -36,8 +36,13 @@ type (
 	}
 
 	RoleFilter struct {
-		RoleID   []string `json:"roleID"`
-		MemberID uint64   `json:"memberID,string"`
+		RoleID      []string `json:"roleID"`
+		MemberID    uint64   `json:"memberID,string"`
+		UserGroupID uint64   `json:"userGroupID,string"`
+
+		// @todo will migrate from MemberID/UserGroupID in a later releae
+		// For internal use only
+		Resource string `json:"-"`
 
 		Query string `json:"query"`
 

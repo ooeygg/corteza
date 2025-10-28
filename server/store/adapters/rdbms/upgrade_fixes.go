@@ -35,7 +35,7 @@ import (
 
 var (
 	// all enabled fix function need to be listed here
-	fixes = []func(context.Context, *Store) error{
+	fixesPre = []func(context.Context, *Store) error{
 		fix_2022_09_00_extendComposeModuleForPrivacyAndDAL,
 		fix_2022_09_00_extendComposeModuleFieldsForPrivacyAndDAL,
 		fix_2022_09_00_dropObsoleteComposeModuleFields,
@@ -54,6 +54,11 @@ var (
 		fix_2024_09_03_renameFederationNodeSyncNodeID,
 		fix_2024_09_03_renameFederationNodeSyncComposeID,
 		fix_2024_09_03_addFederationNodeSyncNodeIDIndex,
+	}
+
+	fixesPost = []func(context.Context, *Store) error{
+		fix_2024_09_05_addRelResourceRoleMembershipColumn,
+		fix_2024_09_05_addUserGroupReferenceToUser,
 	}
 )
 
@@ -900,6 +905,77 @@ func fix_2024_09_03_renameFederationNodeSyncNodeID(ctx context.Context, s *Store
 
 func fix_2024_09_03_renameFederationNodeSyncComposeID(ctx context.Context, s *Store) (err error) {
 	return renameColumn(ctx, s, "federation_nodes_sync", "module_id", "rel_module")
+}
+
+func fix_2024_09_05_addUserGroupReferenceToUser(ctx context.Context, s *Store) (err error) {
+	return addColumn(ctx, s,
+		"users",
+		&dal.Attribute{
+			Ident: "UserGroupID",
+			Type: &dal.TypeRef{Nullable: true, HasDefault: true,
+				DefaultValue: 0,
+
+				RefAttribute: "id",
+				RefModel: &dal.ModelRef{
+					ResourceType: "corteza::system:user-group",
+				},
+			},
+			Store: &dal.CodecAlias{Ident: "rel_user_group"},
+		},
+	)
+}
+
+func fix_2024_09_05_addRelResourceRoleMembershipColumn(ctx context.Context, s *Store) (err error) {
+	err, exists := addColumnExists(ctx, s,
+		"role_members",
+		&dal.Attribute{
+			Ident: "rel_resource",
+			Type:  &dal.TypeText{Nullable: true, HasDefault: false},
+			Store: &dal.CodecAlias{Ident: "rel_resource"},
+		},
+	)
+	if err != nil {
+		return
+	}
+
+	if exists {
+		return
+	}
+
+	db := s.DB.(goqu.SQLDatabase)
+	sql, params, err := s.Dialect.
+		GOQU().
+		DB(db).
+		Update("role_members").
+		Set(goqu.Record{
+			"rel_resource": goqu.Func("concat",
+				goqu.L("'corteza::system:user/'"),
+				goqu.C("rel_user"),
+			),
+		}).
+		ToSQL()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = db.ExecContext(ctx, sql, params...)
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
+func fix_2024_09_05_addRelResourceColumn(ctx context.Context, s *Store) (err error) {
+	return addColumn(ctx, s,
+		"role_members",
+		&dal.Attribute{
+			Ident: "rel_resource",
+			Type:  &dal.TypeText{Nullable: true},
+			Store: &dal.CodecAlias{Ident: "rel_resource"},
+		},
+	)
 }
 
 func fix_2024_09_03_addFederationNodeSyncNodeIDIndex(ctx context.Context, s *Store) (err error) {

@@ -9,6 +9,7 @@ import (
 	automationEnvoy "github.com/cortezaproject/corteza/server/automation/envoy"
 	composeEnvoy "github.com/cortezaproject/corteza/server/compose/envoy"
 	systemEnvoy "github.com/cortezaproject/corteza/server/system/envoy"
+	"github.com/cortezaproject/corteza/server/tests/helpers"
 
 	"github.com/cortezaproject/corteza/server/pkg/cli"
 	"github.com/cortezaproject/corteza/server/pkg/dal"
@@ -17,7 +18,6 @@ import (
 	"github.com/cortezaproject/corteza/server/store"
 	"github.com/cortezaproject/corteza/server/system/service"
 	sysTypes "github.com/cortezaproject/corteza/server/system/types"
-	"github.com/cortezaproject/corteza/server/tests/helpers"
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
 )
