@@ -113,7 +113,15 @@
 
 <script>
 import { divIcon, latLng, latLngBounds } from 'leaflet'
-import { OpenStreetMapProvider } from 'leaflet-geosearch'
+import {
+  OpenStreetMapProvider,
+  OpenCageProvider,
+  EsriProvider,
+  GeoapifyProvider,
+  GeocodeEarthProvider,
+  GoogleProvider,
+  LocationIQProvider,
+} from 'leaflet-geosearch'
 import { isNumber } from 'lodash'
 import { LControl, LMap, LMarker, LPolygon, LTileLayer, LTooltip } from 'vue2-leaflet'
 import CInputSearch from '../input/CInputSearch.vue'
@@ -172,7 +180,6 @@ export default {
     return {
       geoSearch: {
         query: '',
-        provider: new OpenStreetMapProvider(),
         results: [],
         marker: null,
       },
@@ -205,6 +212,59 @@ export default {
         ...map,
       }
     },
+
+    geoSearchApiKey () {
+      return this.$Settings.get('ui.location.geoSearchApiKey', '')
+    },
+
+    geoSearchProviderName () {
+      return this.$Settings.get('ui.location.geoSearchProvider', '')
+    },
+
+    geoSearchProvider () {
+      const providerName = this.geoSearchProviderName.toLowerCase() || 'openstreetmap'
+      const apiKey = this.geoSearchApiKey
+
+      // Map of available providers
+      const providers = {
+        openstreetmap: () => new OpenStreetMapProvider(),
+        opencage: () => new OpenCageProvider({
+          params: { key: apiKey },
+        }),
+        esri: () => new EsriProvider(),
+        geoapify: () => new GeoapifyProvider({
+          params: { apiKey },
+        }),
+        geocodeearth: () => new GeocodeEarthProvider({
+          params: { api_key: apiKey },
+        }),
+        google: () => new GoogleProvider({
+          apiKey,
+        }),
+        locationiq: () => new LocationIQProvider({
+          params: { key: apiKey },
+        }),
+      }
+
+      if (providers[providerName]) {
+        return providers[providerName]()
+      }
+
+      console.warn(`Unknown geosearch provider: ${providerName}, falling back to OpenStreetMap`)
+      return new OpenStreetMapProvider()
+    },
+
+    tileProviderUrl () {
+      return ''
+    },
+
+    tileProvider () {
+      if (this.tileProviderUrl) {
+        return this.tileProviderUrl
+      }
+
+      return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    },
   },
 
   mounted () {
@@ -215,26 +275,43 @@ export default {
 
   methods: {
     onGeoSearch (query) {
-      if (!query) {
+      if (!query || !this.geoSearchProvider) {
         this.geoSearch.results = []
         this.geoSearch.marker = null
         return
       }
 
-      this.geoSearch.provider.search({ query }).then(results => {
-        this.geoSearch.results = results.map(result => ({
-          ...result,
-          latlng: {
-            lat: result.raw.lat,
-            lng: result.raw.lon,
-          },
-        }))
+      this.geoSearchProvider.search({ query }).then(results => {
+        console.log(results)
+        this.geoSearch.results = results.map(result => {
+          // Different providers return coordinates in different formats
+          let lat, lng
+          
+          if (result.y !== undefined && result.x !== undefined) {
+            // ESRI and some others use x, y
+            lat = result.y
+            lng = result.x
+          } else if (result.raw) {
+            // Most providers (OpenStreetMap, OpenCage, etc.) use raw.lat/lon or raw.latitude/longitude
+            lat = result.raw.lat || result.raw.latitude
+            lng = result.raw.lon || result.raw.lng || result.raw.longitude
+          }
+          
+          return {
+            ...result,
+            latlng: {
+              lat,
+              lng,
+            },
+          }
+        })
       }).catch(() => {
         this.$emit('on-geosearch-error')
       })
     },
 
     placeGeoSearchMarker (result) {
+      console.log(result)
       const zoom = this.$refs.map.mapObject._zoom >= 15 ? this.$refs.map.mapObject._zoom : 15
       this.$refs.map.mapObject.flyTo([result.latlng.lat, result.latlng.lng], zoom, { animate: false })
       this.geoSearch.marker = { title: result.label, latlng: result.latlng }
@@ -355,10 +432,11 @@ export default {
   display: block;
   height: auto;
   width: 50%;
-  max-width: 400px;
+  max-width: 50%;
   cursor: auto;
   z-index: 10000;
-  left: 25%;
+  left: 50%;
+  transform: translateX(-50%);
   top: 10px;
 }
 

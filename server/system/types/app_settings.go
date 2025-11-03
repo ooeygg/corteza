@@ -294,6 +294,11 @@ type (
 					Colors []string `json:"colors"`
 				} `kv:"colorSchemes" json:"colorSchemes"`
 			} `kv:"charts" json:"charts"`
+
+			Location struct {
+				GeoSearchProvider string `json:"geoSearchProvider"`
+				GeoSearchApiKey   string `json:"geoSearchApiKey"`
+			} `kv:"location,final" json:"location"`
 		} `kv:"ui" json:"ui"`
 
 		ResourceTranslations struct {

@@ -34,6 +34,7 @@
 
 <script>
 import { getSystemFields, kebabize } from 'corteza-webapp-admin/src/lib/sysFields'
+
 export default {
   name: 'CSystemFields',
 

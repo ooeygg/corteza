@@ -1,14 +1,22 @@
 <template>
   <div>
     <b-button
-      variant="link"
+      v-if="label || editable"
+      :variant="label ? 'link' : 'primary'"
       rounded
-      class="p-0"
+      :class="label ? 'p-0 border-0' : ''"
       @click="openMap"
     >
-      <font-awesome-icon
-        :icon="['fas', 'map-marked-alt']"
-      />
+      <span v-if="label">
+        {{ label }}
+      </span>
+
+      <span v-else>
+        <font-awesome-icon
+          :icon="['fas', 'map-marked-alt']"
+        />
+        {{ $t('openMap') }}
+      </span>
     </b-button>
 
     <b-modal
@@ -36,6 +44,10 @@ import { components } from '@cortezaproject/corteza-vue'
 const { CMap } = components
 
 export default {
+  i18nOptions: {
+    namespaces: 'general.label',
+  },
+
   components: {
     CMap,
   },
@@ -49,6 +61,11 @@ export default {
     editable: {
       type: Boolean,
       default: false,
+    },
+
+    label: {
+      type: String,
+      default: '',
     },
   },
 

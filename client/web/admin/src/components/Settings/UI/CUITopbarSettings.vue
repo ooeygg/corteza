@@ -80,6 +80,7 @@
                 @add-item="topbarSettings.helpLinks.push({ handle: '', url: '', newTab: true })"
               >
                 <b-table
+                  v-if="topbarSettings.helpLinks.length > 0"
                   :fields="links.fields"
                   :items="topbarSettings.helpLinks"
                   thead-tr-class="text-primary"
@@ -161,6 +162,7 @@
                 @add-item="topbarSettings.profileLinks.push({ handle: '', url: '', newTab: true })"
               >
                 <b-table
+                  v-if="topbarSettings.profileLinks.length > 0"
                   :fields="links.fields"
                   :items="topbarSettings.profileLinks"
                   thead-tr-class="text-primary"

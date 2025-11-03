@@ -21,7 +21,6 @@
       :items="items"
       :row-class="genericRowClass"
       :translations="{
-        searchPlaceholder: $t('filter-form.query.placeholder'),
         notFound: $t('admin:general.notFound'),
         noItems: $t('admin:general.resource-list.no-items'),
         loading: $t('loading'),

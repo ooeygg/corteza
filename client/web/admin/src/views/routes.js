@@ -83,8 +83,6 @@ export default [
         ...wrap('system', '/system'),
 
         children: [
-          r('system.stats', 'stats', 'System/Stats'),
-
           combo('system', 'user'),
           combo('system', 'role'),
           combo('system', 'application'),
@@ -146,7 +144,12 @@ export default [
       },
 
       {
-        ...r('ui.settings', 'ui', 'UI/Index'),
+        ...wrap('ui', '/ui'),
+        children: [
+          r('theming.settings', 'theming', 'UI/Theming/Index'),
+          r('navigation.settings', 'navigation', 'UI/Navigation/Index'),
+          r('location.settings', 'location', 'UI/Location/Index'),
+        ],
       },
     ],
   },

@@ -73,7 +73,7 @@ export default {
             {
               label: 'system.items.usergroups',
               route: 'system.userGroup',
-              icon: 'chart-diagram',
+              icon: 'user-group',
               can: ['system/', 'user-groups.search'],
             },
             {
@@ -252,9 +252,27 @@ export default {
           header: { label: 'ui.group' },
           items: [
             {
-              label: 'ui.items.settings',
-              route: 'ui.settings',
-              icon: 'eye',
+              label: 'ui.items.theming',
+              route: 'theming.settings',
+              icon: 'palette',
+              can: [
+                ['system/', 'settings.read'],
+                ['system/', 'settings.manage'],
+              ],
+            },
+            {
+              label: 'ui.items.navigation',
+              route: 'navigation.settings',
+              icon: 'bars',
+              can: [
+                ['system/', 'settings.read'],
+                ['system/', 'settings.manage'],
+              ],
+            },
+            {
+              label: 'ui.items.location',
+              route: 'location.settings',
+              icon: 'map-marker-alt',
               can: [
                 ['system/', 'settings.read'],
                 ['system/', 'settings.manage'],

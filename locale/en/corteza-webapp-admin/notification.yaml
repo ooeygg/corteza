@@ -194,6 +194,8 @@ gateway:
 workflow:
   fetch:
     error: Workflow fetch failed
+  trigger:
+    error: Trigger fetch failed
   create:
     success: Workflow created
     error: Workflow create failed
@@ -288,6 +290,24 @@ settings:
     update:
       success: UI settings updated
       error: UI settings update failed
+  theming:
+    fetch:
+      error: Theming settings fetch failed
+    update:
+      success: Theming settings updated
+      error: Theming settings update failed
+  navigation:
+    fetch:
+      error: Navigation settings fetch failed
+    update:
+      success: Navigation settings updated
+      error: Navigation settings update failed
+  location:
+    fetch:
+      error: Location settings fetch failed
+    update:
+      success: Location settings updated
+      error: Location settings update failed
   code-snippet:
     fetch:
       error: Code snippets fetch failed

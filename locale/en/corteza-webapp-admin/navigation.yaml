@@ -44,4 +44,6 @@ federation:
 ui:
   group: User interface
   items:
-    settings: Settings
+    theming: Theming
+    navigation: Navigation
+    location: Location

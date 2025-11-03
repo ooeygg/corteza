@@ -37,7 +37,6 @@
       >
         <b-form-group
           :label="$t('form.handle.label')"
-          :description="$t('form.handle.description')"
           label-class="text-primary"
           class="mb-3"
         >
@@ -76,35 +75,16 @@
         lg="6"
       >
         <b-form-group
+          :label="$t('form.location-geometry.label')"
           :description="$t('form.location-geometry.description')"
+          label-class="text-primary"
         >
-          <label
-            class="d-flex align-items-center text-primary"
-          >
-            {{ $t('form.location-geometry.label') }}
-            <c-location
-              v-if="!disabled"
-              :value="connection.meta.location.geometry.coordinates || []"
-              :placeholder="$t('form.location-geometry.placeholder')"
-              class="ml-1"
-              editable
-              @input="connection.meta.location.geometry.coordinates = $event"
-            />
-          </label>
-
-          <div
-            class="mt-2 d-flex align-items-center"
-          >
-            <code
-              v-if="locationCoordinates"
-            >
-              {{ locationCoordinates }}
-            </code>
-
-            <span v-else>
-              -
-            </span>
-          </div>
+          <c-location
+            v-if="!disabled"
+            v-model="locationCoordinates"
+            :label="locationCoordinatesLabel"
+            editable
+          />
         </b-form-group>
       </b-col>
     </b-row>
@@ -240,14 +220,19 @@ export default {
       return !this.editable || [this.nameState, this.handleState].includes(false)
     },
 
-    locationCoordinates () {
-      const { coordinates: cc } = this.connection.meta.location.geometry
+    locationCoordinates: {
+      get () {
+        const { coordinates = [] } = this.connection.meta.location.geometry || {}
+        return coordinates
+      },
 
-      if (cc && Array.isArray(cc) && cc.length === 2) {
-        return cc.map(c => c.toFixed(7)).join(', ')
-      }
+      set (value) {
+        this.connection.meta.location.geometry.coordinates = value
+      },
+    },
 
-      return ''
+    locationCoordinatesLabel () {
+      return this.locationCoordinates.map(c => c.toFixed(7)).join(', ')
     },
   },
 }

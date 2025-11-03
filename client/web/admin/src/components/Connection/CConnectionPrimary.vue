@@ -36,7 +36,7 @@
             label-class="text-primary"
             class="mb-3"
           >
-            {{ connection.meta.name || '-' }}
+            {{ connection.meta.name }}
           </b-form-group>
         </b-col>
         <b-col
@@ -48,25 +48,21 @@
             label-class="text-primary"
             class="mb-3"
           >
-            {{ connection.handle || '-' }}
+            {{ connection.handle }}
           </b-form-group>
         </b-col>
         <b-col
           cols="12"
           lg="6"
         >
-          <b-form-group>
-            <label
-              class="d-flex align-items-center text-primary"
-            >
-              {{ $t('location') }}
-              <c-location
-                v-model="locationCoordinates"
-                class="ml-1"
-              />
-            </label>
-
-            {{ locationName || '-' }}
+          <b-form-group
+            :label="$t('location')"
+            label-class="text-primary"
+          >
+            <c-location
+              :value="locationCoordinates"
+              :label="locationName || locationCoordinatesLabel"
+            />
           </b-form-group>
         </b-col>
         <b-col
@@ -78,7 +74,7 @@
             label-class="text-primary"
             class="mb-0"
           >
-            {{ connection.meta.ownership || '-' }}
+            {{ connection.meta.ownership }}
           </b-form-group>
         </b-col>
       </b-row>
@@ -92,7 +88,7 @@
             :label="$t('sensitivity-level')"
             label-class="text-primary"
           >
-            {{ sensitivityLevelName || '-' }}
+            {{ sensitivityLevelName }}
           </b-form-group>
         </b-col>
       </b-row>
@@ -125,11 +121,17 @@ export default {
 
   computed: {
     locationCoordinates () {
-      return this.connection.meta.location.geometry.coordinates || []
+      const { coordinates = [] } = this.connection.meta.location.geometry || {}
+
+      return coordinates
+    },
+
+    locationCoordinatesLabel () {
+      return this.locationCoordinates.map(c => c.toFixed(7)).join(', ')
     },
 
     locationName () {
-      return this.connection.meta.location.properties.name || 'Unnamed location'
+      return this.connection.meta.location.properties.name
     },
 
     sensitivityLevelName () {
@@ -156,7 +158,7 @@ export default {
               this.sensitivityLevel = sensitivityLevel
             })
         }
-      }).catch(this.toastErrorHandler(this.$t('notification:fetch.error')))
+      }).catch(this.toastErrorHandler(this.$t('notification:connection.fetch.error')))
         .finally(async () => {
           this.loading = false
         })

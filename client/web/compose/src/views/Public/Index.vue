@@ -96,12 +96,11 @@
             <circle-step
               step-number="2"
               :done="hasPages"
-              :disabled="!hasModules"
             >
               <b-button
                 v-if="!hasPages"
                 data-test-id="button-page-build"
-                :disabled="!hasModules || !namespace.canCreatePage"
+                :disabled="!namespace.canCreatePage"
                 variant="outline-primary"
                 size="lg"
                 @click="createNewPage"
@@ -251,6 +250,7 @@ export default {
         namespaceID,
         title: 'Demo Page',
         handle: demoPageHandle,
+        visible: true,
         blocks: [],
       })
 

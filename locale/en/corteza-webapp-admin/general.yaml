@@ -44,6 +44,7 @@ label:
   all: All
   none: None
   now: Now
+  openMap: Open Map
   today: Today
   routes: Routes
   requests: Requests

@@ -57,7 +57,9 @@ import {
   faBellSlash,
   faBell as faBellSolid,
   faLocationCrosshairs,
-  faChartDiagram,
+  faUserGroup,
+  faMapMarkerAlt,
+  faPalette,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -136,5 +138,7 @@ library.add(
   faBellSolid,
   faBellSlash,
   faLocationCrosshairs,
-  faChartDiagram,
+  faUserGroup,
+  faMapMarkerAlt,
+  faPalette,
 )

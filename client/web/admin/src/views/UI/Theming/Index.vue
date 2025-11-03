@@ -14,36 +14,24 @@
       :can-manage="canManage"
       @submit="onSubmit($event, 'branding')"
     />
-
-    <c-ui-topbar-settings
-      v-if="settings"
-      :settings="settings"
-      :processing="topbar.processing"
-      :success="topbar.success"
-      :can-manage="canManage"
-      class="mt-3"
-      @submit="onSubmit($event, 'topbar')"
-    />
   </b-container>
 </template>
 
 <script>
 import editorHelpers from 'corteza-webapp-admin/src/mixins/editorHelpers'
-import CUIBrandingEditor from '../../components/Settings/UI/CUIBrandingEditor.vue'
-import CUITopbarSettings from 'corteza-webapp-admin/src/components/Settings/UI/CUITopbarSettings'
+import CUIBrandingEditor from 'corteza-webapp-admin/src/components/Settings/UI/CUIBrandingEditor.vue'
 import { mapGetters } from 'vuex'
 
-const prefix = 'ui.'
+const prefix = 'ui.studio'
 
 export default {
   i18nOptions: {
-    namespaces: ['ui.settings'],
-    keyPrefix: 'editor',
+    namespaces: 'ui.settings',
+    keyPrefix: 'editor.theming',
   },
 
   components: {
     'c-ui-branding-editor': CUIBrandingEditor,
-    'c-ui-topbar-settings': CUITopbarSettings,
   },
 
   mixins: [
@@ -54,21 +42,10 @@ export default {
     return {
       settings: undefined,
 
-      topbar: {
-        processing: false,
-        success: false,
-      },
-
-      customCSS: {
-        processing: false,
-        success: false,
-      },
-
       branding: {
         processing: false,
         success: false,
       },
-
     }
   },
 
@@ -99,7 +76,7 @@ export default {
             this.$set(this.settings, name, value)
           })
         })
-        .catch(this.toastErrorHandler(this.$t('notification:settings.ui.fetch.error')))
+        .catch(this.toastErrorHandler(this.$t('notification:settings.theming.fetch.error')))
         .finally(() => {
           this.decLoader()
         })
@@ -115,8 +92,7 @@ export default {
       this.$SystemAPI.settingsUpdate({ values })
         .then(() => {
           return this.fetchSettings().then(() => {
-            if ((type === 'branding' && this.settings['ui.studio.sass-installed']) || type === 'customCSS') {
-              // window.location.reload()
+            if ((type === 'branding' && this.settings['ui.studio.sass-installed'])) {
               return new Promise((resolve) => {
                 setTimeout(() => {
                   const stylesheet = document.querySelector('link#corteza-custom-css')
@@ -129,9 +105,9 @@ export default {
         })
         .then(() => {
           this.animateSuccess(type)
-          this.toastSuccess(this.$t('notification:settings.ui.update.success'))
+          this.toastSuccess(this.$t('notification:settings.theming.update.success'))
         })
-        .catch(this.toastErrorHandler(this.$t('notification:settings.ui.update.error')))
+        .catch(this.toastErrorHandler(this.$t('notification:settings.theming.update.error')))
         .finally(() => {
           this[type].processing = false
         })

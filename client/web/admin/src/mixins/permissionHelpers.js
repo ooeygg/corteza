@@ -96,7 +96,7 @@ export default {
             }, {})
         })
         .then(() => this.prepareRoles())
-        .catch(this.toastErrorHandler(this.$t('notification:permissions.fetch.system')))
+        .catch(this.toastErrorHandler(this.$t('notification:permissions.fetch.error')))
         .finally(() => {
           this.loaded.permissions = true
           this.decLoader()
