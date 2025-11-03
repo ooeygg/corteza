@@ -10,6 +10,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// goos: darwin
+// goarch: arm64
+// pkg: github.com/cortezaproject/corteza/server/pkg/rbac
+// cpu: Apple M3 Pro
+// BenchmarkAccess_100_10_1000-12                   1552434               755.3 ns/op           320 B/op         11 allocs/op
+// BenchmarkAccess_1000_100_10000-12                1314985              1053 ns/op             320 B/op         11 allocs/op
+// BenchmarkAccess_10000_1000_10000-12               246471              4589 ns/op             780 B/op         13 allocs/op
+// BenchmarkAccess_100000_10000_100000-12              2286            509592 ns/op            1119 B/op         16 allocs/op
 func BenchmarkAccess_100_10_1000(b *testing.B) {
 	benchmarkAccess(b, 100, 10, 1000)
 }

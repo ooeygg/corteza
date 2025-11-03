@@ -17,9 +17,12 @@ var (
 func AllFunctions() []gval.Language {
 	return []gval.Language{
 		gval.Function("isDescendantOf", isDescendantOf),
-		gval.Function("isDescendantOfR", isDescendantOfR),
+
 		gval.Function("isDescendantOfW", isDescendantOfW),
-		gval.Function("isDescendantOfRW", isDescendantOfRW),
+		gval.Function("isDescendantOfC", isDescendantOfC),
+		gval.Function("isDescendantOfR", isDescendantOfR),
+		gval.Function("isDescendantOfU", isDescendantOfU),
+		gval.Function("isDescendantOfD", isDescendantOfD),
 	}
 }
 
@@ -51,12 +54,20 @@ func isDescendantOfR(userID any, resourceOwner any) bool {
 	return isDescendantOf(userID, resourceOwner, "read")
 }
 
-func isDescendantOfW(userID any, resourceOwner any) bool {
-	return isDescendantOf(userID, resourceOwner, "write")
+func isDescendantOfC(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "create")
 }
 
-func isDescendantOfRW(userID any, resourceOwner any) bool {
-	return isDescendantOf(userID, resourceOwner, "read", "write")
+func isDescendantOfW(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "create", "update", "delete")
+}
+
+func isDescendantOfU(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "update")
+}
+
+func isDescendantOfD(userID any, resourceOwner any) bool {
+	return isDescendantOf(userID, resourceOwner, "delete")
 }
 
 func toUint64Slice(v any) []uint64 {
