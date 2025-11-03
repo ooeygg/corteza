@@ -1,6 +1,6 @@
 export default {
   methods: {
-    fetchRecords (namespaceID, fields = [], records = []) {
+    async fetchRecords (namespaceID, fields = [], records = []) {
       if (records.length === 0 || fields.length === 0) {
         return
       }

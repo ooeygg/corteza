@@ -76,7 +76,6 @@
             <c-input-user-group
               v-model="user.userGroupID"
               :placeholder="$t('userGroup.placeholder')"
-              :clearable="false"
             />
           </b-form-group>
         </b-col>

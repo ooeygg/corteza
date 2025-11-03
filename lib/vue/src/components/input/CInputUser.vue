@@ -9,6 +9,7 @@
     :placeholder="placeholder"
     :loading="processing"
     :filterable="false"
+    :clearable="clearable"
     v-bind="$attrs"
     @search="search"
     @input="onUserUpdate"
@@ -31,6 +32,11 @@ export default {
     placeholder: {
       type: String,
       default: '',
+    },
+
+    clearable: {
+      type: Boolean,
+      default: false,
     },
 
     clearOnSelect: {

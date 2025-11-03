@@ -49,21 +49,16 @@
         />
       </b-form-group>
 
-      <!-- <b-form-group
+      <b-form-group
         :label="$t('reminder.edit.assigneeLabel')"
         label-class="text-primary"
       >
-        <c-input-select
+        <c-input-user
           v-model="reminder.assignedTo"
           data-test-id="select-assignee"
-          :options="assignees"
-          :get-option-label="getUserLabel"
-          :loading="processingUsers"
           :placeholder="$t('field.kind.user.suggestionPlaceholder')"
-          :filterable="false"
-          @search="searchUsers"
         />
-      </b-form-group> -->
+      </b-form-group>
 
       <b-form-group
         v-if="reminder.payload.link"
@@ -145,10 +140,9 @@
 </template>
 
 <script>
-import _ from 'lodash'
 import { system } from '@cortezaproject/corteza-js'
 import { components } from '@cortezaproject/corteza-vue'
-const { CInputDateTime } = components
+const { CInputDateTime, CInputUser } = components
 
 export default {
   i18nOptions: {
@@ -157,6 +151,7 @@ export default {
 
   components: {
     CInputDateTime,
+    CInputUser,
   },
 
   props: {
@@ -183,11 +178,6 @@ export default {
 
       // Do this, so we don't edit the original object
       reminder: undefined,
-      assignees: [this.$auth.user.userID],
-
-      fetchedUsers: {
-        [this.$auth.user.userID]: this.$t('reminder.edit.assigneePlaceholder'),
-      },
     }
   },
 
@@ -202,47 +192,9 @@ export default {
     edit: {
       immediate: true,
       deep: true,
-      handler (edit) {
-        this.reminder = new system.Reminder(edit)
-        this.fetchUsers()
+      handler (reminder) {
+        this.reminder = new system.Reminder(reminder)
       },
-    },
-  },
-
-  methods: {
-    searchUsers: _.debounce(function (query) {
-      this.fetchUsers(query)
-    }, 300),
-
-    fetchUsers (query) {
-      this.processingUsers = true
-
-      return this.$SystemAPI.userList({ query, limit: 15 }).then(({ set = [] }) => {
-        this.assignees = [this.$auth.user.userID]
-        set.forEach(({ userID, name, username, email }) => {
-          if (!this.fetchedUsers[userID]) {
-            this.fetchedUsers[userID] = name || username || email || `<@${userID}>`
-          }
-
-          if (userID === this.$auth.user.userID) {
-            return
-          }
-
-          this.assignees.push(userID)
-        }, [])
-      }).finally(() => {
-        setTimeout(() => {
-          this.processingUsers = false
-        }, 300)
-      })
-    },
-
-    getUserLabel (userID) {
-      return this.fetchedUsers[userID]
-    },
-
-    getOptionKey ({ userID }) {
-      return userID
     },
   },
 }

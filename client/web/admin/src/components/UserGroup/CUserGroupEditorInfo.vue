@@ -112,7 +112,6 @@
                     <c-input-user-group
                       v-model="parent.selfID"
                       :placeholder="$t('parents.parent.placeholder')"
-                      :clearable="false"
                     />
                   </b-td>
                   <b-td

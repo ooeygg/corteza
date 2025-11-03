@@ -10,6 +10,7 @@
     shadow="sm"
     no-close-on-route-change
     no-close-on-esc
+    width="400px"
   >
     <template #header>
       <h4
