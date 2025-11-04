@@ -98,6 +98,7 @@
           :filterable="false"
           :selectable="isSelectable"
           :loading="processing"
+          :clearable="false"
           @search="search"
           @input="updateValue($event, ctx.index)"
         >

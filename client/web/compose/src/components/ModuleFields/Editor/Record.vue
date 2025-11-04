@@ -71,11 +71,12 @@
                 {{ option.recordID }}
               </template>
             </template>
-            <template #selected-option-container="option">
+
+            <template #selected-option="option">
               <field-viewer
-                v-if="labelField && getRecordByID(option.recordID).values[labelField.name]"
+                v-if="labelField && getRecordByID(option.label).values[labelField.name]"
                 :field="labelField"
-                :record="option"
+                :record="getRecordByID(option.label)"
                 :namespace="namespace"
                 disable-click
                 value-only
@@ -85,6 +86,7 @@
                 {{ option.label }}
               </template>
             </template>
+
             <pagination
               v-if="showPagination"
               slot="list-footer"
@@ -111,9 +113,7 @@
             @input="selectChange($event)"
             @search="search"
           >
-            <template
-              #option="option"
-            >
+            <template #option="option">
               <field-viewer
                 v-if="labelField && option.values[labelField.name]"
                 :field="labelField"
@@ -127,22 +127,7 @@
                 {{ option.recordID }}
               </template>
             </template>
-            <template
-              #selected-option="option"
-            >
-              <field-viewer
-                v-if="labelField && getRecordByID(option.recordID).values[labelField.name]"
-                :field="labelField"
-                :record="option"
-                :namespace="namespace"
-                disable-click
-                value-only
-              />
 
-              <template v-else>
-                {{ option.recordID }}
-              </template>
-            </template>
             <pagination
               v-if="showPagination"
               slot="list-footer"
@@ -168,6 +153,7 @@
           </b-input-group-append>
         </b-input-group>
       </template>
+
       <template #default="ctx">
         <b-input-group
           v-if="field.options.selectType === 'each'"
@@ -188,9 +174,7 @@
             @input="setRecord($event, ctx.index)"
             @search="search"
           >
-            <template
-              #option="option"
-            >
+            <template #option="option">
               <field-viewer
                 v-if="labelField && option.values[labelField.name]"
                 :field="labelField"
@@ -205,20 +189,18 @@
               </template>
             </template>
 
-            <template
-              #selected-option="option"
-            >
+            <template #selected-option="option">
               <field-viewer
-                v-if="labelField && option.values[labelField.name]"
+                v-if="labelField && getRecordByID(option.label).values[labelField.name]"
                 :field="labelField"
-                :record="getRecordByID(option.recordID)"
+                :record="getRecordByID(option.label)"
                 :namespace="namespace"
                 disable-click
                 value-only
               />
 
               <template v-else>
-                {{ option.recordID }}
+                {{ option.label }}
               </template>
             </template>
 
@@ -258,9 +240,7 @@
       </template>
     </multi>
 
-    <template
-      v-else
-    >
+    <template v-else>
       <b-input-group>
         <c-input-select
           v-model="selected"
@@ -289,6 +269,7 @@
               {{ option.recordID }}
             </template>
           </template>
+
           <template #selected-option>
             <field-viewer
               v-if="labelField && getRecordByID(selected).values[labelField.name]"
@@ -303,6 +284,7 @@
               {{ selected }}
             </template>
           </template>
+
           <pagination
             v-if="showPagination"
             slot="list-footer"
@@ -332,6 +314,7 @@
     </template>
   </b-form-group>
 </template>
+
 <script>
 import base from './base'
 import { debounce } from 'lodash'

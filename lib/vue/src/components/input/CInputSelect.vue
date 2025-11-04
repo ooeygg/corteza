@@ -274,7 +274,7 @@ export default {
   }
 
   .vs__selected {
-    display: block;
+    display: flex;
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width: 100%;
@@ -310,7 +310,6 @@ export default {
 
     .vs__selected {
       margin-top: 0.375rem;
-      padding: 0 2px;
     }
 
     .vs__actions {
