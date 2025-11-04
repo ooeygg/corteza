@@ -63,6 +63,61 @@ func TestDecoder(t *testing.T) {
 	})
 }
 
+func TestParseComplexCSVCell(t *testing.T) {
+	t.Run("plain value", func(t *testing.T) {
+		d := &decoder{}
+
+		out := d.parseComplexCSVCell("cell")
+		require.Equal(t, []string{"cell"}, out)
+	})
+
+	t.Run("multi value without brackets", func(t *testing.T) {
+		d := &decoder{
+			multiValueDelimiter: ";",
+		}
+
+		out := d.parseComplexCSVCell("v1;v2")
+		require.Equal(t, []string{"v1", "v2"}, out)
+	})
+
+	t.Run("multi value with brackets", func(t *testing.T) {
+		d := &decoder{
+			multiValueDelimiter: ";",
+			multiValueBrackets:  true,
+		}
+
+		out := d.parseComplexCSVCell("[v1;v2]")
+		require.Equal(t, []string{"v1", "v2"}, out)
+	})
+
+	t.Run("multi value wrong delimiter", func(t *testing.T) {
+		d := &decoder{
+			multiValueDelimiter: ",",
+			multiValueBrackets:  true,
+		}
+
+		out := d.parseComplexCSVCell("[v1;v2]")
+		require.Equal(t, []string{"v1;v2"}, out)
+	})
+
+	t.Run("json", func(t *testing.T) {
+		d := &decoder{}
+
+		out := d.parseComplexCSVCell("{}")
+		require.Equal(t, []string{"{}"}, out)
+	})
+
+	t.Run("multi value json", func(t *testing.T) {
+		d := &decoder{
+			multiValueDelimiter: ";",
+			multiValueBrackets:  true,
+		}
+
+		out := d.parseComplexCSVCell("[{};{}]")
+		require.Equal(t, []string{"{}", "{}"}, out)
+	})
+}
+
 func testReader() io.Reader {
 	src := `f1,f2,f3
 r1f1,r1f2,r1f3

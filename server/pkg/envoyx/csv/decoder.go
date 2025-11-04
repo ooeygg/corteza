@@ -177,7 +177,17 @@ func (d *decoder) flushTemp(r io.Reader) (_ io.Reader, err error) {
 	return d.src, nil
 }
 
+// parseComplexCSVCell helps us properly multi value and complex JSON definitions
 func (d *decoder) parseComplexCSVCell(cell string) []string {
+	// Cover complex json definitions (geometry field)
+	if strings.HasPrefix(cell, "{") && strings.HasSuffix(cell, "}") {
+		return []string{cell}
+	}
+
+	// Cover multi value fields
+	//
+	// Multi value fields are "mini csvs" encoded in the csv so we need to
+	// clean up the value and then CSV decode again.
 	if d.multiValueBrackets {
 		if strings.HasPrefix(cell, "[") && strings.HasSuffix(cell, "]") {
 			cell = cell[1 : len(cell)-1]
