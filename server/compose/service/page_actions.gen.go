@@ -650,7 +650,7 @@ func PageErrStaleData(mm ...*pageActionProps) *errors.Error {
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("stale data", nil),
+		p.Format("page was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version", nil),
 
 		errors.Meta("type", "staleData"),
 		errors.Meta("resource", "compose:page"),

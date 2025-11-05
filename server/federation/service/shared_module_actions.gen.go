@@ -450,7 +450,7 @@ func SharedModuleErrStaleData(mm ...*sharedModuleActionProps) *errors.Error {
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("stale data", nil),
+		p.Format("module was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version", nil),
 
 		errors.Meta("type", "staleData"),
 		errors.Meta("resource", "federation:shared_module"),

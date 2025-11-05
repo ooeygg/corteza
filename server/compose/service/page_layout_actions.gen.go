@@ -426,7 +426,7 @@ func PageLayoutErrNotFound(mm ...*pageLayoutActionProps) *errors.Error {
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("pageLayout does not exist", nil),
+		p.Format("page layout does not exist", nil),
 
 		errors.Meta("type", "notFound"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -592,7 +592,7 @@ func PageLayoutErrHandleNotUnique(mm ...*pageLayoutActionProps) *errors.Error {
 		errors.Meta("resource", "compose:page-layout"),
 
 		// action log entry; no formatting, it will be applied inside recordAction fn.
-		errors.Meta(pageLayoutLogMetaKey{}, "used duplicate handle ({{pageLayout.handle}}) for pageLayout"),
+		errors.Meta(pageLayoutLogMetaKey{}, "used duplicate handle ({{pageLayout.handle}}) for page layout"),
 		errors.Meta(pageLayoutPropsMetaKey{}, p),
 
 		// translation namespace & key
@@ -620,7 +620,7 @@ func PageLayoutErrStaleData(mm ...*pageLayoutActionProps) *errors.Error {
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("stale data", nil),
+		p.Format("page layout was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version", nil),
 
 		errors.Meta("type", "staleData"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -684,7 +684,7 @@ func PageLayoutErrNotAllowedToRead(mm ...*pageLayoutActionProps) *errors.Error {
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to read this pageLayout", nil),
+		p.Format("not allowed to read this page layout", nil),
 
 		errors.Meta("type", "notAllowedToRead"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -718,7 +718,7 @@ func PageLayoutErrNotAllowedToSearch(mm ...*pageLayoutActionProps) *errors.Error
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to search or list pageLayouts", nil),
+		p.Format("not allowed to search or list page layouts", nil),
 
 		errors.Meta("type", "notAllowedToSearch"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -752,7 +752,7 @@ func PageLayoutErrNotAllowedToListPageLayouts(mm ...*pageLayoutActionProps) *err
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to list pageLayouts", nil),
+		p.Format("not allowed to list page layouts", nil),
 
 		errors.Meta("type", "notAllowedToListPageLayouts"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -786,7 +786,7 @@ func PageLayoutErrNotAllowedToCreate(mm ...*pageLayoutActionProps) *errors.Error
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to create pageLayouts", nil),
+		p.Format("not allowed to create page layouts", nil),
 
 		errors.Meta("type", "notAllowedToCreate"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -820,7 +820,7 @@ func PageLayoutErrNotAllowedToUpdate(mm ...*pageLayoutActionProps) *errors.Error
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to update this pageLayout", nil),
+		p.Format("not allowed to update this page layout", nil),
 
 		errors.Meta("type", "notAllowedToUpdate"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -854,7 +854,7 @@ func PageLayoutErrNotAllowedToDelete(mm ...*pageLayoutActionProps) *errors.Error
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to delete this pageLayout", nil),
+		p.Format("not allowed to delete this page layout", nil),
 
 		errors.Meta("type", "notAllowedToDelete"),
 		errors.Meta("resource", "compose:page-layout"),
@@ -888,7 +888,7 @@ func PageLayoutErrNotAllowedToUndelete(mm ...*pageLayoutActionProps) *errors.Err
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("not allowed to undelete this pageLayout", nil),
+		p.Format("not allowed to undelete this page layout", nil),
 
 		errors.Meta("type", "notAllowedToUndelete"),
 		errors.Meta("resource", "compose:page-layout"),

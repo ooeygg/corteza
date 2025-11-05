@@ -1,5 +1,5 @@
 import Vue from 'vue'
 
-import toast from './toast'
+import { mixins } from '@cortezaproject/corteza-vue'
 
-Vue.mixin(toast)
+Vue.mixin(mixins.toast)

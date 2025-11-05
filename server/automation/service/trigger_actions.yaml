@@ -56,7 +56,7 @@ errors:
     message: "invalid ID"
 
   - error: staleData
-    message: "stale data"
+    message: "trigger was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version"
     severity: warning
 
   - error: notAllowedToRead

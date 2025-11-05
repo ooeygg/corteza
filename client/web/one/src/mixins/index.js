@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import resourceTranslations from './resource-translations'
 
-import toast from './toast'
+import { mixins } from '@cortezaproject/corteza-vue'
 
+Vue.mixin(mixins.toast)
 Vue.mixin(resourceTranslations)
-Vue.mixin(toast)

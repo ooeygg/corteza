@@ -478,7 +478,7 @@ func ApigwRouteErrStaleData(mm ...*apigwRouteActionProps) *errors.Error {
 	var e = errors.New(
 		errors.KindInternal,
 
-		p.Format("stale data", nil),
+		p.Format("route was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version", nil),
 
 		errors.Meta("type", "staleData"),
 		errors.Meta("resource", "system:apigw-route"),

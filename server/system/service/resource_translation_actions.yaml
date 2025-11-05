@@ -57,7 +57,7 @@ errors:
     severity: warning
 
   - error: staleData
-    message: "stale data"
+    message: "resource translation was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version"
     severity: warning
 
   - error: notAllowedToRead

@@ -85,7 +85,7 @@ errors:
     message: "invalid structure after update"
 
   - error: staleData
-    message: "stale data"
+    message: "user group was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version"
     severity: warning
 
   - error: notAllowedToRead

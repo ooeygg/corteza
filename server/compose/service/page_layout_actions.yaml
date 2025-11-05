@@ -52,7 +52,7 @@ actions:
 
 errors:
   - error: notFound
-    message: "pageLayout does not exist"
+    message: "page layout does not exist"
     severity: warning
 
   - error: namespaceNotFound
@@ -73,11 +73,11 @@ errors:
 
   - error: handleNotUnique
     message: "handle not unique"
-    log: "used duplicate handle ({{pageLayout.handle}}) for pageLayout"
+    log: "used duplicate handle ({{pageLayout.handle}}) for page layout"
     severity: warning
 
   - error: staleData
-    message: "stale data"
+    message: "page layout was modified by someone else or by a workflow after you've opened it. Please refresh to see the latest updated version"
     severity: warning
 
   - error: invalidNamespaceID
@@ -85,29 +85,29 @@ errors:
     severity: warning
 
   - error: notAllowedToRead
-    message: "not allowed to read this pageLayout"
+    message: "not allowed to read this page layout"
     log: "could not read {{pageLayout}}; insufficient permissions"
 
   - error: notAllowedToSearch
-    message: "not allowed to search or list pageLayouts"
+    message: "not allowed to search or list page layouts"
     log: "could not search pageLayouts; insufficient permissions"
 
   - error: notAllowedToListPageLayouts
-    message: "not allowed to list pageLayouts"
+    message: "not allowed to list page layouts"
     log: "could not list pageLayouts; insufficient permissions"
 
   - error: notAllowedToCreate
-    message: "not allowed to create pageLayouts"
+    message: "not allowed to create page layouts"
     log: "could not create pageLayouts; insufficient permissions"
 
   - error: notAllowedToUpdate
-    message: "not allowed to update this pageLayout"
+    message: "not allowed to update this page layout"
     log: "could not update {{pageLayout}}; insufficient permissions"
 
   - error: notAllowedToDelete
-    message: "not allowed to delete this pageLayout"
+    message: "not allowed to delete this page layout"
     log: "could not delete {{pageLayout}}; insufficient permissions"
 
   - error: notAllowedToUndelete
-    message: "not allowed to undelete this pageLayout"
+    message: "not allowed to undelete this page layout"
     log: "could not undelete {{pageLayout}}; insufficient permissions"
