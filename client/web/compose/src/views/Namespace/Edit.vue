@@ -27,7 +27,7 @@
         </b-button>
         <b-button
           v-if="namespace.canManageNamespace"
-          v-b-tooltip.noninteractive.hover="{ title: $t('configure'), container: '#body' }"
+          v-b-tooltip.noninteractive.hover="{ title: $t('configure'), boundary: 'body' }"
           data-test-id="button-visit-admin-panel"
           variant="primary"
           class="d-flex align-items-center"

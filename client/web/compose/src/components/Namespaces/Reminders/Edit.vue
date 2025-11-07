@@ -73,7 +73,7 @@
 
           <b-input-group-append>
             <b-button
-              v-b-tooltip.noninteractive.hover="{ title: $t('reminder.recordPageLink'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('reminder.recordPageLink'), boundary: 'body' }"
               :disabled="!recordViewer"
               :to="recordViewer"
               variant="extra-light"

@@ -22,7 +22,7 @@
         />
         <b-input-group-append>
           <b-button
-            v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.configure-scenarios'), container: '#body' }"
+            v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.configure-scenarios'), boundary: 'body' }"
             variant="extra-light"
             :disabled="!canUpdate"
             size="sm"
@@ -60,7 +60,7 @@
           />
         </b-button>
         <b-button
-          v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.edit.report'), container: '#body' }"
+          v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.edit.report'), boundary: 'body' }"
           variant="primary"
           class="d-flex align-items-center justify-content-center"
           style="margin-left:2px;"
@@ -98,7 +98,7 @@
           >
             <div
               v-if="unsavedBlocks.has(index)"
-              v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.unsavedChanges'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.unsavedChanges'), boundary: 'body' }"
               class="btn border-0"
             >
               <font-awesome-icon
@@ -108,7 +108,7 @@
             </div>
             <b-button-group>
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.add.displayElement'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.add.displayElement'), boundary: 'body' }"
                 variant="outline-light"
                 class="border-0"
                 @click="openDisplayElementSelector(index)"
@@ -118,7 +118,7 @@
                 />
               </b-button>
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.edit.block'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('builder:tooltip.edit.block'), boundary: 'body' }"
                 variant="outline-light"
                 class="border-0"
                 @click="editBlock(index)"

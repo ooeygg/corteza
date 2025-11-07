@@ -52,7 +52,7 @@
             >
               <b-button
                 v-if="r.payload.link"
-                v-b-tooltip.noninteractive.hover="{ title: $t('reminder.recordPageLink'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('reminder.recordPageLink'), boundary: 'body' }"
                 :to="recordViewer(r.payload.link)"
                 variant="outline-light"
                 size="sm"
@@ -62,7 +62,7 @@
               </b-button>
 
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('reminder.edit.label'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('reminder.edit.label'), boundary: 'body' }"
                 data-test-id="button-edit-reminder"
                 variant="outline-light"
                 size="sm"
@@ -86,7 +86,7 @@
             class="text-secondary small px-2 pb-1"
           >
             <font-awesome-icon
-              v-b-tooltip.noninteractive.hover="{ title: $t('reminder.snooze.count', { count: r.snoozeCount }), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('reminder.snooze.count', { count: r.snoozeCount }), boundary: 'body' }"
               data-test-id="icon-remind-at"
               :icon="['far', 'bell']"
               class="text-primary"

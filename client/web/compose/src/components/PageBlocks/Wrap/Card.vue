@@ -36,7 +36,7 @@
             >
               <b-button
                 v-if="block.options.showRefresh"
-                v-b-tooltip.noninteractive.hover="{ title: $t('general.label.refresh'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('general.label.refresh'), boundary: 'body' }"
                 variant="outline-light"
                 class="d-flex align-items-center text-secondary d-print-none border-0"
                 @click="$emit('refreshBlock')"
@@ -46,7 +46,7 @@
 
               <b-button
                 v-if="showMagnifyButton"
-                v-b-tooltip.noninteractive.hover="{ title: isBlockMagnified ? '' : $t('general.label.magnify'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: isBlockMagnified ? '' : $t('general.label.magnify'), boundary: 'body' }"
                 variant="outline-light"
                 class="d-flex align-items-center text-secondary d-print-none border-0"
                 @click="$root.$emit('magnify-page-block', isBlockMagnified ? undefined : magnifyParams)"

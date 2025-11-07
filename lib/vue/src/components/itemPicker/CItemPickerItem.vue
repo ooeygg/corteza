@@ -21,7 +21,7 @@
     </b>
     <b-button
       v-if="_hideIcons"
-      v-b-tooltip.noninteractive.hover="{ title: selected ? 'Unselect' : 'Select', container: '#body' , delay: 1000 }"
+      v-b-tooltip.noninteractive.hover="{ title: selected ? 'Unselect' : 'Select', boundary: 'body' , delay: 1000 }"
       :data-test-id="`button-${selected ? 'unselect' : 'select'}`"
       variant="outline-light"
       class="d-flex align-items-center ml-auto p-2 border-0"

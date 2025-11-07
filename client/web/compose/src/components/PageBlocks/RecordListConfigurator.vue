@@ -801,7 +801,7 @@
                     :field-subset="options.fields.length ? options.fields : recordListModule.fields"
                     :button-tooltip="{
                       title: $t('recordList.inlineEdit.fields.configure.tooltip'),
-                      container: '#body'
+                      boundary: 'body'
                     }"
                     variant="outline-extra-light"
                     button-class="d-flex align-items-center text-secondary border-0 py-0 px-1 ml-1"

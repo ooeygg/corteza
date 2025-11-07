@@ -6,7 +6,7 @@
       class="w-25"
     >
       <b-form-radio-group
-        v-b-tooltip.hover="{ title: hasData ? $t('not-configurable') : '', placement: 'left', container: '#body' }"
+        v-b-tooltip.hover="{ title: hasData ? $t('not-configurable') : '', placement: 'left', boundary: 'body' }"
         :checked="inputType"
         :options="[
           { value: 'dateTime', text: $t('kind.dateTime.type.options.dateTime') },

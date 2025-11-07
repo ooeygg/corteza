@@ -48,7 +48,7 @@
         />
 
         <b-button
-          v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.view'), container: '#body' }"
+          v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.view'), boundary: 'body' }"
           variant="primary"
           :to="pageViewer"
           class="d-flex align-items-center"
@@ -184,7 +184,7 @@
               <template #label>
                 {{ $t('icon.page') }}
                 <b-button
-                  v-b-tooltip.noninteractive.hover="{ title: $t('icon.configure'), container: '#body' }"
+                  v-b-tooltip.noninteractive.hover="{ title: $t('icon.configure'), boundary: 'body' }"
                   variant="outline-light"
                   class="d-flex align-items-center px-1 text-primary border-0 ml-1"
                   @click="openIconModal"
@@ -344,7 +344,7 @@
                           />
                           <b-input-group-append>
                             <b-button
-                              v-b-tooltip.noninteractive.hover="{ title: $t('page-layout.tooltip.configure'), container: '#body' }"
+                              v-b-tooltip.noninteractive.hover="{ title: $t('page-layout.tooltip.configure'), boundary: 'body' }"
                               variant="extra-light"
                               class="d-flex align-items-center px-3"
                               @click="configureLayout(index)"
@@ -354,7 +354,7 @@
                               />
                             </b-button>
                             <b-button
-                              v-b-tooltip.noninteractive.hover="{ title: $t('page-layout.tooltip.builder'), container: '#body' }"
+                              v-b-tooltip.noninteractive.hover="{ title: $t('page-layout.tooltip.builder'), boundary: 'body' }"
                               variant="primary"
                               :disabled="layout.pageLayoutID === '0'"
                               class="d-flex align-items-center"
@@ -848,7 +848,7 @@
             <b-input-group-append>
               <b-button
                 v-b-modal.logo
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.preview-link'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.preview-link'), boundary: 'body' }"
                 :disabled="!linkUrl"
                 variant="light"
                 rounded

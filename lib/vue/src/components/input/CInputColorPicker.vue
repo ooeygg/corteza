@@ -89,7 +89,7 @@
             <b-button
               v-for="variable in themeVariables"
               :key="variable.key"
-              v-b-tooltip.noninteractive.hover="{ title: variable.label, container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: variable.label, boundary: 'body' }"
               class="swatch flex-grow-1 rounded-0"
               :style="{ backgroundColor: theme.values[variable.key], borderColor: theme.values[variable.key] }"
               @click="setColor(theme.values[variable.key])"

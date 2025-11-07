@@ -41,7 +41,7 @@
         />
 
         <b-button
-          v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.edit.page'), container: '#body' }"
+          v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.edit.page'), boundary: 'body' }"
           data-test-id="button-page-edit"
           :to="pageEditor"
           variant="primary"

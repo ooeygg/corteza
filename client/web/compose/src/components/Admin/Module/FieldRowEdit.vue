@@ -14,7 +14,7 @@
     >
       <b-form-input
         v-model="value.name"
-        v-b-tooltip.noninteractive.hover="{ title: nameState === false ? $t('module:edit.tooltip.name') : '', placement: 'right', container: '#body' }"
+        v-b-tooltip.noninteractive.hover="{ title: nameState === false ? $t('module:edit.tooltip.name') : '', placement: 'right', boundary: 'body' }"
         required
         :readonly="hasData"
         :state="nameState"
@@ -49,7 +49,7 @@
       <b-input-group class="field-type">
         <c-input-select
           v-model="value.kind"
-          v-b-tooltip.hover="{ title: hasData ? $t('field:not-configurable') : '', placement: 'left', container: '#body' }"
+          v-b-tooltip.hover="{ title: hasData ? $t('field:not-configurable') : '', placement: 'left', boundary: 'body' }"
           :options="fieldKinds"
           :reduce="kind => kind.kind"
           :disabled="hasData"

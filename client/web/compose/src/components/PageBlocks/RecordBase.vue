@@ -46,7 +46,7 @@
                 class="inline-actions ml-1"
               >
                 <b-button
-                  v-b-tooltip.noninteractive.hover="{ title: $t('record.inlineEdit.button.title'), container: '#body' }"
+                  v-b-tooltip.noninteractive.hover="{ title: $t('record.inlineEdit.button.title'), boundary: 'body' }"
                   variant="outline-extra-light"
                   :disabled="editable"
                   size="sm"

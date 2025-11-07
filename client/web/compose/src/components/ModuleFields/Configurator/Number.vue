@@ -23,7 +23,7 @@
         lg="6"
       >
         <b-form-group
-          v-b-tooltip.hover="{ title: hasData ? $t('not-configurable') : $t('kind.number.precisionTooltip'), container: '#body' }"
+          v-b-tooltip.hover="{ title: hasData ? $t('not-configurable') : $t('kind.number.precisionTooltip'), boundary: 'body' }"
           :label="`${$t('kind.number.precisionLabel')} ${(f.options.precision)}`"
           label-class="mb-2 text-primary"
         >

@@ -107,7 +107,7 @@
               {{ $t('secret') }}
               <b-button
                 v-if="!secretVisible"
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.show-client-secret'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.show-client-secret'), boundary: 'body' }"
                 data-test-id="button-show-client-secret"
                 variant="outline-light"
                 size="sm"
@@ -121,7 +121,7 @@
 
               <b-button
                 v-else
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.hide-client-secret'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.hide-client-secret'), boundary: 'body' }"
                 data-test-id="button-hide-client-secret"
                 variant="outline-light"
                 size="sm"
@@ -143,7 +143,7 @@
               />
 
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.regenerate-secret'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.regenerate-secret'), boundary: 'body' }"
                 data-test-id="button-regenerate-client-secret"
                 variant="outline-light"
                 class="text-secondary border-0"
@@ -381,7 +381,7 @@
             <template #label>
               {{ $t('cUrl') }}
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.copy-cURL'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.copy-cURL'), boundary: 'body' }"
                 data-test-id="button-copy-cURL"
                 variant="outline-light"
                 size="sm"
@@ -409,7 +409,7 @@
 
               <b-button
                 v-if="tokenRequest.token"
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.copy-access-token'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.copy-access-token'), boundary: 'body' }"
                 data-test-id="copy-token-from-request"
                 variant="outline-light"
                 size="sm"

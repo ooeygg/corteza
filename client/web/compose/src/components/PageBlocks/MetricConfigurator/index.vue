@@ -326,7 +326,7 @@
             style="top: 0;"
           >
             <b-button
-              v-b-tooltip.noninteractive.hover="{ title: $t('metric.edit.refreshData'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('metric.edit.refreshData'), boundary: 'body' }"
               variant="outline-light"
               size="lg"
               class="d-flex align-items-center text-primary ml-auto border-0 px-2 mt-2 mr-2"

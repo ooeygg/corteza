@@ -370,7 +370,7 @@
 
                   <b-button
                     v-if="field.sortable"
-                    v-b-tooltip.noninteractive.hover="{ title: $t('recordList.sort.tooltip'), container: '#body' }"
+                    v-b-tooltip.noninteractive.hover="{ title: $t('recordList.sort.tooltip'), boundary: 'body' }"
                     variant="outline-extra-light"
                     class="d-flex align-items-center text-secondary d-print-none border-0 px-1 ml-1"
                     @click="handleSort(field)"
@@ -500,7 +500,7 @@
                   >
                     <b-button
                       v-if="showInlineEdit(field)"
-                      v-b-tooltip.noninteractive.hover="{ title: $t('recordList.inlineEdit.button.title'), container: '#body' }"
+                      v-b-tooltip.noninteractive.hover="{ title: $t('recordList.inlineEdit.button.title'), boundary: 'body' }"
                       variant="outline-extra-light"
                       size="sm"
                       class="text-secondary border-0"
@@ -513,7 +513,7 @@
 
                     <b-button
                       v-if="showInlineFilter()"
-                      v-b-tooltip.noninteractive.hover="{ title: $t('recordList.filterByValue'), container: '#body' }"
+                      v-b-tooltip.noninteractive.hover="{ title: $t('recordList.filterByValue'), boundary: 'body' }"
                       variant="outline-extra-light"
                       size="sm"
                       class="text-secondary border-0"

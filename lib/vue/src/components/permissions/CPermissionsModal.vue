@@ -132,7 +132,7 @@
             <h5
               v-for="r in e.rules"
               :key="r.operation"
-              v-b-tooltip.noninteractive.hover="{ title: getRuleTooltip(r.access === 'unknown-context', !!e.userID), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: getRuleTooltip(r.access === 'unknown-context', !!e.userID), boundary: 'body' }"
               class="text-center mb-1 mt-2 w-100"
             >
               <font-awesome-icon

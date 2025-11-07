@@ -2,7 +2,7 @@
   <div class="d-inline-flex gap-1">
     <b-button
       v-if="!inConfirmation"
-      v-b-tooltip.noninteractive.hover="{ title: tooltip, container: '#body' }"
+      v-b-tooltip.noninteractive.hover="{ title: tooltip, boundary: 'body' }"
       :data-test-id="dataTestId"
       :variant="variant"
       :size="size"

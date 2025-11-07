@@ -140,7 +140,7 @@
 
           <b-input-group-append v-if="canAddRecordThroughSelectField">
             <b-button
-              v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), container: '#body' }"
+              v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), boundary: 'body' }"
               variant="light"
               class="d-flex align-items-center"
               @click="addRecordThroughRecordSelectField()"
@@ -216,7 +216,7 @@
 
           <b-input-group-append v-if="canAddRecordThroughSelectField">
             <b-button
-              v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), container: '#body' }"
+              v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), boundary: 'body' }"
               variant="light"
               class="d-flex align-items-center"
               @click="addRecordThroughRecordSelectField()"
@@ -297,7 +297,7 @@
 
         <b-input-group-append v-if="canAddRecordThroughSelectField">
           <b-button
-            v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), container: '#body' }"
+            v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), boundary: 'body' }"
             variant="light"
             class="d-flex align-items-center"
             @click="addRecordThroughRecordSelectField()"

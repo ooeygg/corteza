@@ -24,7 +24,7 @@
             {{ item.title }}
             <font-awesome-icon
               v-if="!item.visible && item.moduleID == '0'"
-              v-b-tooltip.noninteractive.hover="{ title: $t('notVisible'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('notVisible'), boundary: 'body' }"
               class="text-danger"
               :icon="['fas', 'eye-slash']"
             />
@@ -56,7 +56,7 @@
               </b-button>
 
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.view'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.view'), boundary: 'body' }"
                 data-test-id="button-page-view"
                 variant="primary"
                 :to="pageViewer(item)"
@@ -69,7 +69,7 @@
               </b-button>
 
               <b-button
-                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.edit.page'), container: '#body' }"
+                v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.edit.page'), boundary: 'body' }"
                 data-test-id="button-page-edit"
                 variant="primary"
                 :to="{name: 'admin.pages.edit', params: { pageID: item.pageID }}"
@@ -84,7 +84,7 @@
 
             <b-dropdown
               v-if="item.canGrant || namespace.canGrant"
-              v-b-tooltip.noninteractive.hover="{ title: $t('permissions:resources.compose.page.tooltip'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('permissions:resources.compose.page.tooltip'), boundary: 'body' }"
               data-test-id="dropdown-permissions"
               variant="extra-light"
               size="sm"

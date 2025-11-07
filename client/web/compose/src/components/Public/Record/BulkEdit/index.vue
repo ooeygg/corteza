@@ -2,7 +2,7 @@
   <div>
     <b-button
       v-if="!openOnSelect"
-      v-b-tooltip.noninteractive.hover="{ title: $t('recordList.bulkRecord.title'), container: '#body' }"
+      v-b-tooltip.noninteractive.hover="{ title: $t('recordList.bulkRecord.title'), boundary: 'body' }"
       variant="outline-extra-light"
       size="sm"
       class="inline-button text-secondary border-0"

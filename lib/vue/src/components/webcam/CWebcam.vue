@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-button
-      v-b-tooltip.noninteractive.hover="{ title: labels.tooltip, container: '#body' }"
+      v-b-tooltip.noninteractive.hover="{ title: labels.tooltip, boundary: 'body' }"
       variant="light"
       :class="buttonClass"
       @click.prevent="openWebcamModal"

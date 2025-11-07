@@ -52,7 +52,7 @@
 
           <b-input-group-append>
             <b-button
-              v-b-tooltip.noninteractive.hover="{ title: $t('selector.tooltip.clone.noRef'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('selector.tooltip.clone.noRef'), boundary: 'body' }"
               variant="extra-light"
               :disabled="!selectedExistingBlock"
               class="d-flex align-items-center"
@@ -64,7 +64,7 @@
             </b-button>
 
             <b-button
-              v-b-tooltip.noninteractive.hover="{ title: $t('selector.tooltip.clone.ref'), container: '#body' }"
+              v-b-tooltip.noninteractive.hover="{ title: $t('selector.tooltip.clone.ref'), boundary: 'body' }"
               variant="extra-light"
               :disabled="!selectedExistingBlock"
               class="d-flex align-items-center"

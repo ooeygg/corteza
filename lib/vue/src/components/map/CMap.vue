@@ -97,7 +97,7 @@
       <l-control class="leaflet-bar">
         <a
           v-if="!hideCurrentLocationButton"
-          v-b-tooltip.noninteractive.hover="{ title: labels.tooltip && labels.tooltip.goToCurrentLocation, container: '#body' }"
+          v-b-tooltip.noninteractive.hover="{ title: labels.tooltip && labels.tooltip.goToCurrentLocation, boundary: 'body' }"
           role="button"
           class="d-flex justify-content-center align-items-center"
           @click="goToCurrentLocation"

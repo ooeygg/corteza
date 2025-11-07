@@ -30,7 +30,7 @@
         v-if="isCreated && (recordNavigation.prev || recordNavigation.next)"
         class="d-flex align-items-center fill-width gap-1"
       >
-        <span v-b-tooltip.noninteractive.hover="{ title: $t('recordNavigation.prev'), container: '#body' }">
+        <span v-b-tooltip.noninteractive.hover="{ title: $t('recordNavigation.prev'), boundary: 'body' }">
           <b-button
             pill
             size="lg"
@@ -43,7 +43,7 @@
           </b-button>
         </span>
 
-        <span v-b-tooltip.noninteractive.hover="{ title: $t('recordNavigation.next'), container: '#body' }">
+        <span v-b-tooltip.noninteractive.hover="{ title: $t('recordNavigation.next'), boundary: 'body' }">
           <b-button
             pill
             size="lg"

@@ -8,7 +8,7 @@
       <b-input-group>
         <b-input-group-prepend>
           <b-button
-            v-b-tooltip.noninteractive.hover="{ title: $t('validators.expression.tooltip'), container: '#body' }"
+            v-b-tooltip.noninteractive.hover="{ title: $t('validators.expression.tooltip'), boundary: 'body' }"
             variant="extra-light"
           >
             ƒ

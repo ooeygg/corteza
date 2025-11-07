@@ -1,6 +1,6 @@
 <template>
   <b-button
-    v-b-tooltip.noninteractive.hover="{ title: tooltip, container: '#body' }"
+    v-b-tooltip.noninteractive.hover="{ title: tooltip, boundary: 'body' }"
     data-test-id="button-translation"
     :variant="buttonVariant"
     :class="buttonClass"

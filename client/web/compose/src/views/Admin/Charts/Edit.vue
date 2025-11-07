@@ -144,7 +144,7 @@
 
                           <b-input-group-append v-if="showEditColorSchemeButton">
                             <b-button
-                              v-b-tooltip.noninteractive.hover="{ title: $t('colorScheme.custom.edit'), container: '#body' }"
+                              v-b-tooltip.noninteractive.hover="{ title: $t('colorScheme.custom.edit'), boundary: 'body' }"
                               variant="extra-light"
                               class="d-flex align-items-center"
                               @click="editColorScheme()"
@@ -306,7 +306,7 @@
                   style="top: 0;"
                 >
                   <b-button
-                    v-b-tooltip.noninteractive.hover="{ title: $t('edit.loadData'), container: '#body' }"
+                    v-b-tooltip.noninteractive.hover="{ title: $t('edit.loadData'), boundary: 'body' }"
                     :disabled="processing || !reportsValid"
                     variant="outline-light"
                     size="lg"
