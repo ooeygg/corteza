@@ -6,6 +6,8 @@ export {
   CCorredorManualButtons,
 } from './corredor'
 
+export { default as CUploader } from './uploader/CUploader.vue'
+
 export {
   CPreviewInline,
   CPreviewLightbox,

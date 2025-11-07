@@ -25,8 +25,7 @@
         class="d-flex align-items-center"
       >
         <c-uploader-with-preview
-          :endpoint="`/users/${user.userID}/avatar`"
-          :labels="$t('uploader', { returnObjects: true })"
+          :endpoint="$SystemAPI.userProfileAvatarEndpoint({ userID: user.userID })"
           @upload="$emit('onUpload')"
           @clear="$emit('resetAttachment', 'avatar')"
         />

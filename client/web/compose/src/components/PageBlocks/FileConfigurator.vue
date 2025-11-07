@@ -38,13 +38,13 @@
     </b-form-group>
 
     <div class="d-flex gap-1">
-      <uploader
+      <c-uploader
         ref="uploader"
         :endpoint="endpoint"
         :max-filesize="$s('compose.Page.Attachments.MaxSize', 100)"
         :accepted-files="$s('compose.Page.Attachments.Mimetypes', ['*/*'])"
         class="flex-grow-1"
-        @uploaded="appendAttachment"
+        @upload="appendAttachment"
       />
 
       <c-webcam
@@ -210,10 +210,9 @@
 </template>
 <script>
 import base from './base'
-import Uploader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/Uploader'
 import ListLoader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/ListLoader'
 import { components } from '@cortezaproject/corteza-vue'
-const { CInputColorPicker } = components
+const { CInputColorPicker, CUploader } = components
 
 export default {
   i18nOptions: {
@@ -223,7 +222,7 @@ export default {
   name: 'File',
 
   components: {
-    Uploader,
+    CUploader,
     ListLoader,
     CInputColorPicker,
   },
@@ -234,7 +233,7 @@ export default {
     endpoint () {
       const { pageID } = this.page
 
-      return this.$ComposeAPI.pageUploadEndpoint({
+      return this.$ComposeAPI.baseURL + this.$ComposeAPI.pageUploadEndpoint({
         namespaceID: this.namespace.namespaceID,
         pageID,
       })

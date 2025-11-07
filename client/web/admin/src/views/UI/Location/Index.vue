@@ -22,8 +22,6 @@ import editorHelpers from 'corteza-webapp-admin/src/mixins/editorHelpers'
 import CUILocationSettings from 'corteza-webapp-admin/src/components/Settings/UI/CUILocationSettings'
 import { mapGetters } from 'vuex'
 
-const prefix = 'ui.location'
-
 export default {
   i18nOptions: {
     namespaces: 'ui.settings',
@@ -68,7 +66,7 @@ export default {
       this.incLoader()
 
       this.$Settings.fetch()
-      return this.$SystemAPI.settingsList({ prefix })
+      return this.$SystemAPI.settingsList({ prefix: 'ui' })
         .then(settings => {
           this.settings = {}
 

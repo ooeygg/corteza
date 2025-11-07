@@ -85,10 +85,9 @@
 
               <c-uploader-with-preview
                 :value="uploadedFile('ui.main-logo')"
-                :endpoint="'/settings/ui.main-logo'"
+                endpoint="/settings/ui.main-logo"
                 :disabled="!canManage"
-                :labels="$t('mainLogo.uploader', { returnObjects: true })"
-                @upload="onUpload($event)"
+                @upload="onUpload"
               />
             </b-form-group>
           </b-col>
@@ -113,10 +112,9 @@
 
               <c-uploader-with-preview
                 :value="uploadedFile('ui.icon-logo')"
-                :endpoint="'/settings/ui.icon-logo'"
+                endpoint="/settings/ui.icon-logo"
                 :disabled="!canManage"
-                :labels="$t('iconLogo.uploader', { returnObjects: true })"
-                @upload="onUpload($event)"
+                @upload="onUpload"
               />
             </b-form-group>
           </b-col>

@@ -57,6 +57,8 @@ label:
   delete: Delete
   undelete: Undelete
   fileTypeNotAllowed: File type not allowed
+  uploading: Uploading
+  dropFiles: Click or drop files here to upload
 editor:
   unsavedChanges:  Unsaved changes will be lost. Do you wish to leave the page?
 resourceList:

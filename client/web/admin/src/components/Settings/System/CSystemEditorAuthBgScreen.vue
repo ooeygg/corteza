@@ -31,9 +31,8 @@
 
           <c-uploader-with-preview
             :value="uploadedFile('auth.ui.background-image-src')"
-            :endpoint="'/settings/auth.ui.background-image-src'"
+            endpoint="/settings/auth.ui.background-image-src"
             :disabled="!canManage"
-            :labels="$t('image.uploader', { returnObjects: true })"
             @upload="$emit('onUpload')"
             @clear="$emit('resetAttachment', 'auth.ui.background-image-src')"
           />

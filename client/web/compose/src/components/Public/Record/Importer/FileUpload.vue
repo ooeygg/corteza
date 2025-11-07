@@ -4,13 +4,13 @@
       :label="$t('recordList.import.uploadFile')"
       label-class="text-primary"
     >
-      <uploader
-        class="uploader"
+      <c-uploader
         :label="dzLabel"
         :endpoint="endpoint"
         :accepted-files="['application/json', 'text/csv']"
         :max-filesize="$s('compose.Record.Attachments.MaxSize', 100)"
-        @uploaded="onUploaded"
+        class="uploader"
+        @upload="onUploaded"
       />
     </b-form-group>
 
@@ -66,7 +66,8 @@
 </template>
 
 <script>
-import Uploader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/Uploader'
+import { components } from '@cortezaproject/corteza-vue'
+const { CUploader } = components
 
 export default {
   i18nOptions: {
@@ -74,7 +75,7 @@ export default {
   },
 
   components: {
-    Uploader,
+    CUploader,
   },
 
   props: {

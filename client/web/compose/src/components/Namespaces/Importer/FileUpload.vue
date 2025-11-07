@@ -1,17 +1,21 @@
 <template>
   <b-card>
-    <uploader
-      class="uploader"
-      :label="$t('import.uploadFilePlaceholder')"
-      :endpoint="endpoint"
+    <c-uploader
+      :endpoint="fileUploadEndpoint"
       :accepted-files="['application/zip']"
-      @uploaded="onUploaded"
+      :labels="{
+        uploading: $t('general:label.uploading'),
+        placeholder: $t('import.uploadFilePlaceholder'),
+        fileTypeNotAllowed: $t('general:label.fileTypeNotAllowed'),
+      }"
+      @upload="onUploaded"
     />
   </b-card>
 </template>
 
 <script>
-import Uploader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/Uploader'
+import { components } from '@cortezaproject/corteza-vue'
+const { CUploader } = components
 
 export default {
   i18nOptions: {
@@ -19,7 +23,7 @@ export default {
   },
 
   components: {
-    Uploader,
+    CUploader,
   },
 
   data () {
@@ -30,8 +34,8 @@ export default {
   },
 
   computed: {
-    endpoint () {
-      return this.$ComposeAPI.namespaceImportInitEndpoint({})
+    fileUploadEndpoint () {
+      return this.$ComposeAPI.baseURL + this.$ComposeAPI.namespaceImportInitEndpoint({})
     },
 
     canContinue () {

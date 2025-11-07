@@ -33,14 +33,19 @@
     </template>
 
     <div class="d-flex gap-1">
-      <uploader
+      <c-uploader
         ref="uploader"
-        :endpoint="endpoint"
+        :endpoint="fileUploadEndpoint"
         :accepted-files="mimetypes"
         :max-filesize="maxSize"
         :form-data="uploaderFormData"
+        :labels="{
+          uploading: $t('general:label.uploading'),
+          placeholder: $t('general:label.dropFiles'),
+          fileTypeNotAllowed: $t('general:label.fileTypeNotAllowed'),
+        }"
         class="flex-grow-1"
-        @uploaded="appendAttachment"
+        @upload="appendAttachment"
       />
 
       <c-webcam
@@ -78,9 +83,10 @@
 </template>
 <script>
 import base from './base'
-import Uploader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/Uploader'
+import { components } from '@cortezaproject/corteza-vue'
 import ListLoader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/ListLoader'
 import { NoID } from '@cortezaproject/corteza-js'
+const { CUploader } = components
 
 export default {
   i18nOptions: {
@@ -88,18 +94,18 @@ export default {
   },
 
   components: {
-    Uploader,
+    CUploader,
     ListLoader,
   },
 
   extends: base,
 
   computed: {
-    endpoint () {
+    fileUploadEndpoint () {
       const { moduleID, recordID } = this.record
       const { namespaceID } = this.namespace
 
-      return this.$ComposeAPI.recordUploadEndpoint({
+      return this.$ComposeAPI.baseURL + this.$ComposeAPI.recordUploadEndpoint({
         namespaceID,
         moduleID,
         recordID,

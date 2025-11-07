@@ -148,8 +148,6 @@ editor:
     image:
       uploader:
         label: Background image
-        instructions: Click or drop background image here to upload
-        uploading: Uploading auth background image
 
       editor:
         label: Custom CSS

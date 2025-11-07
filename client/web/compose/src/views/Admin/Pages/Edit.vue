@@ -823,11 +823,16 @@
         label-class="text-primary"
         class="mb-0"
       >
-        <uploader
-          :endpoint="endpoint"
+        <c-uploader
+          :endpoint="iconUploadEndpoint"
           :accepted-files="['image/*']"
-          :param-name="'icon'"
-          @uploaded="uploadAttachment"
+          param-name="icon"
+          :labels="{
+            uploading: $t('general:label.uploading'),
+            placeholder: $t('general:label.dropFiles'),
+            fileTypeNotAllowed: $t('general:label.fileTypeNotAllowed'),
+          }"
+          @upload="uploadAttachment"
         />
 
         <b-form-group
@@ -954,13 +959,12 @@ import { components, handle } from '@cortezaproject/corteza-vue'
 import EditorToolbar from 'corteza-webapp-compose/src/components/Admin/EditorToolbar'
 import PageTranslator from 'corteza-webapp-compose/src/components/Admin/Page/PageTranslator'
 import PageLayoutTranslator from 'corteza-webapp-compose/src/components/Admin/PageLayout/PageLayoutTranslator'
-import Uploader from 'corteza-webapp-compose/src/components/Public/Page/Attachment/Uploader'
 import autocomplete from 'corteza-webapp-compose/src/mixins/autocomplete.js'
 import pages from 'corteza-webapp-compose/src/mixins/pages'
 import { isEqual } from 'lodash'
 import Draggable from 'vuedraggable'
 import { mapActions, mapGetters } from 'vuex'
-const { CInputRole, CInputExpression } = components
+const { CInputRole, CInputExpression, CUploader } = components
 
 export default {
   i18nOptions: {
@@ -973,7 +977,7 @@ export default {
     EditorToolbar,
     PageTranslator,
     PageLayoutTranslator,
-    Uploader,
+    CUploader,
     Draggable,
     CInputRole,
     CInputExpression,
@@ -1112,8 +1116,8 @@ export default {
       return this.hasChildren && this.page.canDeletePage && !this.page.deletedAt
     },
 
-    endpoint () {
-      return this.$ComposeAPI.iconUploadEndpoint({
+    iconUploadEndpoint () {
+      return this.$ComposeAPI.baseURL + this.$ComposeAPI.iconUploadEndpoint({
         namespaceID: this.namespace.namespaceID,
       })
     },

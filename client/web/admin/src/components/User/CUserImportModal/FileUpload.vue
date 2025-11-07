@@ -2,9 +2,11 @@
   <div>
     <c-uploader
       :labels="{
-        instructions: $t('import.uploadFilePlaceholder'),
+        placeholder: $t('general:label.dropFiles'),
+        uploading: $t('general:label.uploading'),
+        fileTypeNotAllowed: $t('general:label.fileTypeNotAllowed'),
       }"
-      :endpoint="endpoint"
+      :endpoint="userImportEndpoint"
       :accepted-files="['application/zip']"
       @upload="onUploaded"
     />
@@ -12,7 +14,8 @@
 </template>
 
 <script>
-import CUploader from 'corteza-webapp-admin/src/components/CUploader'
+import { components } from '@cortezaproject/corteza-vue'
+const { CUploader } = components
 
 export default {
   i18nOptions: {
@@ -33,12 +36,8 @@ export default {
   },
 
   computed: {
-    endpoint () {
-      return this.$SystemAPI.userImportEndpoint({})
-    },
-
-    canContinue () {
-      return !!this.session
+    userImportEndpoint () {
+      return this.$SystemAPI.baseURL + this.$SystemAPI.userImportEndpoint({})
     },
   },
 
