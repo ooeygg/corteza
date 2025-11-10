@@ -83,12 +83,12 @@
       <div
         v-for="a in attachments"
         :key="a.attachmentID"
-        :class="{ 'h-100': attachments.length === 1, 'w-100': !canPreview(a) }"
-        class="item"
+        :class="{ 'h-100': attachments.length === 1 }"
       >
         <c-preview-inline
           v-if="canPreview(a)"
           :src="inlineUrl(a)"
+          :title="a.name"
           :meta="a.meta"
           :name="a.name"
           :alt="a.name"
@@ -98,6 +98,14 @@
           ]"
           :labels="previewLabels"
           @openPreview="openLightbox({ ...a, ...$event })"
+        />
+
+        <font-awesome-icon
+          v-else
+          :title="a.name"
+          :icon="['far', `file-${ext(a)}`]"
+          :style="inlineCustomStyles(a)"
+          class="text-secondary"
         />
 
         <div
@@ -335,30 +343,29 @@ export default {
 
     inlineCustomStyles (a) {
       const {
-        width,
-        height,
         borderRadius,
         backgroundColor,
       } = this.previewOptions
-      let { maxWidth, maxHeight, margin } = this.previewOptions
+      let { width, height, maxWidth, maxHeight, margin } = this.previewOptions
 
       maxWidth = maxWidth || '100%'
       maxHeight = maxHeight || '100%'
       margin = margin || 'auto'
 
-      if (this.ext(a) === 'image') {
-        return {
-          height,
-          width,
-          maxHeight,
-          maxWidth,
-          borderRadius,
-          backgroundColor,
-          margin,
-        }
+      if (this.ext(a) !== 'image') {
+        width = '100px'
+        height = '100px'
       }
 
-      return {}
+      return {
+        width,
+        height,
+        maxWidth,
+        maxHeight,
+        borderRadius,
+        backgroundColor,
+        margin,
+      }
     },
 
     setDefaultValues () {
