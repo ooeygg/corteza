@@ -49,7 +49,7 @@
 <script>
 import numeral from 'numeral'
 import vueDropzone from 'vue2-dropzone'
-import { mixins } from '@cortezaproject/corteza-vue'
+import { files } from '@/mixins'
 
 export default {
   name: 'CUploader',
@@ -63,7 +63,7 @@ export default {
   },
 
   mixins: [
-    mixins.files,
+    files,
   ],
 
   props: {
