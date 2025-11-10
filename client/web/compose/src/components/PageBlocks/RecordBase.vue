@@ -1,7 +1,7 @@
 <template>
   <wrap
     v-bind="$props"
-    body-class="field-container pt-3 px-3"
+    body-class="pt-3 px-3"
     v-on="$listeners"
   >
     <div
@@ -27,6 +27,7 @@
           :content-cols-xl="options.horizontalFieldLayoutEnabled && '7'"
           :class="columnWrapClass"
           :style="fieldWidth"
+          class="field-container"
         >
           <template #label>
             <div
