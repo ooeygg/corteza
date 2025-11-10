@@ -126,13 +126,13 @@
           <b-td
             colspan="100%"
             class="p-0 justify-content-center"
-            :class="{ 'pb-2': filterGroup.groupCondition }"
+            :class="{ 'pb-2': groupIndex !== (internalFilter.length - 1) }"
           >
             <div class="group-separator">
               <b-button
                 v-if="groupIndex === (internalFilter.length - 1)"
                 variant="outline-primary"
-                class="btn-add-group d-block py-2 px-3 m-auto bg-white  "
+                class="btn-add-group d-block py-2 px-3 m-auto bg-white"
                 @click="addGroup()"
               >
                 <font-awesome-icon
@@ -269,7 +269,7 @@ export default {
           internal = this.rawFilterToInternal(rawFilter)
 
           if (!internal.length) {
-            internal = [this.createDefaultFilterGroup(undefined, this.startEmpty ? undefined : this.resolvedSelectedField)]
+            internal = [this.createDefaultFilterGroup(this.startEmpty ? undefined : this.resolvedSelectedField)]
           } else {
             this.isLoadingExternalData = true
           }
@@ -307,7 +307,7 @@ export default {
         return []
       }
 
-      return recordListFilter.map(({ groupCondition, filter = [], name }) => {
+      return recordListFilter.map(({ filter = [], name }) => {
         filter = filter.map(({ value, ...f } = {}) => {
           f.record = new compose.Record(this.mockModule, {})
 
@@ -330,7 +330,7 @@ export default {
           return f
         })
 
-        return { groupCondition, filter, name }
+        return { filter, name }
       })
     },
 
@@ -343,7 +343,7 @@ export default {
         return []
       }
 
-      return filter.map(({ groupCondition, filter = [], name }) => {
+      return filter.map(({ filter = [], name }) => {
         filter = filter.map(({ record, ...f }) => {
           if (!f.name || !record) {
             return undefined
@@ -367,7 +367,7 @@ export default {
           return f
         })
 
-        return { groupCondition, filter, name }
+        return { filter, name }
       })
     },
 
@@ -517,9 +517,6 @@ export default {
           // If no more filterGroups, add default back
           if (!this.internalFilter.length) {
             this.internalFilter = [this.createDefaultFilterGroup()]
-          } else if (groupIndex === this.internalFilter.length) {
-            // Reset first filterGroup groupCondition if last filterGroup was deleted
-            this.internalFilter[groupIndex - 1].groupCondition = undefined
           }
         }
       }
@@ -542,14 +539,13 @@ export default {
     addFilter (groupIndex) {
       if ((this.internalFilter[groupIndex] || {}).filter) {
         this.internalFilter[groupIndex].filter.push(
-          this.createDefaultFilter('AND', this.resolvedSelectedField),
+          this.createDefaultFilter(this.resolvedSelectedField),
         )
       }
     },
 
-    createDefaultFilter (condition, field = {}) {
+    createDefaultFilter (field = {}) {
       return {
-        condition,
         name: field.name,
         operator: field.isMulti ? 'IN' : '=',
         value: undefined,
@@ -558,16 +554,14 @@ export default {
       }
     },
 
-    createDefaultFilterGroup (groupCondition = undefined, field) {
+    createDefaultFilterGroup (field) {
       return {
-        groupCondition,
-        filter: [this.createDefaultFilter('Where', field)],
+        filter: [this.createDefaultFilter(field)],
       }
     },
 
     addGroup () {
-      this.internalFilter[this.internalFilter.length - 1].groupCondition = 'AND'
-      this.internalFilter.push(this.createDefaultFilterGroup(undefined, this.resolvedSelectedField))
+      this.internalFilter.push(this.createDefaultFilterGroup(this.resolvedSelectedField))
       this.$emit('value-change')
     },
 

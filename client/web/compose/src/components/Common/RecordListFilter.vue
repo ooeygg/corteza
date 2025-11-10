@@ -31,9 +31,7 @@
         no-body
         class="position-static w-100"
       >
-        <b-card-body
-          class="px-3 pb-0 overflow-auto"
-        >
+        <b-card-body class="px-3 pb-0 overflow-auto">
           <filter-toolbox
             v-model="componentFilter"
             :module="module"
@@ -43,9 +41,7 @@
           />
         </b-card-body>
 
-        <b-card-footer
-          class="d-flex justify-content-between shadow-sm rounded"
-        >
+        <b-card-footer class="d-flex justify-content-between shadow-sm rounded">
           <b-button
             variant="light"
             @click="resetFilter"

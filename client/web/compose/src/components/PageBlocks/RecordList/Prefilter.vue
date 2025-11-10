@@ -70,10 +70,7 @@
 <script>
 import { components } from '@cortezaproject/corteza-vue'
 import { compose } from '@cortezaproject/corteza-js'
-import {
-  getRecordListFilterSql,
-  trimChar,
-} from 'corteza-webapp-compose/src/lib/record-filter.js'
+import { convertRecordListFilter, queryToFilter } from 'corteza-webapp-compose/src/lib/record-filter.js'
 import FilterToolbox from 'corteza-webapp-compose/src/components/Common/FilterToolbox.vue'
 import autocomplete from 'corteza-webapp-compose/src/mixins/autocomplete.js'
 
@@ -150,22 +147,12 @@ export default {
       return name
     },
 
-    parseFilter (filterGroup = this.filterGroup) {
-      const filterSqlArray = filterGroup
-        .map(({ groupCondition, filter = [] }) => {
-          groupCondition = groupCondition ? ` ${groupCondition} ` : ''
-          filter = getRecordListFilterSql(filter)
+    parseFilter () {
+      return queryToFilter('', '', [], this.filterGroup.map(group => {
+        group.filter = convertRecordListFilter(group.filter)
 
-          return filter ? `${filter}${groupCondition}` : ''
-        })
-        .filter((filter) => filter)
-
-      const filterSql = trimChar(
-        trimChar(filterSqlArray.join(''), ' AND '),
-        ' OR ',
-      )
-
-      return filterSql
+        return group
+      }).filter(({ filter }) => filter.length))
     },
   },
 }

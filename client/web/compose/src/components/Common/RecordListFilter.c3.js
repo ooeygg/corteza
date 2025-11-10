@@ -15,7 +15,6 @@ const props = {
     ],
   }),
   recordListFilter: [{
-    groupCondition: '',
     filter: [{
       name: '',
     }],

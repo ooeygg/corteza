@@ -199,6 +199,27 @@ const toBoolean = (v) => {
   return undefined
 }
 
+export function convertRecordListFilter (groupFilter = []) {
+  // Group filters by name
+  const filtersByName = groupFilter.sort((a, b) => a.name.localeCompare(b.name)).reduce((acc, filter) => {
+    if (!acc[filter.name]) {
+      acc[filter.name] = []
+    }
+
+    acc[filter.name].push(filter)
+
+    return acc
+  }, {})
+
+  // Rebuild filter array with proper conditions
+  return Object.entries(filtersByName).flatMap(([_, filters], groupIndex) =>
+    filters.map((filter, idx) => ({
+      ...filter,
+      condition: idx === 0 ? (groupIndex === 0 ? '' : 'AND') : 'OR',
+    })),
+  )
+}
+
 // Takes fields and prefilter and record list filter and merges them into query string
 // ie: Return records that have strings in columns (fields) we're showing that start with <query> in case
 //     of text or are exactly the same in case of numbers
@@ -216,15 +237,7 @@ export function queryToFilter (searchQuery = '', prefilter = '', fields = [], re
     searchQuery = searchQuery ? `(${searchQuery})` : ''
   }
 
-  const recordListFilterSqlArray = recordListFilter.map(({ groupCondition, filter = [] }) => {
-    groupCondition = groupCondition ? ` ${groupCondition} ` : ''
-    filter = getRecordListFilterSql(filter)
-
-    return filter ? `${filter}${groupCondition}` : ''
-  }).filter(filter => filter)
-
-  // Trim AND/OR from end of string
-  const recordListFilterSql = trimChar(trimChar(recordListFilterSqlArray.join(''), ' AND '), ' OR ')
+  const recordListFilterSql = recordListFilter.map(({ filter = [] }) => getRecordListFilterSql(filter)).filter(filter => filter).join(' OR ')
 
   return [prefilter, recordListFilterSql, searchQuery].filter(f => f).join(' AND ')
 }

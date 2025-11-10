@@ -939,7 +939,7 @@ import BulkEditModal from 'corteza-webapp-compose/src/components/Public/Record/B
 import ExporterModal from 'corteza-webapp-compose/src/components/Public/Record/Exporter'
 import ImporterModal from 'corteza-webapp-compose/src/components/Public/Record/Importer'
 import { getItem, removeItem, setItem } from 'corteza-webapp-compose/src/lib/local-storage'
-import { evaluatePrefilter, formatActiveFilterOperator, isBetweenOperator, isFieldInFilter, queryToFilter } from 'corteza-webapp-compose/src/lib/record-filter'
+import { evaluatePrefilter, formatActiveFilterOperator, isBetweenOperator, isFieldInFilter, queryToFilter, convertRecordListFilter } from 'corteza-webapp-compose/src/lib/record-filter'
 import records from 'corteza-webapp-compose/src/mixins/records'
 import users from 'corteza-webapp-compose/src/mixins/users'
 import draggable from 'vuedraggable'
@@ -1256,42 +1256,16 @@ export default {
     },
 
     groupRecordListFilter () {
-      return this.recordListFilter
-        .map((group, index) => {
-          // Create filter group with mapped and sorted filters
-          const groupFilter = {
-            filter: group.filter
-              .map(f => this.createDefaultFilter(
-                f.condition,
-                f,
-                f.value,
-                f.operator,
-              ))
-              .sort((a, b) => a.name.localeCompare(b.name)),
-            groupCondition: index < this.recordListFilter.length - 1 ? 'OR' : undefined,
-          }
+      return this.recordListFilter.map(group => {
+        group.filter = convertRecordListFilter(group.filter
+          .map(f => this.createDefaultFilter(
+            f,
+            f.value,
+            f.operator,
+          )))
 
-          // Group filters by name
-          const filtersByName = groupFilter.filter.reduce((acc, filter) => {
-            if (!acc[filter.name]) {
-              acc[filter.name] = []
-            }
-
-            acc[filter.name].push(filter)
-
-            return acc
-          }, {})
-
-          // Rebuild filter array with proper conditions
-          groupFilter.filter = Object.entries(filtersByName).flatMap(([_, filters], groupIndex) =>
-            filters.map((filter, idx) => ({
-              ...filter,
-              condition: idx === 0 ? (groupIndex === 0 ? 'Where' : 'AND') : 'OR',
-            })),
-          )
-
-          return groupFilter
-        }).filter(({ filter }) => filter.length)
+        return group
+      }).filter(({ filter }) => filter.length)
     },
 
     listSummaries () {
@@ -2119,7 +2093,7 @@ export default {
       this.$root.$emit('module-records-updated', { moduleID: this.recordListModule.moduleID })
     },
 
-    createDefaultFilter (condition, field = {}, value = undefined, operator = undefined) {
+    createDefaultFilter (field = {}, value = undefined, operator = undefined) {
       if (!field.resourceID) {
         field = this.allFields.find(({ name }) => name === field.name) || field
       }
@@ -2153,7 +2127,6 @@ export default {
       }
 
       return {
-        condition,
         name: field.name,
         operator: operator || (field.isMulti ? 'IN' : '='),
         value,
@@ -2171,9 +2144,8 @@ export default {
         if (!recordListFilter.length) {
           recordListFilter = [
             {
-              groupCondition: undefined,
               filter: [
-                this.createDefaultFilter('Where', { name }, fieldValue, '='),
+                this.createDefaultFilter({ name }, fieldValue, '='),
               ],
             },
           ]
@@ -2183,9 +2155,9 @@ export default {
 
           if (!filter.length || (filter.length && !filter[0].name)) {
             recordListFilter[0].filter = []
-            recordListFilter[0].filter.push(this.createDefaultFilter('Where', { name }, fieldValue))
+            recordListFilter[0].filter.push(this.createDefaultFilter({ name }, fieldValue))
           } else {
-            recordListFilter[0].filter.push(this.createDefaultFilter('OR', { name }, fieldValue))
+            recordListFilter[0].filter.push(this.createDefaultFilter({ name }, fieldValue))
           }
         }
 
@@ -2259,9 +2231,8 @@ export default {
         if (!this.recordListFilter.length) {
           this.recordListFilter = [
             {
-              groupCondition: undefined,
               filter: [
-                this.createDefaultFilter('Where', field, value, field.isMulti ? 'IN' : operator),
+                this.createDefaultFilter(field, value, field.isMulti ? 'IN' : operator),
               ],
             },
           ]
@@ -2269,9 +2240,9 @@ export default {
           const { filter } = this.recordListFilter[0]
           if (!filter.length || (filter.length && !filter[0].name)) {
             this.recordListFilter[0].filter = []
-            this.recordListFilter[0].filter.push(this.createDefaultFilter('Where', field, value, operator))
+            this.recordListFilter[0].filter.push(this.createDefaultFilter(field, value, operator))
           } else if (!this.recordListFilter[0].filter.some(f => f.name === field.name && f.value === value)) {
-            this.recordListFilter[0].filter.push(this.createDefaultFilter('OR', field, value, operator))
+            this.recordListFilter[0].filter.push(this.createDefaultFilter(field, value, operator))
           }
         }
       }
@@ -2337,12 +2308,7 @@ export default {
     },
 
     updateFilter (filter = [], name) {
-      const lastFilterIdx = this.recordListFilter.length - 1
       filter = filter.map((filter) => ({ ...filter, name }))
-
-      if (this.recordListFilter.length) {
-        this.recordListFilter[lastFilterIdx].groupCondition = 'AND'
-      }
 
       this.recordListFilter = this.recordListFilter.concat(filter)
 
