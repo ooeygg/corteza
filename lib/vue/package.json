@@ -43,6 +43,7 @@
     "@popperjs/core": "^2.11.8",
     "vue2-dropzone": "^3.6.0",
     "@tiptap/core": "^3.4.2",
+    "@tiptap/extension-hard-break": "^3.4.2",
     "@tiptap/extension-list": "^3.4.2",
     "@tiptap/extension-mention": "^3.4.2",
     "@tiptap/extension-placeholder": "^3.4.2",
