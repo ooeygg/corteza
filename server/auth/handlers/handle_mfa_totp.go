@@ -123,9 +123,10 @@ func (h AuthHandlers) mfaTotpConfigQR(req *request.AuthReq) (err error) {
 		issuer = "Corteza"
 	}
 
-	account := req.AuthUser.User.Handle
+	account := req.AuthUser.User.Email
+
 	if len(account) == 0 {
-		account = req.AuthUser.User.Email
+		account = req.AuthUser.User.Handle
 	}
 
 	URL, err := url.Parse("otpauth://totp")
