@@ -1,20 +1,8 @@
-<template>
-  <div>
-    <fieldset class="form-group">
-      <label
-        class="text-primary"
-      >
-        {{ label }}
-      </label>
-      <div>{{ value }}</div>
-    </fieldset>
-  </div>
-</template>
-
 <script>
 import multi from './multi'
 import errors from '../errors'
 import { compose, validator } from '@cortezaproject/corteza-js'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -65,9 +53,13 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      isFieldRequiredByLayout: 'ui/isFieldRequiredByLayout',
+    }),
+
     formGroupStyleClasses () {
       return {
-        required: this.field.isRequired,
+        required: this.isRequired,
 
         // CSS class "small" is set on form group
         // because of font-size: inherit prop on .col-form-label on
@@ -75,6 +67,14 @@ export default {
         small: false,
         'value-only': this.valueOnly,
       }
+    },
+
+    foo () {
+      return this.isFieldRequiredByLayout(this.field.name || this.field.fieldID)
+    },
+
+    isRequired () {
+      return this.field.isRequired || this.isFieldRequiredByLayout(this.field.name || this.field.fieldID)
     },
 
     state () {

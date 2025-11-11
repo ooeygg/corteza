@@ -481,6 +481,7 @@
           switch
           :labels="checkboxLabel"
         />
+
         <i18next
           path="page-layout.tooltip.title"
           tag="small"
@@ -508,12 +509,21 @@
             :tooltip="$t('page-layout.tooltip.performance.condition')"
             icon-class="text-warning"
           />
+
+          <b-button
+            variant="link"
+            :href="visibilityDocumentationURL"
+            target="_blank"
+            class="ml-auto p-0"
+          >
+            {{ $t('general:label.examples') }}
+          </b-button>
         </template>
         <b-input-group>
           <b-input-group-prepend>
-            <b-button variant="extra-light">
+            <b-input-group-text variant="extra-light">
               ƒ
-            </b-button>
+            </b-input-group-text>
           </b-input-group-prepend>
           <c-input-expression
             v-model="layoutEditor.layout.config.visibility.expression"
@@ -522,16 +532,6 @@
             :suggestion-params="visibilityAutoCompleteParams"
             class="flex-grow-1"
           />
-          <b-input-group-append>
-            <b-button
-              variant="outline-secondary"
-              :href="documentationURL"
-              class="d-flex justify-content-center align-items-center"
-              target="_blank"
-            >
-              ?
-            </b-button>
-          </b-input-group-append>
         </b-input-group>
 
         <i18next
@@ -779,6 +779,124 @@
             </b-table-simple>
           </c-form-table-wrapper>
         </b-form-group>
+
+        <hr>
+
+        <h5 class="d-flex align-items-center mb-3">
+          {{ $t('page-layout.requiredFields.label') }}
+
+          <c-hint
+            :tooltip="$t('page-layout.tooltip.performance.requiredFields')"
+            icon-class="text-warning"
+          />
+
+          <b-button
+            variant="link"
+            :href="visibilityDocumentationURL"
+            target="_blank"
+            class="ml-auto p-0"
+          >
+            {{ $t('general:label.examples') }}
+          </b-button>
+        </h5>
+
+        <p class="text-muted">
+          {{ $t('page-layout.requiredFields.description') }}
+        </p>
+
+        <c-form-table-wrapper
+          :labels="{ addButton: $t('general:label.add') }"
+          :disable-add-button="addRequiredFieldDisabled"
+          @add-item="addRequiredField"
+        >
+          <b-table-simple
+            responsive
+            borderless
+            small
+          >
+            <b-thead>
+              <b-tr>
+                <b-th
+                  class="text-primary"
+                  style="min-width: 250px;"
+                >
+                  {{ $t('page-layout.requiredFields.field') }}
+                </b-th>
+                <b-th
+                  class="text-primary"
+                  style="min-width: 300px;"
+                >
+                  {{ $t('page-layout.requiredFields.condition') }}
+                </b-th>
+                <b-th />
+              </b-tr>
+            </b-thead>
+
+            <b-tbody>
+              <b-tr
+                v-for="(requiredField, index) in validationRequiredFields"
+                :key="index"
+              >
+                <b-td style="min-width: 250px;">
+                  <c-input-select
+                    v-model="requiredField.field"
+                    :options="availableModuleFields"
+                    :placeholder="$t('page-layout.requiredFields.selectPlaceholder')"
+                    :selectable="option => isFieldSelectableForRequired(option, requiredField)"
+                    :get-option-label="getFieldLabel"
+                    :get-option-key="getFieldKey"
+                    :clearable="false"
+                    :reduce="option => option.name || option.fieldID"
+                  />
+                </b-td>
+
+                <b-td
+                  class="align-middle"
+                  style="min-width: 300px;"
+                >
+                  <b-input-group>
+                    <b-input-group-prepend>
+                      <b-input-group-text variant="extra-light">
+                        ƒ
+                      </b-input-group-text>
+                    </b-input-group-prepend>
+
+                    <c-input-expression
+                      v-model="requiredField.condition"
+                      auto-complete
+                      :placeholder="$t('page-layout.requiredFields.conditionPlaceholder')"
+                      :suggestion-params="visibilityAutoCompleteParams"
+                      class="flex-grow-1"
+                    />
+                  </b-input-group>
+                </b-td>
+
+                <b-td
+                  class="text-right"
+                  style="width: 4rem;"
+                >
+                  <c-input-confirm
+                    show-icon
+                    @confirmed="removeRequiredField(index)"
+                  />
+                </b-td>
+              </b-tr>
+            </b-tbody>
+          </b-table-simple>
+        </c-form-table-wrapper>
+
+        <i18next
+          path="page-layout.condition.description.record-page"
+          tag="small"
+          class="text-muted"
+        >
+          <code>record.values.fieldName</code>
+          <code>user.(userID/email...)</code>
+          <code>screen.(width/height)</code>
+          <code>isView/isCreate/isEdit</code>
+          <code>user.userID == record.createdBy</code>
+          <code>screen.width &lt; 1024</code>
+        </i18next>
       </template>
     </b-modal>
 
@@ -964,7 +1082,7 @@ import pages from 'corteza-webapp-compose/src/mixins/pages'
 import { isEqual } from 'lodash'
 import Draggable from 'vuedraggable'
 import { mapActions, mapGetters } from 'vuex'
-const { CInputRole, CInputExpression, CUploader } = components
+const { CInputRole, CInputExpression, CUploader, CInputSelect } = components
 
 export default {
   i18nOptions: {
@@ -981,6 +1099,7 @@ export default {
     Draggable,
     CInputRole,
     CInputExpression,
+    CInputSelect,
   },
 
   mixins: [
@@ -1144,7 +1263,7 @@ export default {
       return this.icon.type === 'link' ? this.icon.src : this.makeAttachmentUrl(this.icon.src)
     },
 
-    documentationURL () {
+    visibilityDocumentationURL () {
       // eslint-disable-next-line no-undef
       const [year, month] = VERSION.split('.')
       return `https://docs.cortezaproject.org/corteza-docs/${year}.${month}/integrator-guide/compose-configuration/page-layouts.html#visibility-condition`
@@ -1213,6 +1332,33 @@ export default {
 
     recordAutoCompleteParams () {
       return this.isRecordPage ? this.processRecordAutoCompleteParams({ module: this.module }) : []
+    },
+
+    availableModuleFields () {
+      if (!this.module) {
+        return []
+      }
+      return this.module.fields
+    },
+
+    addRequiredFieldDisabled () {
+      if (!this.layoutEditor.layout || !this.module) {
+        return true
+      }
+
+      return this.module.fields.length === 0
+    },
+
+    validationRequiredFields () {
+      if (!this.layoutEditor.layout) {
+        return []
+      }
+
+      const { config = {} } = this.layoutEditor.layout || {}
+      const { validation = {} } = config || {}
+      const { requiredFields = [] } = validation || {}
+
+      return requiredFields
     },
   },
 
@@ -1323,6 +1469,7 @@ export default {
 
     updateLayout () {
       this.layoutEditor.layout.meta.updated = true
+      this.layoutEditor.layout.config.validation.requiredFields = this.validationRequiredFields.filter(rf => rf.field !== undefined)
       this.layouts.splice(this.layoutEditor.index, 1, this.layoutEditor.layout)
       this.layoutEditor.index = undefined
       this.layoutEditor.layout = undefined
@@ -1561,6 +1708,34 @@ export default {
 
         return next((layoutsStateChange || pageStateChange) ? window.confirm(this.$t('general:editor.unsavedChanges')) : true)
       }
+    },
+
+    addRequiredField () {
+      this.layoutEditor.layout.config.validation.requiredFields.push({
+        field: undefined,
+        condition: '',
+      })
+    },
+
+    removeRequiredField (index) {
+      this.layoutEditor.layout.config.validation.requiredFields.splice(index, 1)
+    },
+
+    isFieldSelectableForRequired (option, currentRequiredField) {
+      const currentFieldId = option.isSystem ? option.name : option.fieldID
+      const existingField = this.validationRequiredFields.find(rf => {
+        const rfFieldId = rf.field
+        return rfFieldId === currentFieldId && rf !== currentRequiredField
+      })
+      return !existingField
+    },
+
+    getFieldLabel (field) {
+      return field.label || field.name
+    },
+
+    getFieldKey (field) {
+      return field.isSystem ? field.name : field.fieldID
     },
 
     setDefaultValues () {

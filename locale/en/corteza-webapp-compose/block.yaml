@@ -315,7 +315,6 @@ record:
     action: + Add
     placeholder: When should this field be displayed?
     selectPlaceholder: Select field
-    help: Example
     field: Field
     condition: Condition
     clearOnHide: Clear On Hide

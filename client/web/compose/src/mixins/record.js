@@ -140,6 +140,10 @@ export default {
 
       return this
         .dispatchUiEvent('beforeFormSubmit', this.record, { $records: records })
+        .then(() => {
+          // Evaluate layout required fields before validation
+          return this.evaluateLayoutRequiredFields()
+        })
         .then(() => this.validateRecord(pairs))
         .then(() => {
           if (isNew) {
@@ -379,10 +383,30 @@ export default {
      * @returns {Promise<void>}
      */
     async validateRecord (pairs) {
-      // Cache validators for later use
+      const layoutRequiredFields = this.$store.getters['ui/layoutRequiredFields'] || []
+
+      // Create validators with modified modules (if layout required fields exist)
       const validators = {}
       for (const p of pairs) {
-        validators[p.module.resourceID] = validators[p.module.resourceID] || new compose.RecordValidator(p.module)
+        let moduleForValidator = p.module
+
+        // If we have layout required fields, create a modified copy of the module
+        if (layoutRequiredFields.length > 0) {
+          // Clone the module with modified fields
+          const modifiedFields = p.module.fields.map(field => {
+            const isLayoutRequired = layoutRequiredFields.includes(field.name) || layoutRequiredFields.includes(field.fieldID)
+            if (isLayoutRequired && !field.isRequired) {
+              // Create a copy of the field with isRequired set to true
+              return new compose.ModuleField({ ...field, isRequired: true })
+            }
+            return field
+          })
+
+          // Create a new module with the modified fields
+          moduleForValidator = new compose.Module({ ...p.module, fields: modifiedFields })
+        }
+
+        validators[p.module.resourceID] = validators[p.module.resourceID] || new compose.RecordValidator(moduleForValidator)
       }
 
       const vRunner = () => {

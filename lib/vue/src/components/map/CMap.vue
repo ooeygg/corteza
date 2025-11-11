@@ -282,7 +282,6 @@ export default {
       }
 
       this.geoSearchProvider.search({ query }).then(results => {
-        console.log(results)
         this.geoSearch.results = results.map(result => {
           // Different providers return coordinates in different formats
           let lat, lng
@@ -311,7 +310,6 @@ export default {
     },
 
     placeGeoSearchMarker (result) {
-      console.log(result)
       const zoom = this.$refs.map.mapObject._zoom >= 15 ? this.$refs.map.mapObject._zoom : 15
       this.$refs.map.mapObject.flyTo([result.latlng.lat, result.latlng.lng], zoom, { animate: false })
       this.geoSearch.marker = { title: result.label, latlng: result.latlng }

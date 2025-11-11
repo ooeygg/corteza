@@ -40,9 +40,9 @@
     >
       <b-input-group>
         <b-input-group-prepend>
-          <b-button variant="extra-light">
+          <b-input-group-text variant="extra-light">
             ƒ
-          </b-button>
+          </b-input-group-text>
         </b-input-group-prepend>
         <b-form-input
           v-model="field.expressions.value"
@@ -50,7 +50,7 @@
         />
         <b-input-group-append>
           <b-button
-            variant="outline-extra-light"
+            variant="extra-light"
             :href="documentationURL"
             class="d-flex justify-content-center align-items-center text-primary"
             target="_blank"

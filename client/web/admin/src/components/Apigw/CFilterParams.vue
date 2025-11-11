@@ -61,9 +61,9 @@
 
           <b-input-group>
             <b-input-group-prepend>
-              <b-button variant="extra-light">
+              <b-input-group-text variant="extra-light">
                 ƒ
-              </b-button>
+              </b-input-group-text>
             </b-input-group-prepend>
             <b-form-input
               v-model="param.value.expr"
@@ -111,9 +111,9 @@
           <b-input-group-prepend
             v-if="param.label === 'expr'"
           >
-            <b-button variant="extra-light">
+            <b-input-group-text variant="extra-light">
               ƒ
-            </b-button>
+            </b-input-group-text>
           </b-input-group-prepend>
 
           <b-form-input

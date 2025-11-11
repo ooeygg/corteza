@@ -189,7 +189,7 @@
     <hr>
 
     <div class="px-3">
-      <h5 class="d-flex align-items-center justify-content-between mb-2">
+      <h5 class="d-flex align-items-center mb-2">
         {{ $t('record.fieldConditions.label') }}
 
         <c-hint
@@ -203,21 +203,9 @@
           target="_blank"
           class="p-0 ml-auto"
         >
-          {{ $t('record.fieldConditions.help') }}
+          {{ $t('general:label.examples') }}
         </b-button>
       </h5>
-
-      <i18next
-        path="general.visibility.condition.description.record-page"
-        tag="small"
-        class="text-muted"
-      >
-        <code>record.values.fieldName</code>
-        <code>user.(userID/email...)</code>
-        <code>user.userID == record.createdBy</code>
-        <code>record.values.fieldName == "value"</code>
-        <code>record.ownedBy == user.userID</code>
-      </i18next>
 
       <b-row class="mt-3">
         <b-col cols="12">
@@ -239,7 +227,6 @@
         :labels="{
           addButton: $t('general:label.add')
         }"
-        :disable-add-button="addRuleDisabled"
         class="my-3"
         @add-item="addRule"
       >
@@ -276,6 +263,7 @@
               <b-th />
             </b-tr>
           </b-thead>
+
           <b-tbody>
             <b-tr
               v-for="(condition, i) in block.options.fieldConditions"
@@ -299,10 +287,11 @@
               >
                 <b-input-group>
                   <b-input-group-prepend>
-                    <b-button variant="extra-light">
+                    <b-input-group-text variant="extra-light">
                       ƒ
-                    </b-button>
+                    </b-input-group-text>
                   </b-input-group-prepend>
+
                   <c-input-expression
                     v-model="condition.condition"
                     auto-complete
@@ -312,6 +301,7 @@
                   />
                 </b-input-group>
               </b-td>
+
               <b-td style="width: 20px;">
                 <div class="d-flex align-items-center justify-content-center">
                   <c-input-checkbox
@@ -320,6 +310,7 @@
                   />
                 </div>
               </b-td>
+
               <b-td
                 class="text-right"
                 style="width: 4rem;"
@@ -333,6 +324,19 @@
           </b-tbody>
         </b-table-simple>
       </c-form-table-wrapper>
+
+      <i18next
+        path="general.visibility.condition.description.record-page"
+        tag="small"
+        class="text-muted"
+      >
+        <code>record.values.fieldName</code>
+        <code>user.(userID/email...)</code>
+        <code>user.userID == record.createdBy</code>
+        <code>record.values.fieldName == "value"</code>
+        <code>record.ownedBy == user.userID</code>
+        <code>screen.width &lt; 1024</code>
+      </i18next>
     </div>
   </b-tab>
 </template>
@@ -377,10 +381,6 @@ export default {
       // eslint-disable-next-line no-undef
       const [year, month] = VERSION.split('.')
       return `https://docs.cortezaproject.org/corteza-docs/${year}.${month}/integrator-guide/compose-configuration/page-layouts.html#visibility-condition`
-    },
-
-    addRuleDisabled () {
-      return this.block.options.fields.filter(f => !f.isRequired).length === this.block.options.fieldConditions.length
     },
 
     recordDisplayOptions () {

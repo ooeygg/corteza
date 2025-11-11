@@ -82,10 +82,20 @@ type (
 	PageLayoutConfig struct {
 		Visibility PageLayoutVisibility `json:"visibility"`
 
-		Buttons PageLayoutButtonConfig `json:"buttons"`
-		Actions []PageLayoutAction     `json:"actions,omitempty"`
+		Buttons    PageLayoutButtonConfig `json:"buttons"`
+		Actions    []PageLayoutAction     `json:"actions,omitempty"`
+		Validation PageLayoutValidation   `json:"validation"`
 
 		UseTitle bool `json:"useTitle"`
+	}
+
+	PageLayoutValidation struct {
+		RequiredFields []PageLayoutRequiredField `json:"requiredFields,omitempty"`
+	}
+
+	PageLayoutRequiredField struct {
+		Field     string `json:"field"`
+		Condition string `json:"condition"`
 	}
 
 	PageLayoutVisibility struct {

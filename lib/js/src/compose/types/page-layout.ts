@@ -19,6 +19,16 @@ interface PageLayoutConfig {
   actions: Action[];
   // Only used for record pages
   useTitle: boolean;
+  validation: Validation;
+}
+
+interface RequiredField {
+  field: string;
+  condition: string;
+}
+
+interface Validation {
+  requiredFields: RequiredField[];
 }
 
 interface Action {
@@ -71,6 +81,9 @@ export class PageLayout {
     },
     actions: [],
     useTitle: false,
+    validation: {
+      requiredFields: [],
+    },
   }
 
   public meta: Meta = {

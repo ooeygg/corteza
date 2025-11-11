@@ -38,6 +38,7 @@ export default {
   computed: {
     ...mapGetters({
       getPageLayouts: 'pageLayout/getByPageID',
+      layoutRequiredFields: 'ui/layoutRequiredFields',
     }),
 
     isRecordPage () {
@@ -219,6 +220,11 @@ export default {
         block.meta.invisible = !showBlock
       })
 
+      // Evaluate layout required fields if this is a record page
+      if (this.isRecordPage && this.evaluateLayoutRequiredFields) {
+        await this.evaluateLayoutRequiredFields()
+      }
+
       return blocks
     },
 
@@ -239,6 +245,69 @@ export default {
 
         return expressions
       })
+    },
+
+    async evaluateLayoutRequiredFields () {
+      if (!this.layout) {
+        this.$store.dispatch('ui/clearLayoutRequiredFields')
+        return
+      }
+
+      const { config = {} } = this.layout || {}
+      const { validation = {} } = config || {}
+      const { requiredFields = [] } = validation || {}
+
+      if (requiredFields.length === 0) {
+        this.$store.dispatch('ui/clearLayoutRequiredFields')
+        return
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      const { expressions, variables } = this.prepareLayoutRequiredFieldsData()
+
+      if (Object.keys(expressions).length === 0) {
+        // No conditions to evaluate, mark all as required
+        const fields = requiredFields
+          .filter(rf => !rf.condition || rf.condition.trim() === '')
+          .map(rf => rf.field)
+        this.$store.dispatch('ui/setLayoutRequiredFields', fields)
+        return
+      }
+
+      return this.$SystemAPI
+        .expressionEvaluate({ variables, expressions })
+        .then(res => {
+          // Update required fields based on evaluation results
+          const fields = []
+
+          requiredFields.forEach(({ field, condition }) => {
+            // If no condition, always required
+            if (!condition || condition.trim() === '') {
+              fields.push(field)
+            } else if (res[field]) {
+              // Condition evaluated to true, field is required
+              fields.push(field)
+            }
+          })
+
+          this.$store.dispatch('ui/setLayoutRequiredFields', fields)
+        }).catch(this.toastErrorHandler(this.$t('notification:record.requiredFields.failed')))
+    },
+
+    prepareLayoutRequiredFieldsData () {
+      const expressions = {}
+      const variables = this.expressionVariables()
+
+      const { requiredFields = [] } = this.layout.config.validation
+
+      requiredFields.forEach(({ field, condition }) => {
+        if (field && condition && condition.trim() !== '') {
+          expressions[field] = condition
+        }
+      })
+
+      return { expressions, variables }
     },
   },
 }

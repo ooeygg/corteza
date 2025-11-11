@@ -7,12 +7,12 @@
     >
       <b-input-group>
         <b-input-group-prepend>
-          <b-button
+          <b-input-group-text
             v-b-tooltip.noninteractive.hover="{ title: $t('validators.expression.tooltip'), boundary: 'body' }"
             variant="extra-light"
           >
             ƒ
-          </b-button>
+          </b-input-group-text>
         </b-input-group-prepend>
         <slot :value="value[ei]">
           <b-form-input

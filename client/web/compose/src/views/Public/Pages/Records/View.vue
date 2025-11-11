@@ -461,19 +461,15 @@ export default {
 
     createEvents () {
       this.$root.$on('refetch-records', this.refetchRecords)
-      this.$root.$on('record-field-change', this.validateBlocksVisibilityCondition)
+      this.$root.$on('record-field-change', this.evaluateLayoutConditions)
 
       if (this.inModal) {
         this.$root.$on('bv::modal::hide', this.checkUnsavedChanges)
       }
     },
 
-    validateBlocksVisibilityCondition ({ fieldName }) {
-      const { blocks = [] } = this.page
-
-      if (blocks.some(({ meta = {} }) => ((meta.visibility || {}).expression).includes(fieldName))) {
-        this.evaluateBlocks()
-      }
+    evaluateLayoutConditions () {
+      this.evaluateBlocks()
     },
 
     async loadRecord (recordID = this.recordID) {
@@ -739,7 +735,7 @@ export default {
 
     destroyEvents () {
       this.$root.$off('refetch-records', this.refetchRecords)
-      this.$root.$off('record-field-change', this.validateBlocksVisibilityCondition)
+      this.$root.$off('record-field-change', this.evaluateLayoutConditions)
 
       if (this.inModal) {
         this.$root.$off('bv::modal::hide', this.checkUnsavedChanges)

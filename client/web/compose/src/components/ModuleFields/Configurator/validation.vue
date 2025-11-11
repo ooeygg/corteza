@@ -5,7 +5,6 @@
     <b-form-group
       :label="$t('sanitizers.label')"
       :description="$t('sanitizers.description')"
-      label-size="lg"
       label-class="d-flex align-items-center text-primary"
     >
       <template #label>
@@ -17,7 +16,7 @@
           target="_blank"
           class="p-0 ml-auto"
         >
-          {{ $t('sanitizers.examples') }}
+          {{ $t('general:label.examples') }}
         </b-button>
       </template>
 
@@ -36,8 +35,7 @@
     <hr>
 
     <b-form-group
-      label-size="lg"
-      label-class="d-flex text-primary"
+      label-class="d-flex align-items-center text-primary"
       :description="$t('validators.description')"
       class="mt-3"
     >
@@ -50,7 +48,7 @@
           target="_blank"
           class="p-0 ml-auto"
         >
-          {{ $t('sanitizers.examples') }}
+          {{ $t('general:label.examples') }}
         </b-button>
       </template>
 
@@ -106,25 +104,26 @@
     <hr>
 
     <b-form-group
-      label-size="lg"
       label-class="d-flex align-items-center text-primary"
       class="mt-3"
     >
       <template #label>
-        {{ $t('constraints.label') }}
+        {{ $t('constraints.description') }}
         <c-hint
           :tooltip="$t('constraints.tooltip.performance')"
           icon-class="text-warning"
         />
       </template>
 
-      <b-form-checkbox
+      <c-input-checkbox
         v-model="fieldConstraint.exists"
-        class="mt-2"
+        switch
+        :labels="{
+          on: $t('general:label.yes'),
+          off: $t('general:label.no'),
+        }"
         @change="toggleFieldConstraint"
-      >
-        {{ $t('constraints.description') }}
-      </b-form-checkbox>
+      />
 
       <b-row
         v-if="fieldConstraint.exists"

@@ -8,9 +8,7 @@
     :state="state"
     :class="formGroupStyleClasses"
   >
-    <template
-      #label
-    >
+    <template #label>
       <div
         v-if="!valueOnly"
         class="d-flex align-items-center text-primary p-0"

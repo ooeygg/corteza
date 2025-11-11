@@ -253,12 +253,22 @@
                 :tooltip="$t('general.visibility.tooltip.performance.condition')"
                 icon-class="text-warning"
               />
+
+              <b-button
+                variant="link"
+                :href="visibilityDocumentationURL"
+                target="_blank"
+                class="text-primary ml-auto p-0"
+              >
+                {{ $t('general:label.examples') }}
+              </b-button>
             </template>
+
             <b-input-group>
               <b-input-group-prepend>
-                <b-button variant="extra-light">
+                <b-input-group-text variant="extra-light">
                   ƒ
-                </b-button>
+                </b-input-group-text>
               </b-input-group-prepend>
               <c-input-expression
                 id="visibility-fields"
@@ -268,16 +278,6 @@
                 :suggestion-params="visibilityAutoCompleteParams"
                 class="flex-grow-1"
               />
-              <b-input-group-append>
-                <b-button
-                  variant="outline-secondary"
-                  :href="visibilityDocumentationURL"
-                  class="d-flex justify-content-center align-items-center"
-                  target="_blank"
-                >
-                  ?
-                </b-button>
-              </b-input-group-append>
             </b-input-group>
 
             <i18next

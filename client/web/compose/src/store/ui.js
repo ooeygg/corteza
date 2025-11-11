@@ -22,6 +22,8 @@ const types = {
   setLayoutHandle: 'setLayoutHandle',
   setModalPageHandle: 'setModalPageHandle',
   setModalLayoutHandle: 'setModalLayoutHandle',
+  setLayoutRequiredFields: 'setLayoutRequiredFields',
+  clearLayoutRequiredFields: 'clearLayoutRequiredFields',
 }
 
 export default function (ComposeAPI) {
@@ -44,6 +46,8 @@ export default function (ComposeAPI) {
 
       modalPageHandle: '',
       modalLayoutHandle: '',
+
+      layoutRequiredFields: [],
     },
 
     getters: {
@@ -73,6 +77,9 @@ export default function (ComposeAPI) {
 
       modalPageHandle: (state) => state.modalPageHandle,
       modalLayoutHandle: (state) => state.modalLayoutHandle,
+
+      layoutRequiredFields: (state) => state.layoutRequiredFields,
+      isFieldRequiredByLayout: (state) => (fieldID) => state.layoutRequiredFields.includes(fieldID),
     },
 
     actions: {
@@ -168,6 +175,14 @@ export default function (ComposeAPI) {
       setModalLayoutHandle ({ commit }, value) {
         commit(types.setModalLayoutHandle, value)
       },
+
+      setLayoutRequiredFields ({ commit }, fields) {
+        commit(types.setLayoutRequiredFields, fields)
+      },
+
+      clearLayoutRequiredFields ({ commit }) {
+        commit(types.clearLayoutRequiredFields)
+      },
     },
 
     mutations: {
@@ -245,6 +260,14 @@ export default function (ComposeAPI) {
 
       [types.setModalLayoutHandle] (state, value) {
         state.modalLayoutHandle = value || ''
+      },
+
+      [types.setLayoutRequiredFields] (state, fields) {
+        state.layoutRequiredFields = fields || []
+      },
+
+      [types.clearLayoutRequiredFields] (state) {
+        state.layoutRequiredFields = []
       },
     },
   }
