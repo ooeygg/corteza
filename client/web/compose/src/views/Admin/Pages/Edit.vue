@@ -810,6 +810,7 @@
           @add-item="addRequiredField"
         >
           <b-table-simple
+            v-if="validationRequiredFields.length > 0"
             responsive
             borderless
             small
