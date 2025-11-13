@@ -104,6 +104,9 @@ func loadSystemUsers(ctx context.Context, s store.Users) (m map[string]*types.Us
 }
 
 func setUsersTheme(ctx context.Context, log *zap.Logger, s store.Users) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	var (
 		f = types.UserFilter{
 			Deleted: filter.StateInclusive,

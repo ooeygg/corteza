@@ -12,6 +12,9 @@ import (
 )
 
 func setDefaultUserGroupRefs(ctx context.Context, log *zap.Logger, s store.Storer, authOpt options.AuthOpt) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	h, ok := os.LookupEnv("AUTH_DEFAULT_USER_GROUP")
 	if !ok {
 		h = "default-root"

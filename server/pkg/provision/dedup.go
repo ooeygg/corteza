@@ -9,6 +9,9 @@ import (
 )
 
 func invalidateDedupRules(ctx context.Context, log *zap.Logger, s store.Storer) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	var ll types.ModuleSet
 
 	if ll, _, err = s.SearchComposeModules(ctx, types.ModuleFilter{}); err != nil {

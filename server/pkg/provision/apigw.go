@@ -12,6 +12,9 @@ import (
 )
 
 func apigwFilters(ctx context.Context, log *zap.Logger, s store.Storer) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	var (
 		filters types.ApigwFilterSet
 	)

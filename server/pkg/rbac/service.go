@@ -297,7 +297,8 @@ func (svc *service) Watch(ctx context.Context) {
 			case <-svc.f:
 				svc.Reload(ctx)
 			case <-debugTicker.C:
-				svc.LogDebug(ctx)
+				// @todo truncate and bind to a level
+				// svc.LogDebug(ctx)
 			}
 		}
 	}()

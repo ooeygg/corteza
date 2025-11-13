@@ -17,6 +17,9 @@ import (
 //
 // Env variable should contains space delimited pairs of providers (<name> <provider> ....)
 func oidcAutoDiscovery(ctx context.Context, log *zap.Logger, s store.SettingValues, opt options.AuthOpt) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	var provider = strings.TrimSpace(options.EnvString("PROVISION_OIDC_PROVIDER", ""))
 
 	log.Debug("OIDC auto discovery provision",
@@ -74,6 +77,9 @@ func oidcAutoDiscovery(ctx context.Context, log *zap.Logger, s store.SettingValu
 }
 
 func authAddExternals(ctx context.Context, log *zap.Logger, s store.SettingValues) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	var (
 		kinds = []string{
 			"github",

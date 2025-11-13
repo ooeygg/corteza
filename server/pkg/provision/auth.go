@@ -64,6 +64,9 @@ func emailSettings(ctx context.Context, s store.Storer) error {
 // addAuthSuperUsers assigns BYPASS roles to users from AUTH_PROVISION_SUPER_USER value
 // When in Production, Corteza should stop and report an error.
 func addAuthSuperUsers(ctx context.Context, log *zap.Logger, s store.Storer, authOpt options.AuthOpt) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	var (
 		envOpt = options.Environment()
 	)
@@ -171,6 +174,9 @@ func createUserHandle(u *types.User) (hdl string) {
 }
 
 func defaultUserGroup(ctx context.Context, log *zap.Logger, s store.UserGroups, authOpt options.AuthOpt) error {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	g := &types.UserGroup{
 		ID:     id.Next(),
 		Handle: authOpt.DefaultUserGroup,
@@ -233,6 +239,9 @@ func defaultUserGroup(ctx context.Context, log *zap.Logger, s store.UserGroups, 
 
 // defaultAuthClient checks if default client exists (handle = AUTH_DEFAULT_CLIENT) and adds it
 func defaultAuthClient(ctx context.Context, log *zap.Logger, s store.Storer, authOpt options.AuthOpt) error {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	if authOpt.DefaultClient == "" {
 		// Default client not set
 		return nil

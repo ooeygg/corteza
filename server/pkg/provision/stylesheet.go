@@ -1,20 +1,23 @@
 package provision
 
 import (
-    "context"
-    "encoding/json"
-    "strconv"
-    "time"
+	"context"
+	"encoding/json"
+	"strconv"
+	"time"
 
-    "github.com/cortezaproject/corteza/server/pkg/sass"
-    "github.com/cortezaproject/corteza/server/store"
-    "github.com/cortezaproject/corteza/server/system/types"
-    "go.uber.org/zap"
+	"github.com/cortezaproject/corteza/server/pkg/sass"
+	"github.com/cortezaproject/corteza/server/store"
+	"github.com/cortezaproject/corteza/server/system/types"
+	"go.uber.org/zap"
 )
 
 // updateWebappTheme is a function that provisions new webapp themes,
 // and migrates the old custom css and branding sass settings to new webapp themes setting.
 func updateWebappTheme(ctx context.Context, log *zap.Logger, s store.Storer) (err error) {
+	log.Info("provision start")
+	defer log.Info("provision end")
+
 	vv, _, err := store.SearchSettingValues(ctx, s, types.SettingsFilter{})
 	if err != nil {
 		return err
@@ -80,9 +83,9 @@ func provisionTheme(ctx context.Context, s store.Storer, name string, themes []t
 	}
 
 	newThemeSetting := &types.SettingValue{
-		Name:  name,
-		Value: value,
-        UpdatedAt: time.Now(),
+		Name:      name,
+		Value:     value,
+		UpdatedAt: time.Now(),
 	}
 
 	err = store.CreateSettingValue(ctx, s, newThemeSetting)
