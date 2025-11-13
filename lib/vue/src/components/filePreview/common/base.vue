@@ -7,17 +7,13 @@ export default {
   props: {
     inline: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
 
   computed: {
     previewType () {
-      const component = getComponent({ type: this.$attrs.mime, src: this.$attrs.src, name: this.$attrs.name })
-      if (!component) {
-        this.$emit('previewUnavailable', { type: this.$attrs.mime })
-      }
-      return component
+      return getComponent({ type: this.$attrs.mime, src: this.$attrs.src, name: this.$attrs.name })
     },
   },
 }

@@ -1,3 +1,3 @@
 export { default as CPreviewLightbox } from './CPreviewLightbox.vue'
 export { default as CPreviewInline } from './CPreviewInline.vue'
-export { canPreview } from './common/index.js'
+export { canPreview, getExtensionIconType } from './common/index.js'

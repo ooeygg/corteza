@@ -14,7 +14,7 @@
 
     <component
       :is="previewType"
-      slot="main"
+      v-if="previewType"
       v-bind="$attrs"
       v-on="$listeners"
     />
@@ -22,7 +22,7 @@
 </template>
 
 <script lang="js">
-import { LightboxIMG as IMG, PDF } from './common/types'
+import { LightboxIMG as IMG, PDF, NoPreview } from './common/types'
 import { CLightbox } from '../lightbox/index.ts'
 import base from './common/base.vue'
 
@@ -31,6 +31,7 @@ export default {
     CLightbox,
     IMG,
     PDF,
+    NoPreview,
   },
 
   extends: base,

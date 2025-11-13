@@ -65,6 +65,7 @@ export default {
         pageLoading: this.$t('pdf.pageLoading'),
         noPages: this.$t('pdf.noPages'),
         clickToRetry: this.$t('pdf.clickToRetry'),
+        previewUnavailable: this.$t('general.label.previewUnavailable'),
       }
     },
   },

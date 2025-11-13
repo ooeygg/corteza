@@ -12,6 +12,7 @@ export {
   CPreviewInline,
   CPreviewLightbox,
   canPreview,
+  getExtensionIconType,
 } from './filePreview'
 
 export {

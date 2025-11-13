@@ -1,6 +1,6 @@
 <template>
   <div class="lightbox">
-    <header>
+    <div class="header">
       <div class="left">
         <slot name="header.left" />
       </div>
@@ -13,10 +13,11 @@
           &times;
         </button>
       </div>
-    </header>
-    <main>
-      <slot name="main" />
-    </main>
+    </div>
+
+    <div class="main">
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -34,7 +35,7 @@
   z-index: 2000;
 }
 
-.lightbox header {
+.lightbox .header {
   display: flex;
   justify-content: space-between;
   background-color: #FFFFFF;
@@ -47,19 +48,19 @@
   height: 50px;
 }
 
-.lightbox header .left {
+.lightbox .header .left {
   margin-left: 10px;
 }
-.lightbox header .right {
+.lightbox .header .right {
   margin-right: 10px;
 }
 
-.lightbox header > div {
+.lightbox .header > div {
   display: flex;
   align-items: center;
 }
 
-.lightbox main {
+.lightbox .main {
   position: absolute;
   top: 50px;
   left: 0;
@@ -69,7 +70,7 @@
   z-index: 1;
 }
 
-.lightbox header button {
+.lightbox .header button {
   background-color: transparent;
   border: none;
   outline: none;
@@ -80,7 +81,7 @@
   box-sizing: border-box;
 }
 
-.lightbox header button:last-of-type {
+.lightbox .header button:last-of-type {
   margin-right: 0;
 }
 

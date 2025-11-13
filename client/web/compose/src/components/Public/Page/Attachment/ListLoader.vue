@@ -78,12 +78,13 @@
 
     <div
       v-else
-      class="d-flex align-items-center justify-content-around gap-3 flex-wrap h-100"
+      class="d-flex align-items-start justify-content-around gap-3 flex-wrap h-100"
     >
       <div
         v-for="a in attachments"
         :key="a.attachmentID"
         :class="{ 'h-100': attachments.length === 1 }"
+        class="item-preview"
       >
         <c-preview-inline
           v-if="canPreview(a)"
@@ -93,33 +94,20 @@
           :name="a.name"
           :alt="a.name"
           :preview-style="{ width: 'unset', ...inlineCustomStyles(a) }"
-          :preview-class="[
-            !previewOptions.clickToView ? 'disable-zoom-cursor' : '',
-          ]"
           :labels="previewLabels"
           @openPreview="openLightbox({ ...a, ...$event })"
         />
 
-        <font-awesome-icon
-          v-else
-          :title="a.name"
-          :icon="['far', `file-${ext(a)}`]"
-          :style="inlineCustomStyles(a)"
-          class="text-secondary"
-        />
-
         <div
-          v-if="!hideFileName"
-          class="d-flex align-items-center justify-content-center gap-1"
-          :class="{ 'w-100': canPreview(a) }"
+          class="d-flex align-items-start justify-content-center"
+          :style="{ width: `calc(${inlineCustomStyles(a).width} + 4rem)` }"
         >
           <div
+            v-if="!hideFileName"
             :class="{ 'text-center': canPreview(a) }"
-            class="text-wrap"
+            class="text-wrap filename-container"
           >
-            <attachment-link
-              :attachment="a"
-            />
+            <attachment-link :attachment="a" />
           </div>
 
           <b-button
@@ -127,7 +115,7 @@
             :href="a.download"
             variant="outline-extra-light"
             size="sm"
-            class="download-button text-secondary border-0"
+            class="download-button text-secondary border-0 ml-1"
           >
             <font-awesome-icon :icon="['fas', 'download']" />
           </b-button>
@@ -136,6 +124,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import numeral from 'numeral'
 import moment from 'moment'
@@ -143,7 +132,7 @@ import { compose, shared } from '@cortezaproject/corteza-js'
 import AttachmentLink from './Link'
 import draggable from 'vuedraggable'
 import { url, components } from '@cortezaproject/corteza-vue'
-const { CPreviewInline, canPreview } = components
+const { CPreviewInline, canPreview, getExtensionIconType } = components
 
 export default {
   i18nOptions: {
@@ -296,8 +285,6 @@ export default {
     },
 
     openLightbox (e) {
-      if (!this.previewOptions.clickToView) return
-
       if (this.ext(e) === 'pdf') {
         window.open(e.url, '_blank')
       } else {
@@ -312,33 +299,9 @@ export default {
 
     ext (a) {
       const { meta } = a
-      switch (meta && meta.original ? meta.original.ext : null) {
-        case 'odt':
-        case 'doc':
-        case 'docx':
-          return 'word'
-        case 'pdf':
-          return 'pdf'
-        case 'ppt':
-        case 'pptx':
-          return 'powerpoint'
-        case 'zip':
-        case 'rar':
-          return 'archive'
-        case 'xls':
-        case 'xlsx':
-        case 'csv':
-          return 'excel'
-        case 'mov':
-        case 'mp3':
-        case 'mp4':
-          return 'video'
-        case 'png':
-        case 'jpg':
-        case 'jpeg':
-          return 'image'
-        default: return 'alt'
-      }
+      const { original = {} } = meta || {}
+      const { ext } = original || {}
+      return getExtensionIconType(ext)
     },
 
     inlineCustomStyles (a) {
@@ -381,11 +344,36 @@ export default {
   cursor: grab;
 }
 
-.item:hover {
-  background-color: var(--light);
+.download-button {
+  visibility: visible;
+
+  &:hover {
+    color: var(--primary) !important;
+  }
 }
 
-.download-button:hover {
-  color: var(--primary) !important;
+.item:hover {
+  background-color: var(--light);
+
+  .download-button {
+    visibility: visible;
+  }
+}
+
+.filename-container {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  max-width: 100%;
+
+  &:hover {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
 }
 </style>
