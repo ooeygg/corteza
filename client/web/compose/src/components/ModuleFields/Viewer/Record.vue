@@ -5,7 +5,10 @@
     small
   />
 
-  <div v-else>
+  <div
+    v-else
+    @click.stop
+  >
     <span
       v-for="(v, index) of formattedValue"
       :key="v.id || index"

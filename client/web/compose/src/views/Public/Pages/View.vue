@@ -186,7 +186,7 @@ export default {
         // If the page changed we need to clear the record pagination since its not relevant anymore
         if (this.recordPaginationUsable) {
           this.setRecordPaginationUsable(false)
-        } else {
+        } else if (pageID !== oldPageID) {
           this.clearRecordSet()
           this.clearRecordPagination()
         }
