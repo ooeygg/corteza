@@ -369,7 +369,7 @@
 
           <c-button-submit
             data-test-id="button-save-workflow"
-            :disabled="canSave"
+            :disabled="isSaveDisabled"
             :processing="processingSave"
             :text="$t('editor:save')"
             class="ml-auto"
@@ -667,7 +667,7 @@ export default {
       return handle.handleState(this.workflow.handle)
     },
 
-    canSave () {
+    isSaveDisabled () {
       return !this.canUpdateWorkflow || [this.nameState, this.handleState].includes(false)
     },
 
@@ -853,6 +853,48 @@ export default {
       this.graph.setConnectable(true)
       this.graph.setAllowDanglingEdges(false)
       this.graph.setTooltips(true)
+
+      this.graph.container.style.overflow = 'hidden'
+
+      // Panning: middle mouse button and right-click; left-click for selection
+      this.graph.setPanning(true)
+      this.graph.panningHandler.useLeftButtonForPanning = false
+      this.graph.panningHandler.usePopupTrigger = true
+      this.graph.panningHandler.ignoreCell = true
+      this.graph.panningHandler.isForcePanningEvent = (me) => {
+        const evt = me.getEvent()
+        return mxEvent.isMiddleMouseButton(evt) || mxEvent.isRightMouseButton(evt)
+      }
+
+      const panningHandler = this.graph.panningHandler
+      const originalMouseDown = panningHandler.mouseDown
+      panningHandler.mouseDown = function (sender, me) {
+        const evt = me.getEvent()
+        const isPanButton = mxEvent.isMiddleMouseButton(evt) || mxEvent.isRightMouseButton(evt)
+        if (isPanButton) {
+          sender.container.style.cursor = 'grabbing'
+        }
+        if (originalMouseDown) {
+          originalMouseDown.apply(this, arguments)
+        }
+      }
+
+      const originalMouseUp = panningHandler.mouseUp
+      panningHandler.mouseUp = function (sender, me) {
+        sender.container.style.cursor = 'default'
+        if (originalMouseUp) {
+          originalMouseUp.apply(this, arguments)
+        }
+      }
+
+      mxEvent.addListener(this.graph.container, 'mousedown', (evt) => {
+        if (mxEvent.isMiddleMouseButton(evt) || mxEvent.isRightMouseButton(evt)) {
+          this.graph.container.style.cursor = 'grabbing'
+          this.graph.panningHandler.start(evt)
+          mxEvent.consume(evt)
+        }
+      })
+      mxEvent.disableContextMenu(this.graph.container)
 
       /* eslint-disable no-new */
       new mxRubberband(this.graph) // Enables multiple selection
@@ -1673,19 +1715,21 @@ export default {
         })
       })
 
-      // Zoom event
-      mxEvent.addMouseWheelListener((event, up) => {
-        if (mxEvent.isConsumed(event)) {
-          return
+      // Scroll to pan, Ctrl+scroll to zoom
+      this.graph.container.addEventListener('wheel', (event) => {
+        if (event.ctrlKey || (mxClient.IS_MAC && event.metaKey)) {
+          this.zoom(event.deltaY < 0)
+          event.preventDefault()
+          event.stopPropagation()
+        } else {
+          const view = this.graph.getView()
+          view.setTranslate(
+            view.translate.x - (event.deltaX || 0) / view.scale,
+            view.translate.y - (event.deltaY || 0) / view.scale,
+          )
+          event.preventDefault()
         }
-
-        if (mxEvent.isControlDown(event) || (mxClient.IS_MAC && mxEvent.isMetaDown(event))) {
-          return
-        }
-
-        this.zoom(up)
-        mxEvent.consume(event)
-      }, this.graph.container)
+      }, { passive: false })
 
       // On hover, bring cell to foreground
       this.graph.addMouseListener({
