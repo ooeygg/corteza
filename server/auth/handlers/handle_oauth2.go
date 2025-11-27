@@ -560,6 +560,12 @@ func generateIdToken(user *types.User, client *types.AuthClient, ti oauth2def.To
 	if err = token.Set("user_id", strconv.FormatUint(user.ID, 10)); err != nil {
 		return
 	}
+
+	// sub is required by some clients (goth) so we'll provide it just in case
+	if err = token.Set("sub", strconv.FormatUint(user.ID, 10)); err != nil {
+		return
+	}
+
 	if err = token.Set("email", user.Email); err != nil {
 		return
 	}
