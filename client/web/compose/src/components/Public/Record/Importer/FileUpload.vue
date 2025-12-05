@@ -5,10 +5,10 @@
       label-class="text-primary"
     >
       <c-uploader
-        :label="dzLabel"
         :endpoint="endpoint"
         :accepted-files="['application/json', 'text/csv']"
         :max-filesize="$s('compose.Record.Attachments.MaxSize', 100)"
+        show-uploaded-file-name
         class="uploader"
         @upload="onUploaded"
       />
@@ -102,7 +102,7 @@ export default {
 
   computed: {
     endpoint () {
-      return this.$ComposeAPI.recordImportInitEndpoint({
+      return this.$ComposeAPI.baseURL + this.$ComposeAPI.recordImportInitEndpoint({
         namespaceID: this.namespace.namespaceID,
         moduleID: this.module.moduleID,
       })
@@ -140,14 +140,6 @@ export default {
 
     canContinue () {
       return !!this.session
-    },
-
-    dzLabel () {
-      if (this.sessionFile) {
-        return this.$t('recordList.import.dropzoneFileAdded', { name: this.sessionFile.name, count: this.session.progress.entryCount })
-      }
-
-      return this.$t('recordList.import.dropzoneLabel')
     },
   },
 

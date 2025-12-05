@@ -32,17 +32,28 @@
           data-test-id="drop-area"
           class="d-flex align-items-center h-100 w-100 p-2 droparea justify-content-center"
         >
-          {{ displayLabel }}
+          <span
+            v-if="error"
+            class="text-danger"
+          >
+            {{ error }}
+          </span>
+
+          <span
+            v-else-if="activeLabel"
+          >
+            {{ activeLabel }}
+          </span>
+
+          <span
+            v-else
+            class="text-muted"
+          >
+            {{ placeholderLabel }}
+          </span>
         </div>
       </div>
     </vue-dropzone>
-
-    <p
-      v-if="error"
-      class="text-danger mb-0"
-    >
-      {{ error }}
-    </p>
   </div>
 </template>
 
@@ -102,10 +113,16 @@ export default {
       type: String,
       default: 'upload',
     },
+
+    showUploadedFileName: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data () {
     return {
+      active: null,
       processing: null,
       error: null,
     }
@@ -163,7 +180,15 @@ export default {
       return `${uploadingLabel} ${file.name} (${this.size(file)})`
     },
 
-    displayLabel () {
+    activeLabel () {
+      if (!this.showUploadedFileName || !this.active) {
+        return null
+      }
+
+      return `${this.active.name} (${this.size(this.active)})`
+    },
+
+    placeholderLabel () {
       return this.labels.placeholder || 'Click or drop files here to upload'
     },
   },
@@ -178,6 +203,7 @@ export default {
         return this.onError(error, error.message)
       }
 
+      this.active = file
       this.processing = null
       this.error = null
       this.$emit('upload', response, file)
@@ -199,6 +225,7 @@ export default {
     },
 
     onError (e, message) {
+      this.active = null
       this.error = message
       this.processing = null
     },

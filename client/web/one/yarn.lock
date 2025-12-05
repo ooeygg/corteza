@@ -975,10 +975,10 @@
     numeral "^2.0.6"
     pino "^9.6.0"
 
-"@cortezaproject/corteza-vue@^2024.9.6":
-  version "2024.9.6"
-  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-vue/-/corteza-vue-2024.9.6.tgz#b2bd1e6f31636fde09d4de95820cb79ee2a6959c"
-  integrity sha512-aWZ6EfozvrgryRB6uNXFrMyjVd1vhovXWU8EOM4OJ6ts9PPyp4HwApL9hU003NKdnCu+FiEpjOA6Fctg5wrOMw==
+"@cortezaproject/corteza-vue@2024.9.6-fix.1":
+  version "2024.9.6-fix.1"
+  resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-vue/-/corteza-vue-2024.9.6-fix.1.tgz#b8cb6eaeb8d79c524b37b9edd4815645cebab29d"
+  integrity sha512-iIRKoIK8+voq3XeZZebyVtFTC5lYJlYzH3TwJ9uQhULu0MGqv8nn6qaiLhph3RGd2+rl30Fmr4tYmsK3k4qPAg==
   dependencies:
     "@cortezaproject/corteza-js" "^2024.9.6"
     "@floating-ui/dom" "^1.7.4"

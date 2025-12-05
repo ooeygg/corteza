@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@cortezaproject/corteza-js": "^2024.9.6",
-    "@cortezaproject/corteza-vue": "^2024.9.6",
+    "@cortezaproject/corteza-vue": "2024.9.6-fix.1",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
@@ -46,8 +46,8 @@
     "@fullcalendar/list": "^4.3.0",
     "@fullcalendar/timegrid": "^4.3.0",
     "@fullcalendar/vue": "^4.3.1",
-    "@popperjs/core": "^2.4.0",
     "@panter/vue-i18next": "^0.15.2",
+    "@popperjs/core": "^2.4.0",
     "axios": "^1.8.3",
     "bootstrap-vue": "2.23.1",
     "compact-timezone-list": "^1.0.6",
