@@ -128,7 +128,8 @@ export default {
      * Because of this, we are using `view.dom.innerHTML`. This should be improved at a later point
      */
     onUpdate () {
-      this.currentValue = this.editor.getHTML()
+      // Add <br> tags to empty paragraphs
+      this.currentValue = this.editor.getHTML().replace(/<p><\/p>/g, '<p><br></p>')
 
       this.emittedContent = true
       this.$emit('input', this.currentValue)
