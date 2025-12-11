@@ -108,15 +108,9 @@ export default {
           },
         }
 
-        // If name and params match, make sure to refresh page instead of pushing
-        const sameRoute = routeName === this.$route.name &&
-                        slug === this.$route.params.slug &&
-                        pageID === this.$route.params.pageID &&
-                        recordID === this.$route.params.recordID
-
         if (openMode === 'newTab') {
           window.open(this.$router.resolve(routeParams).href, '_blank')
-        } else if (this.isOnPagesRouteOrChild && !sameRoute && openMode === 'modal') {
+        } else if (this.isOnPagesRouteOrChild && openMode === 'modal') {
           this.$root.$emit('show-record-modal', {
             recordID: !recordID || recordID === '0' ? '0' : recordID,
               recordPageID: pageID,
