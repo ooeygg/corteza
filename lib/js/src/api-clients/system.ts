@@ -4692,6 +4692,44 @@ export default class System {
     return `/notification/${notificationID}/read`
   }
 
+  // Mark notification as unread
+  async notificationMarkAsUnread (a: KV, extra: AxiosRequestConfig = {}): Promise<KV> {
+    const {
+      notificationID,
+    } = (a as KV) || {}
+    if (!notificationID) {
+      throw Error('field notificationID is empty')
+    }
+    const cfg: AxiosRequestConfig = {
+      ...extra,
+      method: 'patch',
+      url: this.notificationMarkAsUnreadEndpoint({
+        notificationID,
+      }),
+    }
+
+    return this.api().request(cfg).then(result => stdResolve(result))
+  }
+
+  notificationMarkAsUnreadCancellable (a: KV, extra: AxiosRequestConfig = {}): { response: (a: KV, extra?: AxiosRequestConfig) => Promise<KV>; cancel: () => void; } {
+    const cancelTokenSource = axios.CancelToken.source();
+    const options = {...extra, cancelToken: cancelTokenSource.token }
+
+    return {
+      response: () => this.notificationMarkAsUnread(a, options),
+      cancel: () => {
+        cancelTokenSource.cancel();
+      },
+    }
+  }
+
+  notificationMarkAsUnreadEndpoint (a: KV): string {
+    const {
+      notificationID,
+    } = a || {}
+    return `/notification/${notificationID}/unread`
+  }
+
   // Mark all notifications as read for current user
   async notificationMarkAllAsRead (extra: AxiosRequestConfig = {}): Promise<KV> {
 
@@ -4718,6 +4756,34 @@ export default class System {
 
   notificationMarkAllAsReadEndpoint (): string {
     return '/notification/all/read'
+  }
+
+  // Mark all notifications as unread for current user
+  async notificationMarkAllAsUnread (extra: AxiosRequestConfig = {}): Promise<KV> {
+
+    const cfg: AxiosRequestConfig = {
+      ...extra,
+      method: 'patch',
+      url: this.notificationMarkAllAsUnreadEndpoint(),
+    }
+
+    return this.api().request(cfg).then(result => stdResolve(result))
+  }
+
+  notificationMarkAllAsUnreadCancellable (extra: AxiosRequestConfig = {}): { response: (a: KV, extra?: AxiosRequestConfig) => Promise<KV>; cancel: () => void; } {
+    const cancelTokenSource = axios.CancelToken.source();
+    const options = {...extra, cancelToken: cancelTokenSource.token }
+
+    return {
+      response: () => this.notificationMarkAllAsUnread(options),
+      cancel: () => {
+        cancelTokenSource.cancel();
+      },
+    }
+  }
+
+  notificationMarkAllAsUnreadEndpoint (): string {
+    return '/notification/all/unread'
   }
 
   // Attachment details

@@ -70,6 +70,8 @@ import {
   faTrashAlt,
   faEdit,
   faBell,
+  faEnvelope,
+  faEnvelopeOpen,
 } from '@fortawesome/free-regular-svg-icons'
 
 library.add(
@@ -120,6 +122,7 @@ library.add(
   faArchway,
   faEye,
   faEnvelopeOpen,
+  faEnvelope,
   faWrench,
   faSearch,
   faMapMarkedAlt,

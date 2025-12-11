@@ -1800,10 +1800,24 @@ endpoints:
         name: notificationID
         required: true
         title: Notification ID
+  - name: markAsUnread
+    method: PATCH
+    title: Mark notification as unread
+    path: "/{notificationID}/unread"
+    parameters:
+      path:
+      - type: uint64
+        name: notificationID
+        required: true
+        title: Notification ID
   - name: markAllAsRead
     method: PATCH
     title: Mark all notifications as read for current user
     path: "/all/read"
+  - name: markAllAsUnread
+    method: PATCH
+    title: Mark all notifications as unread for current user
+    path: "/all/unread"
 - title: Attachments
   path: "/attachment/{kind}"
   entrypoint: attachment

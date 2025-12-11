@@ -97,6 +97,7 @@ import {
   faSquare,
   faTrashAlt,
   faUser,
+  faEnvelopeOpen,
 } from '@fortawesome/free-regular-svg-icons'
 
 library.add(
@@ -155,6 +156,7 @@ library.add(
   faChevronRight,
   faShareAlt,
   faEnvelope,
+  faEnvelopeOpen,
   faAngleUp,
   faAngleDown,
   faAngleLeft,
