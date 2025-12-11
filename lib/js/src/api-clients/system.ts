@@ -3860,6 +3860,45 @@ export default class System {
     return '/application/reorder'
   }
 
+  // List labels
+  async labelList (a: KV, extra: AxiosRequestConfig = {}): Promise<KV> {
+    const {
+      kind,
+      name,
+      value,
+      limit,
+    } = (a as KV) || {}
+    const cfg: AxiosRequestConfig = {
+      ...extra,
+      method: 'get',
+      url: this.labelListEndpoint(),
+    }
+    cfg.params = {
+      kind,
+      name,
+      value,
+      limit,
+    }
+
+    return this.api().request(cfg).then(result => stdResolve(result))
+  }
+
+  labelListCancellable (a: KV, extra: AxiosRequestConfig = {}): { response: (a: KV, extra?: AxiosRequestConfig) => Promise<KV>; cancel: () => void; } {
+    const cancelTokenSource = axios.CancelToken.source();
+    const options = {...extra, cancelToken: cancelTokenSource.token }
+
+    return {
+      response: () => this.labelList(a, options),
+      cancel: () => {
+        cancelTokenSource.cancel();
+      },
+    }
+  }
+
+  labelListEndpoint (): string {
+    return 'undefined/label/'
+  }
+
   // Retrieve defined permissions
   async permissionsList (extra: AxiosRequestConfig = {}): Promise<KV> {
 

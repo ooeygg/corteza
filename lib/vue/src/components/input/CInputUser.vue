@@ -71,7 +71,6 @@ export default {
     search: debounce(function (query) {
       if (query !== this.user.filter.query) {
         this.user.filter.query = query
-        this.user.filter.page = 1
       }
 
       this.fetchUsers()
@@ -110,6 +109,8 @@ export default {
     onUserUpdate (user) {
       if (this.clearOnSelect && this.$refs.userSelect) {
         this.$refs.userSelect._data._value = undefined
+      } else {
+        this.user.value = user
       }
 
       this.$emit('input', user.userID)
