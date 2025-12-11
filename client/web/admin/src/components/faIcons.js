@@ -42,7 +42,6 @@ import {
   faFlag,
   faCog,
   faArchway,
-  faEnvelopeOpen,
   faWrench,
   faSearch,
   faMapMarkedAlt,
