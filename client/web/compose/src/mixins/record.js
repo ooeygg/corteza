@@ -348,7 +348,7 @@ export default {
           this.showModal = false
           this.$emit('save')
 
-          this.$root.$emit('refetch-records')
+          this.$root.$emit('refetch-records', { stayOnPage: true })
         }).catch(this.toastErrorHandler(this.$t('notification:record.deleteBulkRecordUpdateFailed')))
         .finally(() => {
           this.processing = false

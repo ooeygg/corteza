@@ -813,7 +813,6 @@
             aria-controls="record-list"
             class="m-0 d-print-none"
             pills
-            :disabled="isProcessing"
             :value="getPagination.page"
             :per-page="getPagination.perPage"
             :total-rows="getPagination.count"
@@ -1042,6 +1041,8 @@ export default {
 
       processingTimeout: undefined,
       cancelled: false,
+
+      stayOnPage: undefined,
     }
   },
 
@@ -1784,7 +1785,7 @@ export default {
       this.refresh(true)
     },
 
-    goToPage (page) {
+    async goToPage (page) {
       if (page >= 1) {
         this.filter.pageCursor = (this.pagination.pages[page - 1] || {}).cursor
         this.pagination.page = page
@@ -1796,7 +1797,8 @@ export default {
           this.pagination.page = 1
         }
       }
-      this.refresh()
+
+      return this.refresh()
     },
 
     handleSelectAllOnPage ({ isChecked }) {
@@ -1969,6 +1971,12 @@ export default {
 
           this.pagination.count = count
           this.pagination.page = 1
+        }
+
+        if (this.stayOnPage) {
+          const goToPageNumber = this.stayOnPage
+          this.stayOnPage = undefined
+          return this.goToPage(goToPageNumber)
         }
 
         // Extract user IDs from record values and load all users
@@ -2416,6 +2424,7 @@ export default {
       this.showCustomSummariesModal = false
       this.processingTimeout = undefined
       this.cancelled = false
+      this.stayOnPage = undefined
     },
 
     abortRequests () {
@@ -2428,7 +2437,11 @@ export default {
       })
     },
 
-    refreshAndResetPagination () {
+    refreshAndResetPagination ({ stayOnPage = true } = {}) {
+      if (stayOnPage) {
+        this.stayOnPage = this.pagination.page
+      }
+
       this.refresh(true)
     },
 
