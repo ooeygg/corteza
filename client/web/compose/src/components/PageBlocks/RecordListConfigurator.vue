@@ -1063,8 +1063,8 @@ export default {
 
     parentFields () {
       if (this.recordListModule) {
-        return this.recordListModule.fields.filter(({ kind, isMulti, options }) => {
-          if (kind === 'Record' && !isMulti && this.record) {
+        return this.recordListModule.fields.filter(({ kind, options }) => {
+          if (kind === 'Record' && this.record) {
             return options.moduleID === this.record.moduleID
           }
 

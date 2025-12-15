@@ -938,7 +938,7 @@ import BulkEditModal from 'corteza-webapp-compose/src/components/Public/Record/B
 import ExporterModal from 'corteza-webapp-compose/src/components/Public/Record/Exporter'
 import ImporterModal from 'corteza-webapp-compose/src/components/Public/Record/Importer'
 import { getItem, removeItem, setItem } from 'corteza-webapp-compose/src/lib/local-storage'
-import { evaluatePrefilter, formatActiveFilterOperator, isBetweenOperator, isFieldInFilter, queryToFilter, convertRecordListFilter } from 'corteza-webapp-compose/src/lib/record-filter'
+import { evaluatePrefilter, formatActiveFilterOperator, isBetweenOperator, isFieldInFilter, queryToFilter, convertRecordListFilter, getFieldFilter } from 'corteza-webapp-compose/src/lib/record-filter'
 import records from 'corteza-webapp-compose/src/mixins/records'
 import users from 'corteza-webapp-compose/src/mixins/users'
 import draggable from 'vuedraggable'
@@ -1520,8 +1520,13 @@ export default {
       const r = new compose.Record(this.recordListModule, {})
 
       // Set record values that should be prefilled
-      if ((this.record || {}).recordID && this.options.refField) {
-        r.values[this.options.refField] = (this.record || {}).recordID
+      if (this.options.refField) {
+        const refField = this.recordListModule.fields.find(f => f.name === this.options.refField)
+        if (refField && refField.isMulti) {
+          r.values[this.options.refField] = [(this.record || {}).recordID]
+        } else {
+          r.values[this.options.refField] = (this.record || {}).recordID
+        }
       }
 
       this.items.unshift(this.wrapRecord(r))
@@ -1647,7 +1652,12 @@ export default {
           throw Error(this.$t('record.invalidRecordVar'))
         }
 
-        filter.push(`(${refField} = ${this.record.recordID})`)
+        const refFieldObj = this.recordListModule.fields.find(f => f.name === refField)
+        if (refFieldObj && refFieldObj.isMulti) {
+          filter.push(getFieldFilter(refField, 'Record', this.record.recordID, 'IN'))
+        } else {
+          filter.push(getFieldFilter(refField, 'Record', this.record.recordID, '='))
+        }
       }
 
       this.prefilter = filter.join(' AND ')

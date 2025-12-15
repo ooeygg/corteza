@@ -380,7 +380,7 @@ export default {
         }
 
         // Only refresh if the record ID has changed or the edit state has changed
-        if ((recordID === NoID && recordID !== oldRecordID) || recordID !== oldRecordID || edit !== oldEdit) {
+        if ((recordID === NoID && recordID !== oldRecordID) || recordID !== oldRecordID || edit !== oldEdit || pageID !== oldPageID) {
           this.refresh()
           return
         }
@@ -504,14 +504,18 @@ export default {
               }
             })
         } else {
-          if (this.refRecord) {
+          if (this.refRecord && this.refRecord.recordID && this.refRecord.recordID !== NoID) {
             this.updateRecordSet(this.refRecord)
 
             // Record create form called from a related records block,
             // we'll try to find an appropriate fields and cross-link this new record to ref
 
             this.module.fields.filter(f => f.kind === 'Record' && f.options.moduleID === this.refRecord.moduleID).forEach(f => {
-              this.values[f.name] = this.refRecord.recordID
+              if (f.isMulti) {
+                this.values[f.name] = [this.refRecord.recordID]
+              } else {
+                this.values[f.name] = this.refRecord.recordID
+              }
             })
           }
 
