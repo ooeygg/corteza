@@ -42,13 +42,13 @@ export function getRecordListFilterSql (filter) {
 
   filter.forEach(f => {
     if (f.name && f.operator) {
-      if (existsPreviousElement) {
-        query += ` ${f.condition} `
-      }
-
       const fieldFilter = getFieldFilter(f.name, f.kind, f.value, f.operator)
 
       if (fieldFilter) {
+        if (existsPreviousElement) {
+          query += ` ${f.condition} `
+        }
+
         query += getFieldFilter(f.name, f.kind, f.value, f.operator)
         existsPreviousElement = true
       }
@@ -103,9 +103,9 @@ export function getFieldFilter (name, kind, query = '', operator = '=') {
 
   // Take care of special case where query is undefined and its not a Bool field
   if (!query && query !== 0) {
-    if (operator === '=') {
+    if (['=', 'IN'].includes(operator)) {
       return `(${name} IS NULL)`
-    } else if (operator === '!=') {
+    } else if (['!=', 'NOT IN'].includes(operator)) {
       return `(${name} IS NOT NULL)`
     }
 
