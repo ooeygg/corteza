@@ -531,6 +531,11 @@ type (
 		//
 		// ID
 		RecordID uint64 `json:",string"`
+
+		// Sort GET parameter
+		//
+		// Sort order
+		Sort string
 	}
 )
 
@@ -2540,6 +2545,7 @@ func (r RecordRevisions) Auditable() map[string]interface{} {
 		"namespaceID": r.NamespaceID,
 		"moduleID":    r.ModuleID,
 		"recordID":    r.RecordID,
+		"sort":        r.Sort,
 	}
 }
 
@@ -2558,8 +2564,25 @@ func (r RecordRevisions) GetRecordID() uint64 {
 	return r.RecordID
 }
 
+// Auditable returns all auditable/loggable parameters
+func (r RecordRevisions) GetSort() string {
+	return r.Sort
+}
+
 // Fill processes request and fills internal variables
 func (r *RecordRevisions) Fill(req *http.Request) (err error) {
+
+	{
+		// GET params
+		tmp := req.URL.Query()
+
+		if val, ok := tmp["sort"]; ok && len(val) > 0 {
+			r.Sort, err = val[0], nil
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	{
 		var val string

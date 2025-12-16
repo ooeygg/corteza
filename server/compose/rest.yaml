@@ -1293,6 +1293,8 @@ endpoints:
     parameters:
       path:
        - { type: uint64, name: recordID, required: true, title: ID }
+      get:
+       - { type: string, name: sort, required: false, title: Sort order }
 
 - title: Data Privacy
   entrypoint: dataPrivacy

@@ -883,9 +883,15 @@ func (ctrl *Record) TriggerScriptOnList(ctx context.Context, r *request.RecordTr
 func (ctrl *Record) Revisions(ctx context.Context, r *request.RecordRevisions) (interface{}, error) {
 	var (
 		makeRev = func() dal.ValueSetter { return &revisions.Revision{} }
+		sorting filter.Sorting
+		err     error
 	)
 
-	iter, err := ctrl.record.SearchRevisions(ctx, r.NamespaceID, r.ModuleID, r.RecordID)
+	if sorting, err = filter.NewSorting(r.Sort); err != nil {
+		return nil, err
+	}
+
+	iter, err := ctrl.record.SearchRevisions(ctx, r.NamespaceID, r.ModuleID, r.RecordID, sorting)
 	if err != nil {
 		return nil, err
 	}

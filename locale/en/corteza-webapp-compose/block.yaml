@@ -733,21 +733,15 @@ recordRevisions:
   configurator:
     label: Record revisions
     preload: Preload record revisions
+    sortDirection:
+      label: Sort direction
+      footnote: Sort revisions by when they were created
+      desc: Newest first
+      asc: Oldest first
     errors:
       invalid-module-id: Field does not contain a valid module ID.
     fields:
-      label: Configure fields to display in record revisions changes
-      show-all:
-        label: Show changes for all fields
-      columns:
-        label:
-          label: Label
-        kind:
-          label: Type
-        displayed-fields:
-          label: Show
-        expanded-references:
-          label: Expand references
+      label: Fields to display in record revisions changes
 
 socialFeed:
   label: Twitter feed
