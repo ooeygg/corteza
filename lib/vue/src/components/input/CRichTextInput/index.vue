@@ -134,6 +134,12 @@ export default {
       this.emittedContent = true
       this.$emit('input', this.currentValue)
     },
+
+    focus () {
+      if (this.editor) {
+        this.editor.commands.focus()
+      }
+    },
   },
 }
 </script>

@@ -144,6 +144,7 @@
           />
 
           <c-rich-text-input
+            ref="richTextInput"
             v-model="newRecord.content"
             :placeholder="$t('comment.content.placeholder')"
             :labels="{
@@ -838,6 +839,17 @@ export default {
       this.newRecord.replyTo = comment
 
       this.replyModal.show = false
+
+      this.$nextTick(() => {
+        const rti = this.$refs.richTextInput
+        if (rti) {
+          if (typeof rti.focus === 'function') {
+            rti.focus()
+          } else if (rti.editor && typeof rti.editor.focus === 'function') {
+            rti.editor.focus()
+          }
+        }
+      })
     },
 
     handleReplyClick (recordID) {
