@@ -1135,6 +1135,9 @@ endpoints:
         type: string
         required: false
         title: Wrap multi value fields in brachets
+      - name: resolveRefs
+        type: bool
+        required: false
   - name: exec
     path: "/exec/{procedure}"
     method: POST

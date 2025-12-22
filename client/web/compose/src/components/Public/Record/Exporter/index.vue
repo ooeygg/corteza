@@ -159,6 +159,15 @@
             :options="multiValueDelimiterOptions"
           />
         </b-form-group>
+
+        <b-form-group>
+          <b-form-checkbox
+            v-model="resolveRefs"
+            class="mb-2"
+          >
+            {{ $t('recordList.export.resolveRefs') }}
+          </b-form-checkbox>
+        </b-form-group>
       </template>
 
       <template #modal-footer>
@@ -290,6 +299,7 @@ export default {
       showExportModal: false,
 
       fields: [],
+      resolveRefs: false,
       forTimezone: false,
       exportTimezone: undefined,
       exportConfig: {
@@ -669,6 +679,7 @@ export default {
         filterRaw: encodeURIComponent(this.exportConfig),
         multiValueDelimiter: encodeURIComponent(this.exportConfig.multiValueDelimiter),
         timezone: encodeURIComponent(this.forTimezone ? this.exportTimezone : undefined),
+        resolveRefs: encodeURIComponent(this.resolveRefs),
       })
     },
 

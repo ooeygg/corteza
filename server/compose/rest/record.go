@@ -761,8 +761,9 @@ func (ctrl *Record) Export(ctx context.Context, r *request.RecordExport) (interf
 		nodes, _, err = envoySvc.Decode(ctx, envoyx.DecodeParams{
 			Type: envoyx.DecodeTypeStore,
 			Params: map[string]any{
-				"storer": service.DefaultStore,
-				"dal":    dal.Service(),
+				"storer":      service.DefaultStore,
+				"dal":         dal.Service(),
+				"resolveRefs": r.GetResolveRefs(),
 			},
 			Filter: map[string]envoyx.ResourceFilter{
 				composeEnvoy.ComposeRecordDatasourceAuxType: {

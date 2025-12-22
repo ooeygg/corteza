@@ -140,6 +140,15 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 		if !hWritten {
 			hWritten = true
 
+			// Splice in resolved ref values
+			for i, h := range header {
+				if _, ok := cache[fmt.Sprintf("%s_resolved", h)]; ok {
+					header = append(header, "")
+					copy(header[i+1:], header[i:])
+					header[i] = fmt.Sprintf("%s_resolved", h)
+				}
+			}
+
 			err = writer.Write(header)
 			if err != nil {
 				return

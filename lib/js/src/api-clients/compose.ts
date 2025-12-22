@@ -2623,6 +2623,7 @@ export default class Compose {
       timezone,
       multiValueDelimiter,
       wrapMultiValue,
+      resolveRefs,
     } = (a as KV) || {}
     if (!namespaceID) {
       throw Error('field namespaceID is empty')
@@ -2649,6 +2650,7 @@ export default class Compose {
       timezone,
       multiValueDelimiter,
       wrapMultiValue,
+      resolveRefs,
     }
 
     return this.api().request(cfg).then(result => stdResolve(result))

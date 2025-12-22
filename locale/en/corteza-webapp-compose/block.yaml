@@ -413,6 +413,7 @@ recordList:
     selection: Selected records
     specifyTimezone: Export to timezone
     timezonePlaceholder: Select timezone
+    resolveRefs: Resolve references
     datePresetUndefined: Unknown date preset
   federated: Federated
   fields: Module fields

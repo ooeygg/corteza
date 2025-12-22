@@ -1696,7 +1696,7 @@ export default {
       this.processing = true
 
       const { namespaceID, moduleID } = this.filter || {}
-      const { filter, filterRaw, timezone } = e
+      const { filter, filterRaw, timezone, resolveRefs } = e
       e = {
         ...e,
         namespaceID,
@@ -1726,6 +1726,7 @@ export default {
           filter: this.selectedAllRecords ? this.bulkQuery : filter,
           jwt: this.$auth.accessToken,
           timezone: timezone ? timezone.tzCode : undefined,
+          resolveRefs,
         },
       })
 
