@@ -1032,20 +1032,36 @@ func fix_2024_9_7_migrateLabelsValueToJsonbPostgres(ctx context.Context, s *Stor
   			FROM information_schema.columns 
   			WHERE table_name = 'labels' AND column_name = 'value'`
 
-	rows, err = s.DB.QueryContext(ctx, checkQuery)
+	exists, err := func() (bool, error) {
+		rows, err = s.DB.QueryContext(ctx, checkQuery)
+		if err != nil {
+			return false, err
+		}
+		defer rows.Close()
+
+		if rows.Next() {
+			if err = rows.Scan(&columnType); err != nil {
+				return false, err
+			}
+		}
+
+		if len(columnType) == 0 {
+			log.Debug("labels table not found, skipping migration")
+			return true, nil
+		}
+
+		if columnType == "jsonb" {
+			log.Debug("labels.value column already jsonb, skipping migration")
+			return true, nil
+		}
+
+		return false, nil
+	}()
+
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err = rows.Scan(&columnType); err != nil {
-			return err
-		}
-	}
-
-	if columnType == "jsonb" {
-		log.Debug("labels.value column already jsonb, skipping migration")
+	if exists {
 		return nil
 	}
 
@@ -1077,24 +1093,40 @@ func fix_2024_9_7_migrateLabelsValueToJsonbMySql(ctx context.Context, s *Store) 
 		rows       *sql.Rows
 	)
 	checkQuery := `
-  			SELECT data_type 
-  			FROM information_schema.columns 
+  			SELECT data_type
+  			FROM information_schema.columns
   			WHERE table_name = 'labels' AND column_name = 'value'`
 
-	rows, err = s.DB.QueryContext(ctx, checkQuery)
+	exists, err := func() (bool, error) {
+		rows, err = s.DB.QueryContext(ctx, checkQuery)
+		if err != nil {
+			return false, err
+		}
+		defer rows.Close()
+
+		if rows.Next() {
+			if err = rows.Scan(&columnType); err != nil {
+				return false, err
+			}
+		}
+
+		if len(columnType) == 0 {
+			log.Debug("labels table not found, skipping migration")
+			return true, nil
+		}
+
+		if columnType == "json" {
+			log.Debug("labels.value column already json, skipping migration")
+			return true, nil
+		}
+
+		return false, nil
+	}()
+
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err = rows.Scan(&columnType); err != nil {
-			return err
-		}
-	}
-
-	if columnType == "json" {
-		log.Debug("labels.value column already json, skipping migration")
+	if exists {
 		return nil
 	}
 
@@ -1124,25 +1156,42 @@ func fix_2024_9_7_migrateLabelsValueToJsonbSqlite(ctx context.Context, s *Store)
 		columnType string
 		rows       *sql.Rows
 	)
+
 	checkQuery := `
   			SELECT type
   			FROM pragma_table_info('labels')
   			WHERE name = 'value'`
 
-	rows, err = s.DB.QueryContext(ctx, checkQuery)
+	exists, err := func() (bool, error) {
+		rows, err = s.DB.QueryContext(ctx, checkQuery)
+		if err != nil {
+			return false, err
+		}
+		defer rows.Close()
+
+		if rows.Next() {
+			if err = rows.Scan(&columnType); err != nil {
+				return false, err
+			}
+		}
+
+		if len(columnType) == 0 {
+			log.Debug("labels table not found, skipping migration")
+			return true, nil
+		}
+
+		if strings.ToUpper(columnType) == "JSON" {
+			log.Debug("labels.value column already json, skipping migration")
+			return true, nil
+		}
+
+		return false, nil
+	}()
+
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err = rows.Scan(&columnType); err != nil {
-			return err
-		}
-	}
-
-	if strings.ToUpper(columnType) == "JSON" {
-		log.Debug("labels.value column already json, skipping migration")
+	if exists {
 		return nil
 	}
 
@@ -1191,20 +1240,36 @@ func fix_2024_9_7_migrateLabelsValueToJsonbSqlserver(ctx context.Context, s *Sto
   			FROM INFORMATION_SCHEMA.COLUMNS
   			WHERE TABLE_NAME = 'labels' AND COLUMN_NAME = 'value'`
 
-	rows, err = s.DB.QueryContext(ctx, checkQuery)
+	exists, err := func() (bool, error) {
+		rows, err = s.DB.QueryContext(ctx, checkQuery)
+		if err != nil {
+			return false, err
+		}
+		defer rows.Close()
+
+		if rows.Next() {
+			if err = rows.Scan(&columnType); err != nil {
+				return false, err
+			}
+		}
+
+		if len(columnType) == 0 {
+			log.Debug("labels table not found, skipping migration")
+			return true, nil
+		}
+
+		if columnType == "nvarchar" {
+			log.Debug("labels.value column already nvarchar, skipping migration")
+			return true, nil
+		}
+
+		return false, nil
+	}()
+
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err = rows.Scan(&columnType); err != nil {
-			return err
-		}
-	}
-
-	if columnType == "nvarchar" {
-		log.Debug("labels.value column already nvarchar, skipping migration")
+	if exists {
 		return nil
 	}
 
