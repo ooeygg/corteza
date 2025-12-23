@@ -71,7 +71,7 @@ export default {
     }),
 
     dialogClass () {
-      return this.block && this.block.options.magnifyOption === 'fullscreen' ? 'h-100 mw-100 m-0 mh-100' : 'h-100 mw-90'
+      return this.block && this.block.options.magnifyOption === 'fullscreen' ? 'h-100 mw-100 m-0 mh-100' : 'h-100 modal-max-width'
     },
 
     contentClass () {
@@ -177,7 +177,7 @@ export default {
   position: initial;
 }
 
-.mw-90 {
-  max-width: 90vw;
+.modal-max-width {
+  max-width: 97vw;
 }
 </style>

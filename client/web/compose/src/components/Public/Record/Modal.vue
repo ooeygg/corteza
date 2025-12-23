@@ -96,7 +96,7 @@ export default {
     },
 
     dialogClass () {
-      const classes = ['h-100', 'mw-90']
+      const classes = ['h-100', 'modal-max-width']
 
       if (this.modalPageHandle) {
         classes.push(`page-${this.modalPageHandle}-modal`)
@@ -252,8 +252,8 @@ export default {
 </script>
 
 <style lang="scss">
-.mw-90 {
-  max-width: 90vw;
+.modal-max-width {
+  max-width: 97vw;
 }
 
 .position-initial {
