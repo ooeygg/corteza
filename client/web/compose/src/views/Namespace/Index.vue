@@ -11,6 +11,14 @@
       to="topbar-avatar-dropdown"
     >
       <b-dropdown-item-button
+        v-if="showDrafts"
+        data-test-id="dropdown-item-drafts"
+        @click="toggleDrafts"
+      >
+        {{ $t('drafts:title') }}
+      </b-dropdown-item-button>
+
+      <b-dropdown-item-button
         data-test-id="dropdown-item-reminders"
         @click="remindersVisible = true"
       >
@@ -41,7 +49,7 @@ const { CReminderSidebar } = components
 
 export default {
   i18nOptions: {
-    namespaces: 'general',
+    namespaces: ['general', 'drafts'],
   },
 
   components: {
@@ -64,6 +72,10 @@ export default {
     ...mapGetters({
       namespaces: 'namespace/set',
     }),
+
+    showDrafts () {
+      return this.$Settings.get('ui.topbar', {}).showDrafts
+    },
   },
 
   created () {
@@ -87,6 +99,7 @@ export default {
     ...mapActions({
       loadUsers: 'user/load',
       loadNamespaces: 'namespace/load',
+      toggleDrafts: 'drafts/toggleVisibility',
     }),
 
     setDefaultValues () {

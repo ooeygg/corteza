@@ -383,7 +383,7 @@ export default {
           })
 
           return new compose.Record(this.mockRevisionModule, {
-            recordID: r.resourceID,
+            recordID: r.resource,
             values: {
               revision: r.revision,
               changeID: r.changeID,

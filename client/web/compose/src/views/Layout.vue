@@ -33,6 +33,12 @@
         <template #avatar-dropdown>
           <portal-target name="topbar-avatar-dropdown" />
         </template>
+
+        <template #right-tools>
+          <c-draft-button
+            v-if="$Settings.get('ui.topbar', {}).showDrafts"
+          />
+        </template>
       </c-topbar>
     </header>
 
@@ -121,16 +127,23 @@
     />
 
     <c-notification-sidebar v-if="!$Settings.get('ui.topbar', {}).hideNotifications" />
+
+    <c-draft-sidebar v-if="$Settings.get('ui.topbar', {}).showDrafts" />
   </div>
 </template>
 
 <script>
 import { components } from '@cortezaproject/corteza-vue'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faFile } from '@fortawesome/free-regular-svg-icons'
 import { debounce } from 'lodash'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
 import CTranslationModal from '../components/Translator/CTranslatorModal'
-const { CToaster, CPrompts, CPermissionsModal, CTopbar, CSidebar, CExtendSession, CNotificationSidebar } = components
+
+library.add(faFile)
+
+const { CToaster, CPrompts, CPermissionsModal, CTopbar, CSidebar, CExtendSession, CNotificationSidebar, CDraftSidebar, CDraftButton } = components
 
 export default {
   i18nOptions: {
@@ -146,6 +159,8 @@ export default {
     CToaster, // Only used for reminders
     CExtendSession,
     CNotificationSidebar,
+    CDraftSidebar,
+    CDraftButton,
   },
 
   data () {

@@ -1,5 +1,5 @@
 <template>
-  <div class="header-navigation d-flex flex-wrap align-items-center py-2 px-3 gap-2">
+  <div class="header-navigation d-flex flex-wrap align-items-center py-2 pl-3 pr-2 gap-2">
     <div
       class="sidebar-spacer"
       :class="{ 'expanded': expanded }"
@@ -435,6 +435,16 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
 #theme-dropleft {
   .btn {
     font-family: var(--font-regular);
+  }
+}
+
+@media (min-width: 576px) {
+  .b-sidebar.topbar-offset {
+    top: var(--topbar-height) !important;
+    height: calc(100% - var(--topbar-height) - 0.5rem) !important;
+    border-top-left-radius: 1rem !important;
+    border-bottom-left-radius: 1rem !important;
+    overflow: hidden !important;
   }
 }
 </style>

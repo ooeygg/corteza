@@ -84,7 +84,7 @@ export default {
   computed: {
     displayedFieldsArray: {
       get () {
-        return this.module.fields.filter(f => this.options.displayedFields.includes(f.name))
+        return this.module.filterFields(this.options.displayedFields)
       },
 
       set (fields) {

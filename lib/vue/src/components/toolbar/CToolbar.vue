@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="c-toolbar d-flex flex-column flex-sm-row bg-white p-3 gap-1 flex-wrap"
-  >
+  <div class="c-toolbar d-flex flex-column flex-sm-row bg-white p-2 gap-1 flex-wrap">
     <div
       class="d-flex align-items-center flex-sm-grow-0 flex-sm-shrink-0 flex-fill fill-width gap-1 flex-wrap"
     >
@@ -26,6 +24,12 @@
 </template>
 
 <style scoped lang="scss">
+.c-toolbar {
+  z-index: 1036;
+  position: relative;
+  min-height: 64px;
+}
+
 .fill-width > * {
   flex: 1;
 }

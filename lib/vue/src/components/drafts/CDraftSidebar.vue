@@ -1,7 +1,7 @@
 <template>
   <b-sidebar
     v-model="isVisible"
-    header-class="d-flex align-items-center justify-content-between notification-sidebar-header bg-white pl-3 pr-2"
+    header-class="d-flex align-items-center justify-content-between draft-sidebar-header bg-white pl-3 pr-2"
     body-class="d-flex flex-column overflow-hidden bg-white"
     sidebar-class="topbar-offset"
     :backdrop="isMobile"
@@ -31,26 +31,26 @@
       </b-button>
     </template>
 
-    <notifications />
+    <drafts />
   </b-sidebar>
 </template>
 
-<script lang="js">
-import Notifications from './Notifications.vue'
+<script>
+import Drafts from './Drafts.vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default {
   i18nOptions: {
-    namespaces: 'notifications',
+    namespaces: 'drafts',
   },
 
   components: {
-    Notifications,
+    Drafts,
   },
 
   computed: {
     ...mapGetters({
-      visible: 'notifications/visible',
+      visible: 'drafts/visible',
     }),
 
     isVisible: {
@@ -71,7 +71,7 @@ export default {
   watch: {
     isVisible (visible) {
       if (visible) {
-        this.$root.$emit('right-sidebar:opened', 'notifications')
+        this.$root.$emit('right-sidebar:opened', 'drafts')
       }
     },
   },
@@ -86,11 +86,11 @@ export default {
 
   methods: {
     ...mapMutations({
-      setVisible: 'notifications/setVisible',
+      setVisible: 'drafts/setVisible',
     }),
 
     handleSidebarOpened (name) {
-      if (name !== 'notifications') {
+      if (name !== 'drafts') {
         this.isVisible = false
       }
     },
@@ -99,7 +99,8 @@ export default {
 </script>
 
 <style lang="scss">
-.notification-sidebar-header {
+.draft-sidebar-header {
   height: 4rem;
 }
 </style>
+

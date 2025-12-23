@@ -28,6 +28,18 @@
         </b-form-checkbox>
 
         <b-form-checkbox
+          v-model="topbarSettings.showDrafts"
+        >
+          {{ $t('drafts.show') }}
+          <b-badge
+            variant="warning"
+            class="ml-1"
+          >
+            {{ $t('general:label.experimental') || 'Experimental' }}
+          </b-badge>
+        </b-form-checkbox>
+
+        <b-form-checkbox
           v-model="topbarSettings.hideHelp"
         >
           {{ $t('help.hide') }}

@@ -4,10 +4,11 @@
     :title="title"
     header-class="d-flex align-items-center justify-content-between reminder-sidebar-header p-3 border-bottom"
     body-class="d-flex flex-column overflow-hidden bg-white"
+    sidebar-class="topbar-offset"
     :backdrop="isMobile"
     no-footer
     right
-    shadow="sm"
+    shadow
     no-close-on-route-change
     no-close-on-esc
     width="400px"
@@ -63,6 +64,30 @@ export default {
 
     isMobile () {
       return window.innerWidth < 576
+    },
+  },
+
+  watch: {
+    isVisible (visible) {
+      if (visible) {
+        this.$root.$emit('right-sidebar:opened', 'reminders')
+      }
+    },
+  },
+
+  created () {
+    this.$root.$on('right-sidebar:opened', this.handleSidebarOpened)
+  },
+
+  beforeDestroy () {
+    this.$root.$off('right-sidebar:opened', this.handleSidebarOpened)
+  },
+
+  methods: {
+    handleSidebarOpened (name) {
+      if (name !== 'reminders') {
+        this.isVisible = false
+      }
     },
   },
 }
