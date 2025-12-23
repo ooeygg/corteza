@@ -181,6 +181,7 @@ export default {
 
       setTimeout(() => {
         this.$router.push({
+          params: this.$route.params,
           query: {
             ...this.$route.query,
             recordID,
@@ -216,6 +217,7 @@ export default {
       setTimeout(() => {
         if (this.recordID === undefined && this.page === undefined) {
           this.$router.replace({
+            params: this.$route.params,
             query: {
               ...this.$route.query,
               recordID: undefined,

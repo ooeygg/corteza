@@ -298,6 +298,7 @@
         <b-input-group-append v-if="canAddRecordThroughSelectField">
           <b-button
             v-b-tooltip.hover="{ title: $t('kind.record.tooltip.addRecord'), boundary: 'body' }"
+            type="button"
             variant="light"
             class="d-flex align-items-center"
             @click="addRecordThroughRecordSelectField()"
@@ -468,6 +469,14 @@ export default {
 
     createEvents () {
       this.$root.$on('record-field-change', this.refetchOnPrefilterValueChange)
+      this.$root.$on('module-records-updated', this.refreshOnRelatedRecordsUpdate)
+      this.$root.$on('refetch-records', this.loadLatest)
+    },
+
+    refreshOnRelatedRecordsUpdate ({ moduleID } = {}) {
+      if (this.field.options.moduleID === moduleID) {
+        this.loadLatest()
+      }
     },
 
     refetchOnPrefilterValueChange ({ fieldName }) {
@@ -700,6 +709,8 @@ export default {
 
     destroyEvents () {
       this.$root.$off('record-field-change', this.refetchOnPrefilterValueChange)
+      this.$root.$off('module-records-updated', this.refreshOnRelatedRecordsUpdate)
+      this.$root.$off('refetch-records', this.loadLatest)
     },
 
     setDefaultValues () {
