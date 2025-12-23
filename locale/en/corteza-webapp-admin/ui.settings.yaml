@@ -85,7 +85,7 @@ editor:
       hide: Hide notifications
 
     drafts:
-      show: Show drafts
+      hide: Hide drafts
 
     links:
       title: Custom links

@@ -74,7 +74,7 @@ export default {
     }),
 
     showDrafts () {
-      return this.$Settings.get('ui.topbar', {}).showDrafts
+      return this.$Settings.get('ui.topbar.showDrafts', false)
     },
   },
 

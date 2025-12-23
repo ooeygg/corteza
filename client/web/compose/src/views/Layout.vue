@@ -36,7 +36,7 @@
 
         <template #right-tools>
           <c-draft-button
-            v-if="$Settings.get('ui.topbar', {}).showDrafts"
+            v-if="$Settings.get('ui.topbar.showDrafts', false)"
           />
         </template>
       </c-topbar>
@@ -126,9 +126,9 @@
       }"
     />
 
-    <c-notification-sidebar v-if="!$Settings.get('ui.topbar', {}).hideNotifications" />
+    <c-notification-sidebar v-if="!$Settings.get('ui.topbar.hideNotifications', false)" />
 
-    <c-draft-sidebar v-if="$Settings.get('ui.topbar', {}).showDrafts" />
+    <c-draft-sidebar v-if="$Settings.get('ui.topbar.showDrafts', false)" />
   </div>
 </template>
 
