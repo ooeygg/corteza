@@ -49,6 +49,7 @@ func (e CsvEncoder) encodeRecordDatasources(ctx context.Context, writer *csv.Wri
 
 func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writer, p envoyx.EncodeParams, node *envoyx.Node, tt envoyx.Traverser) (_ any, err error) {
 	rds := node.Datasource.(*RecordDatasource)
+	resolved := map[string]string{}
 
 	header := make([]string, 0, 4)
 
@@ -98,7 +99,9 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 			return ""
 		}
 
-		if !rds.multivalues[h] {
+		// Encode as mf if the OG field is multi value OR we're on the resolved record column
+		src, ok := resolved[h]
+		if !rds.multivalues[h] && !(ok && rds.multivalues[src]) {
 			return v.Values[0]
 		}
 
@@ -146,6 +149,8 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 					header = append(header, "")
 					copy(header[i+1:], header[i:])
 					header[i] = fmt.Sprintf("%s_resolved", h)
+
+					resolved[header[i]] = h
 				}
 			}
 
