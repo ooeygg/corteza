@@ -6,6 +6,8 @@
     body-class="d-flex flex-column overflow-hidden bg-white"
     sidebar-class="topbar-offset"
     :backdrop="isMobile"
+    backdrop-variant="white"
+    no-slide
     no-footer
     right
     shadow
@@ -37,6 +39,8 @@
 </template>
 
 <script lang="js">
+import { throttle } from 'lodash'
+
 export default {
   props: {
     title: {
@@ -51,6 +55,12 @@ export default {
     },
   },
 
+  data () {
+    return {
+      isMobile: false,
+    }
+  },
+
   computed: {
     isVisible: {
       get () {
@@ -60,10 +70,6 @@ export default {
       set (visible) {
         this.$emit('update:visible', visible)
       },
-    },
-
-    isMobile () {
-      return window.innerWidth < 576
     },
   },
 
@@ -79,11 +85,21 @@ export default {
     this.$root.$on('right-sidebar:opened', this.handleSidebarOpened)
   },
 
+  mounted () {
+    this.checkIfMobile()
+    window.addEventListener('resize', this.checkIfMobile)
+  },
+
   beforeDestroy () {
     this.$root.$off('right-sidebar:opened', this.handleSidebarOpened)
+    window.removeEventListener('resize', this.checkIfMobile)
   },
 
   methods: {
+    checkIfMobile: throttle(function () {
+      this.isMobile = window.innerWidth < 1024
+    }, 500),
+
     handleSidebarOpened (name) {
       if (name !== 'reminders') {
         this.isVisible = false
@@ -97,5 +113,9 @@ export default {
 .reminder-sidebar-header {
   height: 64px;
   background-color: var(--gray-200);
+}
+
+.b-sidebar-backdrop {
+  opacity: 0.75 !important;
 }
 </style>

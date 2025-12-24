@@ -377,8 +377,10 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
     display: none;
     min-width: calc(var(--sidebar-width) - 60px);
 
-    &.expanded {
-      display: block;
+    @media (min-width: 1024px) {
+      &.expanded {
+        display: block;
+      }
     }
   }
 }
@@ -438,7 +440,7 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
   }
 }
 
-@media (min-width: 576px) {
+@media (min-width: 1024px) {
   .b-sidebar.topbar-offset {
     top: var(--topbar-height) !important;
     height: calc(100% - var(--topbar-height)) !important;

@@ -5,6 +5,8 @@
     body-class="d-flex flex-column overflow-hidden bg-white"
     sidebar-class="topbar-offset"
     :backdrop="isMobile"
+    backdrop-variant="white"
+    no-slide
     no-footer
     right
     shadow
@@ -38,6 +40,7 @@
 <script>
 import Drafts from './Drafts.vue'
 import { mapGetters, mapMutations } from 'vuex'
+import { throttle } from 'lodash'
 
 export default {
   i18nOptions: {
@@ -46,6 +49,12 @@ export default {
 
   components: {
     Drafts,
+  },
+
+  data () {
+    return {
+      isMobile: false,
+    }
   },
 
   computed: {
@@ -62,10 +71,6 @@ export default {
         this.setVisible(visible)
       },
     },
-
-    isMobile () {
-      return window.innerWidth < 576
-    },
   },
 
   watch: {
@@ -80,14 +85,24 @@ export default {
     this.$root.$on('right-sidebar:opened', this.handleSidebarOpened)
   },
 
+  mounted () {
+    this.checkIfMobile()
+    window.addEventListener('resize', this.checkIfMobile)
+  },
+
   beforeDestroy () {
     this.$root.$off('right-sidebar:opened', this.handleSidebarOpened)
+    window.removeEventListener('resize', this.checkIfMobile)
   },
 
   methods: {
     ...mapMutations({
       setVisible: 'drafts/setVisible',
     }),
+
+    checkIfMobile: throttle(function () {
+      this.isMobile = window.innerWidth < 1024
+    }, 500),
 
     handleSidebarOpened (name) {
       if (name !== 'drafts') {
@@ -101,6 +116,10 @@ export default {
 <style lang="scss">
 .draft-sidebar-header {
   height: 4rem;
+}
+
+.b-sidebar-backdrop {
+  opacity: 0.75 !important;
 }
 </style>
 

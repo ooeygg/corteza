@@ -1,7 +1,7 @@
 <template>
   <div
     :id="namespaceID"
-    class="d-flex flex-column w-100 vh-100 overflow-hidden"
+    class="d-flex flex-column w-100 h-viewport overflow-hidden"
   >
     <header>
       <c-topbar
@@ -376,12 +376,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.sidebar-spacer {
-  width: 0;
-  transition: width 0.2s ease-in-out;
-
-  &.expanded {
-    width: 240px;
-  }
+.h-viewport {
+  height: 100vh;
+  height: 100dvh;
 }
 </style>

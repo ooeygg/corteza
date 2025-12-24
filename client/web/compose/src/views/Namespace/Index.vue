@@ -27,7 +27,6 @@
 
     <router-view
       v-if="loaded"
-      class="pb-safari"
     />
   </div>
 </template>
@@ -104,12 +103,4 @@ export default {
 </script>
 
 <style scoped>
-/* fixes bottom part of page being cut off */
-
-/* CSS specific to iOS devices */
-@supports (-webkit-touch-callout: none) {
-  .pb-safari {
-    padding-bottom: 5.5em;
-  }
-}
 </style>
