@@ -365,7 +365,7 @@ export default {
 }
 
 .vs__dropdown-menu {
-  z-index: 1100;
+  z-index: 1051;
 
   .vs__dropdown-option {
     &.vs__dropdown-option--selected {

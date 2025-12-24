@@ -429,7 +429,7 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
 
 <style lang="scss">
 .topbar-dropdown-menu {
-  z-index: 1100;
+  z-index: 1051;
 }
 
 #theme-dropleft {
@@ -441,10 +441,11 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
 @media (min-width: 576px) {
   .b-sidebar.topbar-offset {
     top: var(--topbar-height) !important;
-    height: calc(100% - var(--topbar-height) - 0.5rem) !important;
+    height: calc(100% - var(--topbar-height)) !important;
     border-top-left-radius: 1rem !important;
     border-bottom-left-radius: 1rem !important;
     overflow: hidden !important;
+    z-index: 1048 !important;
   }
 }
 </style>

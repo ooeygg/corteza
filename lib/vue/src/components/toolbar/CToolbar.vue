@@ -25,7 +25,7 @@
 
 <style scoped lang="scss">
 .c-toolbar {
-  z-index: 1036;
+  z-index: 1049;
   position: relative;
   min-height: 64px;
 }

@@ -11,14 +11,6 @@
       to="topbar-avatar-dropdown"
     >
       <b-dropdown-item-button
-        v-if="showDrafts"
-        data-test-id="dropdown-item-drafts"
-        @click="toggleDrafts"
-      >
-        {{ $t('drafts:title') }}
-      </b-dropdown-item-button>
-
-      <b-dropdown-item-button
         data-test-id="dropdown-item-reminders"
         @click="remindersVisible = true"
       >
