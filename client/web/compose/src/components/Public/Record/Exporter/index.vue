@@ -160,7 +160,10 @@
           />
         </b-form-group>
 
-        <b-form-group>
+        <b-form-group
+          :description="$t('recordList.export.resolveRefsNote')"
+          label-class="text-primary"
+        >
           <b-form-checkbox
             v-model="resolveRefs"
             class="mb-2"
