@@ -298,8 +298,9 @@ export default {
   computed: {
     hideDrafts: {
       get () {
-        return this.topbarSettings.showDrafts === false
+        return this.topbarSettings.showDrafts !== true
       },
+
       set (value) {
         this.$set(this.topbarSettings, 'showDrafts', !value)
       },
