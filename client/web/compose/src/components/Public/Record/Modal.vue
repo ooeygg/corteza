@@ -6,8 +6,9 @@
     :dialog-class="dialogClass"
     content-class="position-initial"
     body-class="p-0"
-    footer-class="p-0 overflow-hidden"
+    footer-class="overflow-hidden"
     size="xl"
+    no-fade
     @hidden="onHidden"
   >
     <template #modal-title>
@@ -179,16 +180,14 @@ export default {
         this.pushModalPreviousPage({ recordID, recordPageID, edit })
       }
 
-      setTimeout(() => {
-        this.$router.push({
-          params: this.$route.params,
-          query: {
-            ...this.$route.query,
-            recordID,
-            recordPageID,
-            edit,
-          },
-        })
+      this.$router.push({
+        params: this.$route.params,
+        query: {
+          ...this.$route.query,
+          recordID,
+          recordPageID,
+          edit,
+        },
       })
     },
 
@@ -212,26 +211,25 @@ export default {
     },
 
     onHidden () {
+      const { recordID, recordPageID } = this.$route.query
       this.setDefaultValues()
 
-      setTimeout(() => {
-        if (this.recordID === undefined && this.page === undefined) {
-          this.$router.replace({
-            params: this.$route.params,
-            query: {
-              ...this.$route.query,
-              recordID: undefined,
-              moduleID: undefined,
-              recordPageID: undefined,
-              edit: undefined,
-              modalLayoutID: undefined,
-            },
-          })
-        }
+      if (recordID !== undefined || recordPageID !== undefined) {
+        this.$router.push({
+          params: this.$route.params,
+          query: {
+            ...this.$route.query,
+            recordID: undefined,
+            moduleID: undefined,
+            recordPageID: undefined,
+            edit: undefined,
+            modalLayoutID: undefined,
+          },
+        })
+      }
 
-        this.setModalPageHandle(undefined)
-        this.setModalLayoutHandle(undefined)
-      })
+      this.setModalPageHandle(undefined)
+      this.setModalLayoutHandle(undefined)
     },
 
     setDefaultValues () {

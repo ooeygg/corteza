@@ -3,13 +3,13 @@
     id="page-block-modal"
     v-model="showModal"
     scrollable
-    body-class="card p-0"
-    footer-class="p-0"
+    body-class="p-0"
     :content-class="contentClass"
     :dialog-class="dialogClass"
     hide-header
     hide-footer
     size="xl"
+    no-fade
     @hidden="onHidden"
   >
     <page-block
@@ -75,18 +75,29 @@ export default {
     },
 
     contentClass () {
-      return `${this.block && this.block.options.magnifyOption === 'fullscreen' ? 'mh-100 rounded-0' : 'card'} position-initial`
+      return `${this.block && this.block.options.magnifyOption === 'fullscreen' ? 'mh-100 rounded-0' : ''} position-initial`
+    },
+
+    magnifiedBlockID () {
+      return this.$route.query.magnifiedBlockID
+    },
+  },
+
+  watch: {
+    magnifiedBlockID: {
+      immediate: true,
+      handler (magnifiedBlockID) {
+        if (!magnifiedBlockID) {
+          this.setDefaultValues()
+        } else if (magnifiedBlockID !== fetchID(this.block)) {
+          this.loadModal(magnifiedBlockID)
+        }
+      },
     },
   },
 
   mounted () {
     this.$root.$on('magnify-page-block', this.magnifyPageBlock)
-
-    const { magnifiedBlockID } = this.$route.query
-
-    if (magnifiedBlockID) {
-      this.magnifyPageBlock({ blockID: magnifiedBlockID })
-    }
   },
 
   beforeDestroy () {
@@ -104,14 +115,12 @@ export default {
       const magnifiedBlockID = blockID || (block || {}).blockID
       this.loadModal(magnifiedBlockID)
 
-      setTimeout(() => {
-        this.$router.push({
-          query: {
-            ...this.$route.query,
-            magnifiedBlockID,
-          },
-        })
-      }, 300)
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          magnifiedBlockID,
+        },
+      })
     },
 
     loadModal (blockID) {
@@ -146,14 +155,14 @@ export default {
     },
 
     onHidden () {
-      setTimeout(() => {
-        this.$router.replace({
+      if (this.$route.query.magnifiedBlockID !== undefined) {
+        this.$router.push({
           query: {
             ...this.$route.query,
             magnifiedBlockID: undefined,
           },
         })
-      }, 300)
+      }
     },
 
     setDefaultValues () {

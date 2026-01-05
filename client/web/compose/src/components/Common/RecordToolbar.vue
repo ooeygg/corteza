@@ -1,5 +1,8 @@
 <template>
-  <c-toolbar :class="{ 'shadow border-top': !inModal }">
+  <c-toolbar
+    :class="{ 'shadow border-top': !inModal }"
+    :style="{ padding: inModal ? '0 !important' : '' }"
+  >
     <template #start>
       <b-button
         v-if="!(hideBack || settings.hideBack)"
