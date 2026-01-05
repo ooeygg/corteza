@@ -512,7 +512,7 @@
                     </b-button>
 
                     <b-button
-                      v-if="showInlineFilter()"
+                      v-if="showInlineFilter(field)"
                       v-b-tooltip.noninteractive.hover="{ title: $t('recordList.filterByValue'), boundary: 'body' }"
                       variant="outline-extra-light"
                       size="sm"
@@ -2287,8 +2287,8 @@ export default {
       return this.options.inlineRecordEditEnabled && field.canEdit && !this.showingDeletedRecords && isfieldInlineEditable()
     },
 
-    showInlineFilter () {
-      return this.options.filterPresets.length > 0
+    showInlineFilter (field) {
+      return !this.options.hideFiltering && field.filterable
     },
 
     onInlineEditClose () {
