@@ -1945,75 +1945,72 @@ export default {
       const { response, cancel } = this.$ComposeAPI.recordListCancellable({ ...this.filter, moduleID, namespaceID, query, ...paginationOptions, summaries })
       this.abortableRequests.push(cancel)
 
-      return response().then(({ set, filter, summaries = {} }) => {
-        const records = set.map(r => new compose.Record(r, this.recordListModule))
+      return Promise.all([response(), new Promise(resolve => setTimeout(resolve, 300))])
+        .then(([{ set, filter, summaries = {} }]) => {
+          const records = set.map(r => new compose.Record(r, this.recordListModule))
 
-        this.updateRecordSet(records)
+          this.updateRecordSet(records)
 
-        this.filter = { ...this.filter, ...filter }
-        this.filter.nextPage = filter.nextPage
-        this.filter.prevPage = filter.prevPage
+          this.filter = { ...this.filter, ...filter }
+          this.filter.nextPage = filter.nextPage
+          this.filter.prevPage = filter.prevPage
 
-        if (resetPagination) {
-          this.summaries = summaries
+          if (resetPagination) {
+            this.summaries = summaries
 
-          let count = this.pagination.count || 0
+            let count = this.pagination.count || 0
 
-          if (paginationOptions.incTotal) {
-            count = filter.total || 0
-            this.filter.incTotal = false
-          }
-
-          if (paginationOptions.incPageNavigation) {
-            const pages = filter.pageNavigation || []
-            this.pagination.pages = pages
-
-            if (!paginationOptions.incTotal) {
-              if (pages.length > 1) {
-                const lastPageCount = pages[pages.length - 1].items
-                count = ((pages.length - 1) * this.recordsPerPage) + lastPageCount
-              } else {
-                count = records.length
-              }
+            if (paginationOptions.incTotal) {
+              count = filter.total || 0
+              this.filter.incTotal = false
             }
 
-            this.filter.incPageNavigation = false
+            if (paginationOptions.incPageNavigation) {
+              const pages = filter.pageNavigation || []
+              this.pagination.pages = pages
+
+              if (!paginationOptions.incTotal) {
+                if (pages.length > 1) {
+                  const lastPageCount = pages[pages.length - 1].items
+                  count = ((pages.length - 1) * this.recordsPerPage) + lastPageCount
+                } else {
+                  count = records.length
+                }
+              }
+
+              this.filter.incPageNavigation = false
+            }
+
+            this.pagination.count = count
+            this.pagination.page = 1
           }
 
-          this.pagination.count = count
-          this.pagination.page = 1
-        }
+          if (this.stayOnPage) {
+            const goToPageNumber = this.stayOnPage
+            this.stayOnPage = undefined
+            return this.goToPage(goToPageNumber)
+          }
 
-        if (this.stayOnPage) {
-          const goToPageNumber = this.stayOnPage
-          this.stayOnPage = undefined
-          return this.goToPage(goToPageNumber)
-        }
+          // Extract user IDs from record values and load all users
+          const fields = this.fields.filter(f => f.moduleField).map(f => f.moduleField)
 
-        // Extract user IDs from record values and load all users
-        const fields = this.fields.filter(f => f.moduleField).map(f => f.moduleField)
-
-        return Promise.all([
-          this.fetchUsers(fields, records),
-          this.fetchRecords(namespaceID, fields, records),
-        ]).then(() => {
-          this.items = records.map(r => this.wrapRecord(r))
-        })
-      }).catch((e) => {
-        if (!axios.isCancel(e)) {
-          this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
-        } else {
-          this.cancelled = true
-        }
-      }).finally(() => {
-        if (!this.cancelled) {
-          this.processingTimeout = setTimeout(() => {
+          return Promise.all([
+            this.fetchUsers(fields, records),
+            this.fetchRecords(namespaceID, fields, records),
+          ]).then(() => {
+            this.items = records.map(r => this.wrapRecord(r))
             this.processing = false
-          }, 300)
-        } else {
+          })
+        }).catch((e) => {
+          if (!axios.isCancel(e)) {
+            this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
+          } else {
+            this.cancelled = true
+          }
+          this.processing = false
+        }).finally(() => {
           this.cancelled = false
-        }
-      })
+        })
     },
 
     getStorageRecordListFilter () {

@@ -215,14 +215,6 @@ export default {
     },
 
     onSearch (query, loading) {
-      if (this.loading) {
-        if (this.$refs.vueSelect) {
-          this.$refs.vueSelect._data.search = this.query
-        }
-
-        return
-      }
-
       if (query !== this.query) {
         this.query = query
       }

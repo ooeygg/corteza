@@ -319,6 +319,7 @@
 <script>
 import base from './base'
 import { debounce } from 'lodash'
+import axios from 'axios'
 import { compose, NoID } from '@cortezaproject/corteza-js'
 import { mapActions, mapGetters } from 'vuex'
 import { queryToFilter, evaluatePrefilter, isFieldInFilter } from 'corteza-webapp-compose/src/lib/record-filter'
@@ -346,6 +347,7 @@ export default {
   data () {
     return {
       processing: false,
+      cancelRequest: null,
 
       query: '',
 
@@ -591,8 +593,16 @@ export default {
         q.sort = ''
       }
 
-      this.$ComposeAPI.recordList({ ...q, query })
-        .then(({ filter, set }) => {
+      if (this.cancelRequest) {
+        this.cancelRequest()
+        this.cancelRequest = null
+      }
+
+      const { response, cancel } = this.$ComposeAPI.recordListCancellable({ ...q, query })
+      this.cancelRequest = cancel
+
+      return Promise.all([response(), new Promise(resolve => setTimeout(resolve, 300))])
+        .then(([{ filter, set }]) => {
           this.filter = { ...this.filter, ...filter }
           this.filter.nextPage = filter.nextPage
           this.filter.prevPage = filter.prevPage
@@ -601,8 +611,12 @@ export default {
 
           this.records = set.map(r => new compose.Record(this.module, r))
           this.formatRecordValues(set.map(({ recordID }) => recordID))
-        }).finally(() => {
           this.processing = false
+        })
+        .catch((e) => {
+          if (axios.isCancel(e)) return
+          this.processing = false
+          throw e
         })
     },
 
@@ -619,18 +633,22 @@ export default {
         return
       }
 
-      const stopProcessing = () => {
-        setTimeout(() => {
-          this.processing = false
-        }, 300)
-      }
-
       if (this.labelField.kind === 'Record' && recordLabelField) {
         this.processing = true
-        return this.fetchRecords(namespaceID, [this.labelField], this.records).finally(stopProcessing)
+        return Promise.all([
+          this.fetchRecords(namespaceID, [this.labelField], this.records),
+          new Promise(resolve => setTimeout(resolve, 300)),
+        ]).finally(() => {
+          this.processing = false
+        })
       } else if (this.labelField.kind === 'User') {
         this.processing = true
-        return this.fetchUsers([this.labelField], this.records).finally(stopProcessing)
+        return Promise.all([
+          this.fetchUsers([this.labelField], this.records),
+          new Promise(resolve => setTimeout(resolve, 300)),
+        ]).finally(() => {
+          this.processing = false
+        })
       }
     },
 
