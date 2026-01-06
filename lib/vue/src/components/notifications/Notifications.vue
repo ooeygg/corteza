@@ -30,11 +30,10 @@
 
           <b-button
             v-if="hasUnread"
-            v-b-tooltip.hover
+            v-b-tooltip.hover="{ title: $t('markAllAsRead'), delay: { show: 500, hide: 0 } }"
             variant="outline-light"
             class="p-2 border-0 d-flex align-items-center justify-content-center"
             style="width: 2rem; height: 2rem;"
-            :title="$t('markAllAsRead')"
             @click="handleMarkAllAsRead"
           >
             <font-awesome-icon
@@ -44,11 +43,10 @@
           </b-button>
 
           <b-button
-            v-b-tooltip.hover
+            v-b-tooltip.hover="{ title: $t(muted ? 'unmute' : 'mute'), delay: { show: 500, hide: 0 } }"
             variant="outline-light"
             class="p-2 border-0 d-flex align-items-center justify-content-center"
             style="width: 2rem; height: 2rem;"
-            :title="$t(muted ? 'unmute' : 'mute')"
             @click="toggleMuted"
           >
             <font-awesome-icon

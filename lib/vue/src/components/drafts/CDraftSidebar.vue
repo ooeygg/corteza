@@ -22,6 +22,7 @@
       </h5>
 
       <b-button
+        v-b-tooltip.hover="{ title: $t('general:label.close'), delay: { show: 500, hide: 0 } }"
         variant="outline-light"
         class="d-flex align-items-center justify-content-center p-2 border-0 text-secondary"
         @click="isVisible = false"
