@@ -142,7 +142,7 @@ reminder:
   routesTo: Label for page link
   snooze:
     label: Snooze
-    count: Snooze count {{count}}
+    count: Snooze count
 tooltip:
   dragAndDrop: Drag and drop to change order
 fieldKinds:

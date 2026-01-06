@@ -1,6 +1,6 @@
 <template>
   <div class="h-100 d-flex flex-column">
-    <div class="overflow-auto flex-grow-1 h-100 border-top">
+    <div class="overflow-auto flex-grow-1 h-100">
       <div
         v-if="loading"
         class="d-flex justify-content-center p-5"

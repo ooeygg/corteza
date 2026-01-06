@@ -15,6 +15,7 @@
       :right="right"
       no-close-on-route-change
       no-close-on-esc
+      z-index="1037"
     >
       <template #header>
         <div
@@ -256,12 +257,6 @@ $nav-width: 320px;
   display: flex !important;
   left: calc(-#{$nav-width}) !important;
   transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-  @media (min-width: 1024px) {
-    border-top-right-radius: 1rem !important;
-    border-bottom-right-radius: 1rem !important;
-    overflow: hidden !important;
-  }
 
   &.expanded {
     left: 0 !important;

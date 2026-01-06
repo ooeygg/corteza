@@ -38,10 +38,11 @@
       </div>
 
       <div class="draft-item-content">
-        <div class="font-weight-bold text-dark mb-1">
+        <h5 class="font-weight-bold text-break">
           {{ recordLabel }}
-        </div>
-        <div class="text-muted small">
+        </h5>
+
+        <div class="text-secondary mb-1 text-break">
           {{ description }}
         </div>
         <div class="d-flex align-items-center justify-content-end flex-wrap gap-1">

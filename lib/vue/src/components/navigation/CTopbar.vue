@@ -440,14 +440,4 @@ $nav-user-icon-size: calc(var(--topbar-height) - 16px);
   }
 }
 
-@media (min-width: 1024px) {
-  .b-sidebar.topbar-offset {
-    top: var(--topbar-height) !important;
-    height: calc(100% - var(--topbar-height)) !important;
-    border-top-left-radius: 1rem !important;
-    border-bottom-left-radius: 1rem !important;
-    overflow: hidden !important;
-    z-index: 1048 !important;
-  }
-}
 </style>

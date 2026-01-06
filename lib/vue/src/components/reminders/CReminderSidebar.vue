@@ -2,12 +2,12 @@
   <b-sidebar
     v-model="isVisible"
     :title="title"
-    header-class="d-flex align-items-center justify-content-between reminder-sidebar-header p-3 border-bottom"
+    header-class="d-flex align-items-center justify-content-between bg-white pr-2 pl-3 py-3 border-bottom"
     body-class="d-flex flex-column overflow-hidden bg-white"
-    sidebar-class="topbar-offset"
+    sidebar-class="reminder-sidebar"
+    bg-variant="white"
     :backdrop="isMobile"
     backdrop-variant="white"
-    no-slide
     no-footer
     right
     shadow
@@ -16,11 +16,11 @@
     width="400px"
   >
     <template #header>
-      <h4
+      <h5
         class="text-primary mb-0"
       >
         <b>{{ title }}</b>
-      </h4>
+      </h5>
 
       <b-button
         variant="outline-light"
@@ -110,12 +110,28 @@ export default {
 </script>
 
 <style lang="scss">
-.reminder-sidebar-header {
-  height: 64px;
-  background-color: var(--gray-200);
-}
-
 .b-sidebar-backdrop {
   opacity: 0.75 !important;
+}
+
+@media (min-width: 1024px) {
+  .b-sidebar.reminder-sidebar {
+    top: calc(var(--topbar-height) + 0.5rem) !important;
+    right: 0.5rem !important;
+    height: calc(100% - var(--topbar-height) - 1rem) !important;
+    border-radius: 1rem !important;
+    border: none !important;
+    z-index: 1048 !important;
+
+    .b-sidebar-header {
+      border-top-left-radius: 1rem !important;
+      border-top-right-radius: 1rem !important;
+    }
+
+    .b-sidebar-body {
+      border-bottom-left-radius: 1rem !important;
+      border-bottom-right-radius: 1rem !important;
+    }
+  }
 }
 </style>
