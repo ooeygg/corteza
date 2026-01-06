@@ -862,7 +862,12 @@ export default {
     checkUnsavedChanges (bvEvent, modalId) {
       if ((bvEvent && modalId !== 'record-modal') || !this.edit || this.isDraft) return true
 
-      const recordStateChange = this.compareRecordValues() ? window.confirm(this.$t('general:record.unsavedChanges')) : true
+      let recordStateChange = true
+
+      if (this.compareRecordValues()) {
+        const message = this.showDrafts ? this.$t('general:record.unsavedChangesDraft') : this.$t('general:record.unsavedChanges')
+        recordStateChange = window.confirm(message)
+      }
 
       if (!recordStateChange) {
         this.processing = false

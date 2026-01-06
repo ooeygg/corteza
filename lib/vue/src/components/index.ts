@@ -116,9 +116,4 @@ export {
   CNotificationSidebar,
 } from './notifications'
 
-export {
-  CDraftButton,
-  CDraftSidebar,
-} from './drafts'
-
 export { default as C3 } from './c3'

@@ -3,6 +3,7 @@ import {
   loadAllDraftsFromStorage,
   saveDraftToStorage,
   removeDraftFromStorage,
+  clearAllDraftsFromStorage,
 } from './storage'
 
 const { Revision } = system
@@ -23,6 +24,7 @@ const types = {
   REMOVE_DRAFT: 'REMOVE_DRAFT',
   SET_LOADING: 'SET_LOADING',
   setVisible: 'setVisible',
+  CLEAR_DRAFTS: 'CLEAR_DRAFTS',
 }
 
 export default function () {
@@ -133,6 +135,13 @@ export default function () {
         commit(types.REMOVE_DRAFT, changeID)
       },
 
+      async clearDrafts (
+        { commit }: { commit: (mutation: string, payload?: any) => void },
+      ): Promise<void> {
+        clearAllDraftsFromStorage()
+        commit(types.CLEAR_DRAFTS)
+      },
+
       toggleVisibility ({ commit, state }: { commit: (mutation: string, payload?: any) => void; state: DraftsState }): void {
         commit(types.setVisible, !state.visible)
       },
@@ -147,6 +156,10 @@ export default function () {
         const drafts = { ...state.drafts }
         delete drafts[changeID]
         state.drafts = drafts
+      },
+
+      [types.CLEAR_DRAFTS] (state: DraftsState): void {
+        state.drafts = {}
       },
 
       [types.SET_LOADING] (state: DraftsState, loading: boolean): void {

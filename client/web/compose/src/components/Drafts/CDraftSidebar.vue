@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import Drafts from './Drafts.vue'
+import Drafts from 'corteza-webapp-compose/src/components/Drafts/Drafts.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { throttle } from 'lodash'
 
@@ -140,4 +140,3 @@ export default {
   }
 }
 </style>
-

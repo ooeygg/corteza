@@ -140,10 +140,12 @@ import { debounce } from 'lodash'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
 import CTranslationModal from '../components/Translator/CTranslatorModal'
+import CDraftSidebar from '../components/Drafts/CDraftSidebar'
+import CDraftButton from '../components/Drafts/CDraftButton'
 
 library.add(faFile)
 
-const { CToaster, CPrompts, CPermissionsModal, CTopbar, CSidebar, CExtendSession, CNotificationSidebar, CDraftSidebar, CDraftButton } = components
+const { CToaster, CPrompts, CPermissionsModal, CTopbar, CSidebar, CExtendSession, CNotificationSidebar } = components
 
 export default {
   i18nOptions: {

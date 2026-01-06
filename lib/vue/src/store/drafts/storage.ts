@@ -53,6 +53,12 @@ export function removeDraftFromStorage (changeID: string): void {
   localStorage.removeItem(buildStorageKey(changeID))
 }
 
+export function clearAllDraftsFromStorage (): void {
+  for (const storageKey of getAllDraftKeys()) {
+    localStorage.removeItem(storageKey)
+  }
+}
+
 export function loadAllDraftsFromStorage (): Map<string, system.Revision> {
   const drafts = new Map<string, system.Revision>()
 

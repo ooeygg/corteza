@@ -1,6 +1,7 @@
 <template>
   <div class="draft-item-container px-3 pt-3 pb-2 border-bottom">
     <b-list-group-item
+      :id="`draft-item-${draft.revision.changeID}`"
       :class="{ 'border-primary': active }"
       class="draft-item border rounded bg-white p-3 position-relative"
       @click="$emit('click', draft)"
@@ -23,6 +24,17 @@
             />
           </template>
 
+          <b-dropdown-item
+            v-if="recordID"
+            @click.stop="$emit('view', draft)"
+          >
+            <font-awesome-icon
+              :icon="['far', 'file-alt']"
+              class="text-primary"
+            />
+            {{ $t('viewRecord') }}
+          </b-dropdown-item>
+
           <c-input-confirm
             :text="$t('general:label.delete')"
             show-icon
@@ -38,17 +50,38 @@
       </div>
 
       <div class="draft-item-content">
-        <h5 class="font-weight-bold text-break">
+        <h5
+          v-if="recordLabel && !useFieldViewer"
+          class="font-weight-bold text-break"
+        >
           {{ recordLabel }}
         </h5>
 
-        <div class="text-secondary mb-1 text-break">
-          {{ description }}
+        <div
+          v-if="useFieldViewer"
+          class="changed-field mb-2"
+        >
+          <div class="text-primary font-weight-bold">
+            {{ firstChangedField.label || firstChangedField.name }}
+          </div>
+          <field-viewer
+            v-bind="{ namespace, field: firstChangedField, record }"
+            value-only
+            class="text-break"
+          />
         </div>
+
+        <b-button
+          :id="`draft-description-${draft.revision.changeID}`"
+          variant="link"
+          class="small text-secondary mb-1 text-break cursor-pointer p-0"
+          @click.prevent.stop
+        >
+          {{ description }}
+        </b-button>
         <div class="d-flex align-items-center justify-content-end flex-wrap gap-1">
           <b-badge
-            v-b-tooltip.hover.d200
-            :title="$t('general:label.namespace.single')"
+            v-b-tooltip.hover="{ title: $t('general:label.namespace.single'), delay: { show: 500, hide: 0 } }"
             variant="primary"
             style="font-size: 85%;"
           >
@@ -56,8 +89,7 @@
           </b-badge>
 
           <b-badge
-            v-b-tooltip.hover.d200
-            :title="$t('general:label.module.single')"
+            v-b-tooltip.hover="{ title: $t('general:label.module.single'), delay: { show: 500, hide: 0 } }"
             variant="extra-light"
             style="font-size: 85%;"
           >
@@ -75,12 +107,38 @@
         {{ draft.revision.timestamp | locFullDateTime }}
       </div>
     </div>
+
+    <b-popover
+      v-if="changedFields.length > 0"
+      :target="`draft-description-${draft.revision.changeID}`"
+      triggers="hover"
+      placement="left"
+      boundary="viewport"
+    >
+      <div
+        v-for="field in changedFields"
+        :key="field.name"
+        class="mb-2"
+      >
+        <div class="text-primary font-weight-bold">
+          {{ field.label || field.name }}
+        </div>
+        <field-viewer
+          v-bind="{ namespace, field, record }"
+          value-only
+          class="text-break"
+        />
+      </div>
+    </b-popover>
   </div>
 </template>
 
 <script>
 import { compose } from '@cortezaproject/corteza-js'
-import CInputConfirm from '../input/CInputConfirm.vue'
+import { components } from '@cortezaproject/corteza-vue'
+import FieldViewer from 'corteza-webapp-compose/src/components/ModuleFields/Viewer'
+
+const { CInputConfirm } = components
 
 export default {
   i18nOptions: {
@@ -89,6 +147,7 @@ export default {
 
   components: {
     CInputConfirm,
+    FieldViewer,
   },
 
   props: {
@@ -175,6 +234,35 @@ export default {
       const changesCount = revision.changes.length
       return this.$t('general:changes', { count: changesCount })
     },
+
+    record () {
+      const { revision } = this.draft
+      if (this.module && revision.record) {
+        return new compose.Record(this.module, revision.record)
+      }
+      return null
+    },
+
+    recordID () {
+      const parts = this.draft.revision.resource.split('/')
+      return parts[3] === '0' ? undefined : parts[3]
+    },
+
+    firstChangedField () {
+      if (!this.module || !this.draft.revision.changes || this.draft.revision.changes.length === 0) return null
+      const changedNames = this.draft.revision.changes.map(c => c.key)
+      return (this.module.fields || []).find(f => changedNames.includes(f.name))
+    },
+
+    useFieldViewer () {
+      return !!this.module && !!this.record && !!this.firstChangedField
+    },
+
+    changedFields () {
+      if (!this.module || !this.draft.revision.changes) return []
+      const changedNames = this.draft.revision.changes.map(c => c.key)
+      return (this.module.fields || []).filter(f => changedNames.includes(f.name))
+    },
   },
 }
 </script>
@@ -207,4 +295,3 @@ export default {
   }
 }
 </style>
-

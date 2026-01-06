@@ -89,6 +89,7 @@ label:
   saveAndClose: Save and close
   saveAs: Save as
   saveAsCopy: Save as copy
+  search: Search
   status: Status
   timeHour: "{{t}}h"
   timeMinute: "{{t}}min"
@@ -211,7 +212,8 @@ webcam:
     camera: Unable to access the camera. Please make sure you have granted camera permissions.
 
 record:
-  unsavedChanges: Unsaved changes will be lost. Do you wish to close the record?
+  unsavedChanges: Unsaved changes will be lost. Do you wish to leave?
+  unsavedChangesDraft: Unsaved changes will be discarded, but can still be found in Drafts. Do you wish to leave?
 
 themes:
   labels:
