@@ -197,7 +197,9 @@ export default {
 
         if (!this.page || this.page.pageID !== recordPageID) {
           this.page = this.getPageByID(recordPageID)
-          this.setModalPageHandle(this.page.handle)
+          if (this.page) {
+            this.setModalPageHandle(this.page.handle)
+          }
         }
 
         if (this.page && (!this.module || this.module.moduleID !== this.page.moduleID)) {

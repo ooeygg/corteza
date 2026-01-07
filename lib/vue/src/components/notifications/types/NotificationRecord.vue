@@ -108,11 +108,11 @@ export default {
 
         if (openMode === 'newTab') {
           window.open(this.$router.resolve(routeParams).href, '_blank')
-        } else if (this.isOnPagesRouteOrChild && openMode === 'modal') {
+        } else if (this.isOnPagesRouteOrChild && openMode === 'modal' && slug === this.$route.params.slug) {
           this.$root.$emit('show-record-modal', {
             recordID: !recordID || recordID === '0' ? '0' : recordID,
-              recordPageID: pageID,
-              edit,
+            recordPageID: pageID,
+            edit,
           })
 
           return
