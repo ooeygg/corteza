@@ -1,11 +1,11 @@
 <template>
   <b-card
-    header-class="p-0 border-bottom"
+    :header-class="!hideToolbar ? 'p-0 border-bottom' : 'd-none'"
     body-class="p-0"
     class="border border-light rounded"
   >
     <template
-      v-if="editor"
+      v-if="editor && !hideToolbar"
       #header
     >
       <r-toolbar
@@ -68,6 +68,11 @@ export default {
     placeholder: {
       type: String,
       default: '',
+    },
+
+    hideToolbar: {
+      type: Boolean,
+      default: false,
     },
   },
 

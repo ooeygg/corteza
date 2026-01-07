@@ -73,6 +73,7 @@
                 :show-content="showContent(comment)"
                 :highlighted="highlightedCommentId === comment.recordID"
                 @reply="replyToComment(comment)"
+                @edit="onEditComment(comment, $event)"
                 @reply-click="handleReplyClick"
                 @mouseleave="resetHighlightedComment(comment.recordID)"
               />
@@ -708,6 +709,34 @@ export default {
             this.scrollToLatest()
           })
         })
+    },
+
+    onEditComment (comment, { title, content }) {
+      const record = new compose.Record(this.roModule, { ...comment })
+
+      if (this.titleField) {
+        record.values[this.titleField.name] = title
+      }
+
+      if (this.contentField) {
+        record.values[this.contentField.name] = content
+      }
+
+      return this.$ComposeAPI.recordUpdate(record).then(rec => {
+        const updatedRecord = new compose.Record(this.roModule, rec)
+        updatedRecord.author = comment.author
+        updatedRecord.reply = comment.reply
+
+        this.comments.forEach(dateGroup => {
+          dateGroup.messages.forEach(messageGroup => {
+            const index = messageGroup.comments.findIndex(c => c.recordID === updatedRecord.recordID)
+            if (index > -1) {
+              messageGroup.comments.splice(index, 1, updatedRecord)
+            }
+          })
+        })
+      })
+        .catch(this.toastErrorHandler(this.$t('notification:record.updateFailed')))
     },
 
     expandFilter () {
