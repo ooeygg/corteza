@@ -49,6 +49,7 @@ import {
   faMapMarkedAlt,
   faOutdent,
   faParagraph,
+  faPaperclip,
   faPen,
   faPlus,
   faQuestion,
@@ -200,5 +201,6 @@ library.add(
   faBellSolid,
   faBellSlash,
   faLocationCrosshairs,
+  faPaperclip,
   faReply,
 )

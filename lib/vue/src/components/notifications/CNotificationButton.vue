@@ -7,8 +7,8 @@
     @click="toggleNotifications"
   >
     <font-awesome-icon
-      :icon="notificationsIcon.icon"
-      :class="notificationsIcon.class"
+      :icon="['far', 'bell']"
+      class="text-dark"
     />
     <b-badge
       v-if="unreadCount > 0 && !muted"
@@ -32,20 +32,6 @@ export default {
       unreadCount: 'notifications/unreadCount',
       muted: 'notifications/muted',
     }),
-
-    notificationsIcon () {
-      if (this.unreadCount > 0 && !this.muted) {
-        return {
-          icon: ['fas', 'bell'],
-          class: 'text-primary',
-        }
-      }
-
-      return {
-        icon: ['far', 'bell'],
-        class: 'text-dark',
-      }
-    },
   },
 
   methods: {

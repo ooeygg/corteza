@@ -774,7 +774,7 @@ comment:
   title:
     placeholder: Title
   content:
-    placeholder: Comment here...
+    placeholder: Write your message here...
   submit: Submit
   noComments: No comments yet
   load:
@@ -788,11 +788,15 @@ comment:
   referenceField:
     label: Reference field
     footnote: Field that links comments with the parent record
+  attachmentField:
+    label: Attachment field
+    footnote: Field used to store comment attachments
   today: Today
   yesterday: Yesterday
   tooltip:
     reply: Reply
     edit: Edit
+    attach: Attach file
 navigation:
   chart: Charts
   colorPicker: Choose a color

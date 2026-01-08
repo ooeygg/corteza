@@ -145,6 +145,25 @@
           lg="6"
         >
           <b-form-group
+            :label="$t('comment.attachmentField.label')"
+            label-class="text-primary"
+            :description="$t('comment.attachmentField.footnote')"
+          >
+            <c-input-select
+              v-model="options.attachmentField"
+              :options="selectedModuleFieldsByType('File')"
+              :get-option-label="f => `${f.label || f.name} (${f.kind})`"
+              :reduce="f => f.name"
+              :placeholder="$t('general.label.none')"
+            />
+          </b-form-group>
+        </b-col>
+
+        <b-col
+          cols="12"
+          lg="6"
+        >
+          <b-form-group
             :label="$t('comment.sortDirection.label')"
             label-class="text-primary"
             :description="$t('comment.sortDirection.footnote')"
@@ -255,12 +274,16 @@ export default {
         this.options.titleField = ''
         this.options.contentField = ''
         this.options.referenceField = ''
+        this.options.attachmentField = ''
         this.selectedModuleFields.forEach(f => {
           if (f.name === 'Reference') {
             this.options.referenceField = 'Reference'
           }
           if (f.name === 'Content') {
             this.options.contentField = 'Content'
+          }
+          if (f.name === 'Attachments') {
+            this.options.attachmentField = 'Attachments'
           }
         })
       },

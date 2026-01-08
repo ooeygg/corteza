@@ -21,6 +21,9 @@
       :class="bodyClass"
       class="rt-editor-content rt-content p-2"
       :style="{ minHeight: minBodyHeight, maxHeight: maxBodyHeight }"
+      @drop.native="onDrop"
+      @paste.native="onPaste"
+      @dragover.native.prevent
     />
   </b-card>
 </template>
@@ -143,6 +146,20 @@ export default {
     focus () {
       if (this.editor) {
         this.editor.commands.focus()
+      }
+    },
+
+    onDrop (event) {
+      if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+        event.preventDefault()
+        this.$emit('upload', event.dataTransfer.files)
+      }
+    },
+
+    onPaste (event) {
+      if (event.clipboardData && event.clipboardData.files && event.clipboardData.files.length > 0) {
+        event.preventDefault()
+        this.$emit('upload', event.clipboardData.files)
       }
     },
   },

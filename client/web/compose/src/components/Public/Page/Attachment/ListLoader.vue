@@ -42,11 +42,18 @@
                   :href="a.download"
                   variant="outline-extra-light"
                   size="sm"
-                  class="download-button text-secondary border-0"
+                  class="download-button text-secondary border-0 ml-1"
                   @click.stop
                 >
                   <font-awesome-icon :icon="['fas', 'download']" />
                 </b-button>
+
+                <c-input-confirm
+                  v-if="enableDelete"
+                  show-icon
+                  class="ml-1"
+                  @confirmed="deleteAttachment(index)"
+                />
               </attachment-link>
             </div>
 
@@ -59,18 +66,6 @@
 
               <span>{{ uploadedAt(a) }}</span>
             </i18next>
-          </b-col>
-
-          <b-col
-            cols="auto"
-            class="d-flex align-items-start"
-          >
-            <c-input-confirm
-              v-if="enableDelete"
-              show-icon
-              class="ml-2"
-              @confirmed="deleteAttachment(index)"
-            />
           </b-col>
         </b-row>
       </draggable>

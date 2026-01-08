@@ -145,6 +145,14 @@
           >
             {{ $t('field.noPermission') }}
           </small>
+
+          <field-viewer
+            v-if="showAttachments"
+            :field="attachmentField"
+            :record="comment"
+            :namespace="namespace"
+            value-only
+          />
         </template>
       </div>
     </b-card>
@@ -161,6 +169,10 @@ const { CRichTextInput } = components
 
 export default {
   name: 'CommentItem',
+
+  i18nOptions: {
+    namespaces: 'block',
+  },
 
   components: {
     FieldViewer,
@@ -180,6 +192,11 @@ export default {
     },
 
     contentField: {
+      type: Object,
+      default: undefined,
+    },
+
+    attachmentField: {
       type: Object,
       default: undefined,
     },
@@ -258,6 +275,20 @@ export default {
 
     canEdit () {
       return this.authorIsCurrentUser && !this.comment.deletedAt
+    },
+
+    showAttachments () {
+      if (!this.attachmentField || !this.attachmentField.canReadRecordValue) {
+        return false
+      }
+
+      const v = this.comment.values[this.attachmentField.name]
+
+      if (this.attachmentField.isMulti) {
+        return Array.isArray(v) && v.length > 0
+      }
+
+      return !!v
     },
   },
 
