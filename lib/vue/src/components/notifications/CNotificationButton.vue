@@ -12,7 +12,7 @@
     />
     <b-badge
       v-if="unreadCount > 0 && !muted"
-      variant="danger"
+      variant="primary"
       pill
       class="position-absolute notification-badge"
     >
