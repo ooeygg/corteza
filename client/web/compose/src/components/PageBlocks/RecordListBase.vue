@@ -420,7 +420,7 @@
             <b-tr
               v-for="(item, index) in items"
               :key="`${index}${item.r.recordID}`"
-              :class="{ 'pointer': !(options.editable && editing), }"
+              :class="{ 'pointer': isRowClickable }"
               :variant="inlineEditing && item.r.deletedAt ? 'warning' : ''"
               @click="handleRowClick(item)"
             >
@@ -1107,6 +1107,10 @@ export default {
       return !this.options.hidePaging
     },
 
+    isRowClickable () {
+      return !(this.options.editable && this.editing) && this.options.recordDisplayOption !== 'doNothing'
+    },
+
     showPerPageSelector () {
       return this.options.showRecordPerPageOption
     },
@@ -1735,6 +1739,10 @@ export default {
     },
 
     handleRowClick ({ r: { recordID } }) {
+      if (this.options.recordDisplayOption === 'doNothing') {
+        return
+      }
+
       if ((this.options.editable && this.editing) || (!this.recordPageID && !this.options.rowViewUrl)) {
         return
       }

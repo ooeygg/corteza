@@ -1013,6 +1013,7 @@ export default {
         { value: 'sameTab', text: this.$t('recordList.record.openInSameTab') },
         { value: 'newTab', text: this.$t('recordList.record.openInNewTab') },
         { value: 'modal', text: this.$t('recordList.record.openInModal') },
+        { value: 'doNothing', text: this.$t('recordList.record.doNothing') },
       ]
     },
 
