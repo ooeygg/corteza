@@ -58,7 +58,7 @@
         <small>{{ commentTime }}</small>
       </div>
 
-      <div class="d-flex flex-column w-100 overflow-hidden gap-1">
+      <div class="d-flex flex-column w-100 overflow-hidden gap">
         <comment-reply
           v-if="comment.reply"
           :reply="comment.reply"

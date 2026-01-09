@@ -73,6 +73,7 @@
                 :show-title="showTitle(comment)"
                 :show-content="showContent(comment)"
                 :highlighted="highlightedCommentId === comment.recordID"
+                class="mb-1"
                 @reply="replyToComment(comment)"
                 @edit="onEditComment(comment, $event)"
                 @reply-click="handleReplyClick"
