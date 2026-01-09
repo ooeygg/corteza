@@ -368,7 +368,16 @@ func (ip *iteratorProvider) resolveReferences(ctx context.Context, ds dal.FullSe
 			}
 
 			for i, rec := range relRecords {
-				cacheRecord.SetValue(fmt.Sprintf("%s_resolved", refField), uint(i), rec.Values.Get(resLab, 0).Value)
+				if rec.Values == nil {
+					continue
+				}
+
+				v := rec.Values.Get(resLab, 0)
+				if v == nil {
+					continue
+				}
+
+				cacheRecord.SetValue(fmt.Sprintf("%s value", refField), uint(i), v.Value)
 			}
 
 			ip.rows[i] = cacheRecord

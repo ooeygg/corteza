@@ -105,8 +105,8 @@ func (e JsonlEncoder) encodeRecordDatasource(ctx context.Context, writer *json.E
 			}
 
 			proc(h)
-			if _, ok := out[fmt.Sprintf("%s_resolved", h)]; ok {
-				proc(fmt.Sprintf("%s_resolved", h))
+			if _, ok := out[fmt.Sprintf("%s value", h)]; ok {
+				proc(fmt.Sprintf("%s value", h))
 			}
 		}
 

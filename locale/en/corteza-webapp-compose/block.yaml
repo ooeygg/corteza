@@ -413,8 +413,8 @@ recordList:
     selection: Selected records
     specifyTimezone: Export to timezone
     timezonePlaceholder: Select timezone
-    resolveRefs: Resolve references
-    resolveRefsNote: When resolve references is checked, all record fields include the record label next to the identifier.
+    resolveRefs: Include record selector values
+    resolveRefsNote: When include record selector values is checked, all record fields include the record label next to the identifier.
     datePresetUndefined: Unknown date preset
   federated: Federated
   fields: Module fields

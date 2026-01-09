@@ -145,10 +145,10 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 
 			// Splice in resolved ref values
 			for i, h := range header {
-				if _, ok := cache[fmt.Sprintf("%s_resolved", h)]; ok {
+				if _, ok := cache[fmt.Sprintf("%s value", h)]; ok {
 					header = append(header, "")
 					copy(header[i+1:], header[i:])
-					header[i] = fmt.Sprintf("%s_resolved", h)
+					header[i] = fmt.Sprintf("%s value", h)
 
 					resolved[header[i]] = h
 				}
