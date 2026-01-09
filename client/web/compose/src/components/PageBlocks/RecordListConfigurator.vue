@@ -932,14 +932,18 @@
                   {{ $t('recordList.hideRecordCloneButton') }}
                 </b-form-checkbox>
 
+                <b-form-checkbox v-model="options.hideRecordReminderButton">
+                  {{ $t('recordList.hideRecordReminderButton') }}
+                </b-form-checkbox>
+
                 <b-form-checkbox
                   v-model="options.hideRecordPermissionsButton"
                 >
                   {{ $t('recordList.hideRecordPermissionsButton') }}
                 </b-form-checkbox>
 
-                <b-form-checkbox v-model="options.hideRecordReminderButton">
-                  {{ $t('recordList.hideRecordReminderButton') }}
+                <b-form-checkbox v-model="options.hideRecordDeleteButton">
+                  {{ $t('recordList.hideRecordDeleteButton') }}
                 </b-form-checkbox>
               </b-form-group>
             </b-col>

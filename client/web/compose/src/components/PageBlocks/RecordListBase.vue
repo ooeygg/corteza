@@ -2190,11 +2190,11 @@ export default {
     },
 
     isInlineRestoreActionVisible ({ deletedAt }) {
-      return !!deletedAt
+      return !this.options.hideRecordDeleteButton && !!deletedAt
     },
 
     isInlineDeleteActionVisible ({ recordID, canDeleteRecord, deletedAt }) {
-      return !deletedAt && (canDeleteRecord || recordID === NoID)
+      return !this.options.hideRecordDeleteButton && !deletedAt && (canDeleteRecord || recordID === NoID)
     },
 
     isViewRecordActionVisible ({ canReadRecord }) {
@@ -2210,11 +2210,11 @@ export default {
     },
 
     isDeleteActionVisible ({ deletedAt, canDeleteRecord }) {
-      return !deletedAt && canDeleteRecord
+      return !this.options.hideRecordDeleteButton && !deletedAt && canDeleteRecord
     },
 
     isRestoreActionVisible ({ canUndeleteRecord }) {
-      return canUndeleteRecord
+      return !this.options.hideRecordDeleteButton && canUndeleteRecord
     },
 
     areActionsVisible (record) {

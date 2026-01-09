@@ -50,6 +50,7 @@ export interface Options {
   hideRecordEditButton: boolean;
   hideRecordViewButton: boolean;
   hideRecordPermissionsButton: boolean;
+  hideRecordDeleteButton: boolean;
   enableRecordPageNavigation: boolean;
   allowExport: boolean;
   perPage: number;
@@ -120,6 +121,7 @@ const defaults: Readonly<Options> = Object.freeze({
   hideRecordEditButton: false,
   hideRecordViewButton: false,
   hideRecordPermissionsButton: false,
+  hideRecordDeleteButton: false,
   enableRecordPageNavigation: false,
   allowExport: false,
   perPage: 20,
@@ -235,6 +237,7 @@ export class PageBlockRecordList extends PageBlock {
       'hideRecordEditButton',
       'hideRecordViewButton',
       'hideRecordPermissionsButton',
+      'hideRecordDeleteButton',
       'enableRecordPageNavigation',
       'editable',
       'draggable',
