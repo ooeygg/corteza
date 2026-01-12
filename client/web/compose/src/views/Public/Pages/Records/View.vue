@@ -713,7 +713,7 @@ export default {
       } else if (!this.isNew) {
         this.$router.push({ name: 'page.record', params: { ...this.$route.params, recordID: this.recordID }, query })
       } else {
-        this.$router.push({ name: 'page', params: this.$route.params, query })
+        this.$router.push({ name: 'page.record.create', params: { pageID: this.page.pageID, edit: true } })
       }
     },
 
