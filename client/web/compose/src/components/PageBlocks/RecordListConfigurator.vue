@@ -236,11 +236,11 @@
               lg="6"
             >
               <b-form-group
-                :label="$t('recordList.record.filterHide')"
+                :label="$t('recordList.record.prefilterHideSearch')"
                 label-class="text-primary"
               >
                 <c-input-checkbox
-                  v-model="options.hideFiltering"
+                  v-model="options.hideSearch"
                   switch
                   invert
                   :labels="checkboxLabel"
@@ -249,15 +249,36 @@
             </b-col>
 
             <b-col
+              v-if="!options.hideSearch"
+              lg="6"
+              cols="12"
+            >
+              <b-form-group
+                :label="$t('recordList.record.searchableFields')"
+                label-class="text-primary"
+              >
+                <column-picker
+                  size="sm"
+                  variant="light"
+                  :module="recordListModule"
+                  :fields="options.searchableFields"
+                  :field-subset="queryableFields"
+                  @updateFields="onUpdateSearchableFields"
+                >
+                  {{ $t('recordList.record.configureSearchableFields') }}
+                </column-picker>
+              </b-form-group>
+            </b-col>
+            <b-col
               cols="12"
               lg="6"
             >
               <b-form-group
-                :label="$t('recordList.record.prefilterHideSearch')"
+                :label="$t('recordList.record.filterHide')"
                 label-class="text-primary"
               >
                 <c-input-checkbox
-                  v-model="options.hideSearch"
+                  v-model="options.hideFiltering"
                   switch
                   invert
                   :labels="checkboxLabel"
@@ -1101,6 +1122,17 @@ export default {
         { value: 'uniqueCount', label: this.$t('recordList.summaries.metrics.uniqueCount.label') },
       ]
     },
+
+    queryableFields () {
+      if (!this.recordListModule) {
+        return []
+      }
+
+      return [
+        ...this.recordListModule.fields,
+        ...this.recordListModule.systemFields(),
+      ].filter(f => f.isQueryable)
+    },
   },
 
   watch: {
@@ -1234,6 +1266,10 @@ export default {
 
     onUpdateInlineEditableFields (fields = []) {
       this.options.inlineEditFields = fields.map(f => f.fieldID && f.fieldID !== NoID ? f.fieldID : f.name).filter(f => !!f)
+    },
+
+    onUpdateSearchableFields (fields = []) {
+      this.options.searchableFields = fields.map(f => f.fieldID && f.fieldID !== NoID ? f.fieldID : f.name).filter(f => !!f)
     },
 
     onUpdateTextWrapOption (fields = []) {

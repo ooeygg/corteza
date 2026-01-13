@@ -1924,7 +1924,15 @@ export default {
       this.selected = []
 
       // Compute query based on query, prefilter and recordListFilter
-      const query = queryToFilter(this.query, this.prefilter, this.fields.map(({ moduleField }) => moduleField), this.groupRecordListFilter)
+      let searchFields = []
+      if (this.options.searchableFields.length > 0) {
+        searchFields = this.recordListModule.filterFields(this.options.searchableFields)
+      } else {
+        // Default to visible fields if no searchable fields are configured
+        searchFields = this.fields.map(({ moduleField }) => moduleField)
+      }
+
+      const query = queryToFilter(this.query, this.prefilter, searchFields, this.groupRecordListFilter)
 
       const { moduleID, namespaceID } = this.recordListModule
 

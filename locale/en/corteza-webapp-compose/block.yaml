@@ -595,6 +595,8 @@ recordList:
     showRecordPerPageOption: User will be able to select records per page
     showDeletedRecordsOption: Show option to see deleted records
     setCustomFilterPresets: User will be able to set custom filter presets
+    searchableFields: Searchable fields
+    configureSearchableFields: Select fields that will be used for search
     openInSameTab: Open record in the same tab
     openInNewTab: Open record in a new tab
     openInModal: Open record in a modal

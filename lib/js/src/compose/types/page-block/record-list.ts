@@ -58,6 +58,7 @@ export interface Options {
   recordSelectorDisplayOption: string;
   addRecordDisplayOption: string;
   magnifyOption: string;
+  searchableFields: string[];
 
   fullPageNavigation: boolean;
   showTotalCount: boolean;
@@ -129,6 +130,7 @@ const defaults: Readonly<Options> = Object.freeze({
   recordSelectorDisplayOption: 'sameTab',
   addRecordDisplayOption: 'sameTab',
   magnifyOption: '',
+  searchableFields: [],
 
   fullPageNavigation: false,
   showTotalCount: false,
@@ -199,6 +201,10 @@ export class PageBlockRecordList extends PageBlock {
 
     if (o.fields) {
       this.options.fields = o.fields
+    }
+
+    if (o.searchableFields) {
+      this.options.searchableFields = o.searchableFields
     }
 
     if (o.inlineEditFields) {

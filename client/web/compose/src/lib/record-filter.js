@@ -229,7 +229,7 @@ export function queryToFilter (searchQuery = '', prefilter = '', fields = [], re
   // Create query for search string
   if (searchQuery || searchQuery === 0) {
     searchQuery = fields
-      .filter(f => !nonQueryableFieldNames.includes(f.name) && !nonQueryableFieldKinds.includes(f.kind))
+      .filter(f => f.isQueryable !== false && !nonQueryableFieldNames.includes(f.name) && !nonQueryableFieldKinds.includes(f.kind))
       .map(f => getFieldFilter(f.name, f.kind, searchQuery, 'LIKE'))
       .filter(q => !!q)
       .join(' OR ')
