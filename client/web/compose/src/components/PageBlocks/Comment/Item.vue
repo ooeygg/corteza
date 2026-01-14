@@ -116,7 +116,7 @@
 
         <template v-else-if="!isEditing">
           <field-viewer
-            v-if="showTitle"
+            v-if="shouldShowTitle"
             :field="titleField"
             :record="comment"
             :namespace="namespace"
@@ -125,14 +125,14 @@
           />
 
           <small
-            v-else-if="titleField && !titleField.canReadRecordValue"
+            v-else-if="showTitle && titleField && !titleField.canReadRecordValue"
             class="text-secondary"
           >
             {{ $t('field.noPermission') }}
           </small>
 
           <field-viewer
-            v-if="showContent"
+            v-if="shouldShowContent"
             :field="contentField"
             :record="comment"
             :namespace="namespace"
@@ -140,7 +140,7 @@
             class="multiline"
           />
           <small
-            v-else-if="contentField && !contentField.canReadRecordValue"
+            v-else-if="showContent && contentField && !contentField.canReadRecordValue"
             class="text-secondary"
           >
             {{ $t('field.noPermission') }}
@@ -275,6 +275,24 @@ export default {
 
     canEdit () {
       return this.authorIsCurrentUser && !this.comment.deletedAt
+    },
+
+    shouldShowTitle () {
+      if (!this.showTitle || !this.titleField || !this.titleField.canReadRecordValue) {
+        return false
+      }
+
+      const v = this.comment.values[this.titleField.name]
+      return !!v && v.toString().trim().length > 0
+    },
+
+    shouldShowContent () {
+      if (!this.showContent || !this.contentField || !this.contentField.canReadRecordValue) {
+        return false
+      }
+
+      const v = this.comment.values[this.contentField.name]
+      return !!v && v.toString().trim().length > 0
     },
 
     showAttachments () {

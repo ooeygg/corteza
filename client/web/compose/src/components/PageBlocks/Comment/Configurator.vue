@@ -17,30 +17,6 @@
 
     <div v-if="selectedModule">
       <b-form-group
-        :label="$t('field.selector.available')"
-      >
-        <div class="d-flex">
-          <div class="border fields w-100 p-2">
-            <div
-              v-for="field in allFields"
-              :key="field.name"
-              class="field"
-            >
-              <span v-if="field.label">{{ field.label }} ({{ field.name }})</span>
-
-              <span v-else>{{ field.name }}</span>
-
-              <span class="small float-right">
-                <span v-if="field.isSystem">{{ $t('field.selector.systemField') }}</span>
-
-                <span v-else>{{ field.kind }}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </b-form-group>
-
-      <b-form-group
         :label="$t('recordList.record.prefilterLabel')"
         label-class="text-primary"
       >
@@ -151,7 +127,7 @@
           >
             <c-input-select
               v-model="options.attachmentField"
-              :options="selectedModuleFieldsByType('File')"
+              :options="selectedModuleFieldsByType('File', { includeMulti: true })"
               :get-option-label="f => `${f.label || f.name} (${f.kind})`"
               :reduce="f => f.name"
               :placeholder="$t('general.label.none')"
@@ -302,9 +278,11 @@ export default {
   },
 
   methods: {
-    selectedModuleFieldsByType (type) {
+    selectedModuleFieldsByType (type, { includeMulti = false } = {}) {
       return (this.selectedModuleFields || []).filter((f) => {
-        return f.kind === type
+        if (f.kind !== type) return false
+        if (!includeMulti && f.isMulti) return false
+        return true
       })
     },
   },
