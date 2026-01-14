@@ -123,8 +123,8 @@ const defaults: Readonly<Options> = Object.freeze({
   hideRecordViewButton: false,
   hideRecordPermissionsButton: false,
   hideRecordDeleteButton: false,
-  enableRecordPageNavigation: false,
-  allowExport: false,
+  enableRecordPageNavigation: true,
+  allowExport: true,
   perPage: 20,
   recordDisplayOption: 'sameTab',
   recordSelectorDisplayOption: 'sameTab',
@@ -133,7 +133,7 @@ const defaults: Readonly<Options> = Object.freeze({
   searchableFields: [],
 
   fullPageNavigation: false,
-  showTotalCount: false,
+  showTotalCount: true,
   showDeletedRecordsOption: false,
   customFilterPresets: false,
 

@@ -267,6 +267,10 @@
                 >
                   {{ $t('recordList.record.configureSearchableFields') }}
                 </column-picker>
+
+                <b-form-text class="text-secondary small">
+                  {{ $t('recordList.record.searchableFieldsFootnote') }}
+                </b-form-text>
               </b-form-group>
             </b-col>
             <b-col

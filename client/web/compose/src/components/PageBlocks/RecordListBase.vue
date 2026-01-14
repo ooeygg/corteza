@@ -2304,7 +2304,7 @@ export default {
     },
 
     showInlineFilter (field) {
-      return !this.options.hideFiltering && field.filterable
+      return this.options.inlineValueFiltering && !this.options.hideFiltering && field.filterable
     },
 
     onInlineEditClose () {
