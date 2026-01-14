@@ -249,6 +249,23 @@
             </b-col>
 
             <b-col
+              cols="12"
+              lg="6"
+            >
+              <b-form-group
+                :label="$t('recordList.record.filterHide')"
+                label-class="text-primary"
+              >
+                <c-input-checkbox
+                  v-model="options.hideFiltering"
+                  switch
+                  invert
+                  :labels="checkboxLabel"
+                />
+              </b-form-group>
+            </b-col>
+
+            <b-col
               v-if="!options.hideSearch"
               lg="6"
               cols="12"
@@ -271,22 +288,6 @@
                 <b-form-text class="text-secondary small">
                   {{ $t('recordList.record.searchableFieldsFootnote') }}
                 </b-form-text>
-              </b-form-group>
-            </b-col>
-            <b-col
-              cols="12"
-              lg="6"
-            >
-              <b-form-group
-                :label="$t('recordList.record.filterHide')"
-                label-class="text-primary"
-              >
-                <c-input-checkbox
-                  v-model="options.hideFiltering"
-                  switch
-                  invert
-                  :labels="checkboxLabel"
-                />
               </b-form-group>
             </b-col>
           </b-row>
