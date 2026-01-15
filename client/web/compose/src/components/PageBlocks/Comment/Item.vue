@@ -106,7 +106,7 @@
             <b-button
               variant="primary"
               size="sm"
-              :disabled="isProcessing"
+              :disabled="isProcessing || !isValid"
               @click="onSave"
             >
               {{ $t('general.label.save') }}
@@ -307,6 +307,10 @@ export default {
       }
 
       return !!v
+    },
+
+    isValid () {
+      return !!this.editValue.title || !!this.editValue.content
     },
   },
 

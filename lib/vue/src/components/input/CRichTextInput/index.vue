@@ -137,7 +137,9 @@ export default {
      */
     onUpdate () {
       // Add <br> tags to empty paragraphs
-      this.currentValue = this.editor.getHTML().replace(/<p><\/p>/g, '<p><br></p>')
+      const editorValue = this.editor.getHTML().replace(/<p><\/p>/g, '<p><br></p>')
+
+      this.currentValue = editorValue === '<p><br></p>' ? '' : editorValue
 
       this.emittedContent = true
       this.$emit('input', this.currentValue)

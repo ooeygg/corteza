@@ -803,6 +803,10 @@ export default {
     },
 
     submitComment () {
+      if (!this.isValid) {
+        return
+      }
+
       this.submitting = true
 
       const record = new compose.Record(this.roModule)
