@@ -21119,7 +21119,3 @@ fieldset.required legend>div:first-child>span:first-child::after {
 .ProseMirror.ProseMirror-focused {
   outline: none
 }
-
-.vs__dropdown-menu {
-  z-index: 1100 !important
-}
