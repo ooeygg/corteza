@@ -995,6 +995,9 @@ tabs:
         label: Title
       block:
         label: Block
+      lazy:
+        label: Lazy load
+        tooltip: When enabled, the tab content will only be rendered when the tab is first activated
   tooltip:
     edit: Edit block
     clone: Clone block & tab
