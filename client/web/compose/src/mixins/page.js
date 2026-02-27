@@ -187,18 +187,6 @@ export default {
       const { blocks = [] } = this.layout || {}
       const tabbedIDs = new Set()
 
-      const collectTabbedIDs = (blockIDs) => {
-        blockIDs.forEach(blockID => {
-          if (tabbedIDs.has(blockID)) return
-          tabbedIDs.add(blockID)
-          const block = this.page.blocks.find(b => b.blockID === blockID)
-          if (block && block.kind === 'Tabs') {
-            const IDs = (block.options.tabs || []).map(t => t.blockID).filter(id => id && !blocks.some(b => b.blockID === id))
-            collectTabbedIDs(IDs)
-          }
-        })
-      }
-
       blocks.forEach(({ blockID, xywh }) => {
         const block = this.page.blocks.find(b => b.blockID === blockID)
 
@@ -208,8 +196,11 @@ export default {
 
           if (block.kind === 'Tabs') {
             const { tabs = [] } = block.options
-            const IDs = tabs.map(t => t.blockID).filter(id => id && !blocks.some(b => b.blockID === id))
-            collectTabbedIDs(IDs)
+            tabs.forEach(t => {
+              if (t.blockID && !blocks.some(b => b.blockID === t.blockID)) {
+                tabbedIDs.add(t.blockID)
+              }
+            })
           }
         }
       })
@@ -244,7 +235,25 @@ export default {
         const showBlock = block && validExpression && validRole
 
         // Update invisible status based on visibility evaluation
-        block.meta.invisible = !showBlock
+        if (!block.meta) {
+          this.$set(block, 'meta', {})
+        }
+        this.$set(block.meta, 'invisible', !showBlock)
+      })
+
+      // Propagate invisibility to Tabs blocks
+      blocks.forEach(block => {
+        if (block.kind === 'Tabs' && !block.meta.invisible) {
+          const { tabs = [] } = block.options
+          const hasVisibleTab = tabs.some(t => {
+            const b = blocks.find(b => fetchID(b) === t.blockID)
+            return b ? !b.meta.invisible : !!t.title
+          })
+
+          if (!hasVisibleTab) {
+            this.$set(block.meta, 'invisible', true)
+          }
+        }
       })
 
       // Evaluate layout required fields if this is a record page

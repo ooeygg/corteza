@@ -7,7 +7,7 @@
     v-on="$listeners"
   >
     <div
-      v-if="!tabbedBlocks.length"
+      v-if="!tabbedBlocks.length && editable"
       class="d-flex h-100 align-items-center justify-content-center"
     >
       <p class="mb-0">
