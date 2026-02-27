@@ -1,4 +1,5 @@
 import { compose } from '@cortezaproject/corteza-js'
+import { fetchID } from 'corteza-webapp-compose/src/lib/block'
 import PageTranslator from 'corteza-webapp-compose/src/components/Admin/Page/PageTranslator'
 import { mapActions, mapGetters } from 'vuex'
 
@@ -184,12 +185,38 @@ export default {
 
       const tempBlocks = []
       const { blocks = [] } = this.layout || {}
+      const tabbedIDs = new Set()
+
+      const collectTabbedIDs = (blockIDs) => {
+        blockIDs.forEach(blockID => {
+          if (tabbedIDs.has(blockID)) return
+          tabbedIDs.add(blockID)
+          const block = this.page.blocks.find(b => b.blockID === blockID)
+          if (block && block.kind === 'Tabs') {
+            const IDs = (block.options.tabs || []).map(t => t.blockID).filter(id => id && !blocks.some(b => b.blockID === id))
+            collectTabbedIDs(IDs)
+          }
+        })
+      }
 
       blocks.forEach(({ blockID, xywh }) => {
         const block = this.page.blocks.find(b => b.blockID === blockID)
 
         if (block) {
           block.xywh = xywh
+          tempBlocks.push(block)
+
+          if (block.kind === 'Tabs') {
+            const { tabs = [] } = block.options
+            const IDs = tabs.map(t => t.blockID).filter(id => id && !blocks.some(b => b.blockID === id))
+            collectTabbedIDs(IDs)
+          }
+        }
+      })
+
+      // Include blocks that are only in tabs
+      this.page.blocks.forEach(block => {
+        if (tabbedIDs.has(block.blockID)) {
           tempBlocks.push(block)
         }
       })
@@ -198,16 +225,16 @@ export default {
     },
 
     async evaluateBlocks (blocks = this.page.blocks) {
-      const layoutBlocks = this.layout.blocks
       let layoutBlocksExpressions = {}
 
       // Only evaluate expressions if any blocks have visibility expressions
-      if (layoutBlocks.some(({ meta = {} }) => (meta.visibility || {}).expression)) {
-        layoutBlocksExpressions = await this.evaluateBlocksExpressions()
+      if (blocks.some(({ meta = {} }) => (meta.visibility || {}).expression)) {
+        layoutBlocksExpressions = await this.evaluateBlocksExpressions(blocks)
       }
 
       blocks.forEach(block => {
-        const { blockID, meta = {} } = block
+        const { meta = {} } = block
+        const blockID = fetchID(block)
         const visibility = meta.visibility || {}
         const { roles = [] } = visibility
 
@@ -228,15 +255,15 @@ export default {
       return blocks
     },
 
-    async evaluateBlocksExpressions () {
+    async evaluateBlocksExpressions (blocks = this.page.blocks) {
       const expressions = {}
       const variables = this.expressionVariables()
 
-      this.layout.blocks.forEach(block => {
+      blocks.forEach(block => {
         const { visibility } = block.meta
         if (!(visibility || {}).expression) return
 
-        expressions[block.blockID] = visibility.expression
+        expressions[fetchID(block)] = visibility.expression
       })
 
       return this.$SystemAPI.expressionEvaluate({ variables, expressions }).catch(e => {

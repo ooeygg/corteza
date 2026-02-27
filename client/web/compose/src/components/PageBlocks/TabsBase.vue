@@ -179,6 +179,10 @@ export default {
           return acc
         }
 
+        if (unparsedBlock.meta.invisible && !this.editable) {
+          return acc
+        }
+
         let block = JSON.parse(JSON.stringify(unparsedBlock))
 
         // Blocks should display as Plain, to avoid card shadow/border
