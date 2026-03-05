@@ -1915,7 +1915,7 @@ export default {
         .filter(({ canReadRecordValue, canUpdateRecordValue }) => canReadRecordValue && canUpdateRecordValue)
         .map(({ name }) => name)
 
-      await Promise.all(itemsToSave.map(async (item) => {
+      for (const item of itemsToSave) {
         const isNew = item.r.recordID === NoID
         let action = 'update'
         if (item.r.deletedAt) {
@@ -1926,7 +1926,7 @@ export default {
 
         try {
           const index = this.items.findIndex(i => i.id === item.id)
-          if (index === -1) return
+          if (index === -1) continue
 
           this.inlineErrors = this.inlineErrors.filter(e => e.meta.id !== item.id)
 
@@ -1939,7 +1939,7 @@ export default {
               this.items.splice(index, 1)
             }
             this.$delete(this.dirtyInlineRecords, item.id)
-            return
+            continue
           }
 
           // Validate
@@ -1981,7 +1981,7 @@ export default {
 
           this.toastErrorHandler(this.$t(`notification:record.${action}Failed`))(e)
         }
-      }))
+      }
 
       this.processingDirtyRecords = ''
 
@@ -2007,10 +2007,10 @@ export default {
       this.processingDirtyRecords = 'deny'
       let hasError = false
 
-      await Promise.all(itemsToDeny.map(async (item) => {
+      for (const item of itemsToDeny) {
         try {
           const index = this.items.findIndex(i => i.id === item.id)
-          if (index === -1) return
+          if (index === -1) continue
 
           const isNew = item.r.recordID === NoID
           this.$delete(this.dirtyInlineRecords, item.id)
@@ -2027,7 +2027,7 @@ export default {
           hasError = true
           this.toastErrorHandler(this.$t('notification:record.loadFailed'))(e)
         }
-      }))
+      }
 
       this.processingDirtyRecords = ''
 
@@ -2454,6 +2454,9 @@ export default {
             this.fetchUsers(fields, records),
             this.fetchRecords(namespaceID, fields, records),
           ]).then(() => {
+            this.dirtyInlineRecords = {}
+            this.inlineErrors = new validator.Validated()
+            this.processingInlineRecords = {}
             this.items = records.map(r => this.wrapRecord(r))
             this.processing = false
           })
