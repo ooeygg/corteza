@@ -198,7 +198,16 @@ export default {
       return this.$Settings.attachment('ui.iconLogo')
     },
 
+    currentNamespace () {
+      const { slug } = this.$route.params
+      return slug ? this.$store.getters['namespace/getByUrlPart'](slug) : undefined
+    },
+
     logo () {
+      const ns = this.currentNamespace
+      if (ns && ns.meta && ns.meta.logoEnabled && ns.meta.logo) {
+        return ns.meta.logo
+      }
       return this.$Settings.attachment('ui.mainLogo')
     },
 
