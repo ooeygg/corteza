@@ -116,4 +116,11 @@ export {
   CNotificationSidebar,
 } from './notifications'
 
+export {
+  CTopbarSearch,
+  CSearchButton,
+  RecordItem,
+  ItemGroup,
+} from './search'
+
 export { default as C3 } from './c3'
