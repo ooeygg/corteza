@@ -46,7 +46,8 @@
         </b-form-checkbox>
 
         <b-form-checkbox
-          v-model="topbarSettings.hideSearch"
+          v-if="$Settings.get('discovery.enabled', false)"
+          v-model="hideSearch"
         >
           {{ $t('search.hide') }}
         </b-form-checkbox>
@@ -309,6 +310,16 @@ export default {
 
       set (value) {
         this.$set(this.topbarSettings, 'showDrafts', !value)
+      },
+    },
+
+    hideSearch: {
+      get () {
+        return this.topbarSettings.showSearch !== true
+      },
+
+      set (value) {
+        this.$set(this.topbarSettings, 'showSearch', !value)
       },
     },
   },

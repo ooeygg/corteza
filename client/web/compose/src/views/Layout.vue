@@ -36,7 +36,7 @@
 
         <template #right-tools>
           <c-search-button
-            v-if="!$Settings.get('ui.topbar.hideSearch', false)"
+            v-if="$Settings.get('discovery.enabled', false) && $Settings.get('ui.topbar.showSearch', false)"
             :labels="{
               search: $t('general:label.search'),
             }"
