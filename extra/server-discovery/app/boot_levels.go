@@ -119,7 +119,7 @@ func (app *CortezaDiscoveryApp) Activate(ctx context.Context) (err error) {
 	}
 
 	if app.Opt.Indexer.Enabled {
-		indexer.Watchers(ctx)
+		go indexer.Watchers(ctx)
 	}
 
 	app.lvl = bootLevelActivated
