@@ -12,6 +12,11 @@ import (
 )
 
 type (
+	// UserResolver is a callback that loads user properties by ID.
+	// Used during contextual role expression evaluation to populate
+	// the "user" variable in expression scope.
+	UserResolver func(userID uint64) map[string]interface{}
+
 	service struct {
 		l      *sync.RWMutex
 		logger *zap.Logger
@@ -27,6 +32,8 @@ type (
 		orgTree *orgTree
 
 		store rbacRulesStore
+
+		userResolver UserResolver
 	}
 
 	// RuleFilter is a dummy struct to satisfy store codegen
@@ -91,6 +98,13 @@ func (svc *service) UpdateUserGroups(gm ...GroupMembers) (err error) {
 	return
 }
 
+// SetUserResolver registers a callback that resolves user properties by user ID.
+// The resolved user data is injected into the expression scope as "user" when
+// evaluating contextual role expressions.
+func (svc *service) SetUserResolver(fn UserResolver) {
+	svc.userResolver = fn
+}
+
 // Can function performs permission check for roles in context
 //
 // First extracts roles from context, then
@@ -110,7 +124,7 @@ func (svc *service) Check(ses Session, op string, res Resource) (userAccess Acce
 		return Inherit
 	}
 
-	sesRoles := getSessionRoles(ses, res, svc.roles)
+	sesRoles := getSessionRoles(ses, res, svc.roles, svc.userResolver)
 
 	// @todo probably move this somewhere
 	if member(sesRoles, BypassRole) {
@@ -250,7 +264,7 @@ func (svc *service) Trace(ses Session, op string, res Resource) *Trace {
 	}
 
 	var (
-		fRoles = getSessionRoles(ses, res, svc.roles)
+		fRoles = getSessionRoles(ses, res, svc.roles, svc.userResolver)
 	)
 
 	_ = check(svc.indexed, fRoles, op, res.RbacResource(), t)
