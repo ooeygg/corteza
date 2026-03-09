@@ -912,9 +912,10 @@ export default {
       }
 
       // Inline record lists
-      this.usedBlocks.forEach((b, index) => {
+      const hasInvalidRecordList = this.usedBlocks.some(b => {
         if (b.kind === 'RecordList' && b.options.editable) {
           const recordListModule = this.getModuleByID(b.options.moduleID)
+          if (!recordListModule) return false
           const req = new Set(recordListModule.fields.filter(({ isRequired = false }) => isRequired).map(({ name }) => name))
 
           // Check if all required fields are there
@@ -922,11 +923,15 @@ export default {
             req.delete(f.name)
           }
 
-          if (req.size) {
-            this.toastErrorHandler(this.$t('notification:page.saveFailedRequired'))()
-          }
+          return req.size > 0
         }
+        return false
       })
+
+      if (hasInvalidRecordList) {
+        this.toastErrorHandler(this.$t('notification:page.saveFailedRequired'))()
+        return
+      }
 
       this.processing = true
 

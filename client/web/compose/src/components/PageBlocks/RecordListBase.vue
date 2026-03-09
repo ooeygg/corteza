@@ -493,7 +493,7 @@
               v-for="(item, index) in items"
               :key="`${index}${item.r.recordID}`"
               :class="{ 'pointer': isRowClickable }"
-              :variant="inlineEditing && item.r.deletedAt ? 'warning' : ''"
+              :variant="inlineEditing && (dirtyInlineRecords[item.id] || item.r.deletedAt) ? 'warning' : ''"
               @click="handleRowClick(item)"
             >
               <b-td
@@ -539,7 +539,7 @@
                 :key="field.key"
               >
                 <field-editor
-                  v-if="field.moduleField.canUpdateRecordValue && field.editable"
+                  v-if="field.moduleField.canUpdateRecordValue && field.editable && isFieldEditable(field.moduleField)"
                   :field="field.moduleField"
                   value-only
                   :record="item.r"
@@ -1829,7 +1829,10 @@ export default {
         const err = v.run(item.r, ...fields)
 
         if (!err.valid()) {
-          const fieldNames = new Set(err.set.map(e => e.meta.field))
+          const fieldNames = new Set(err.set.map(e => {
+            const f = this.recordListModule.fields.find(f => f.name === e.meta.field)
+            return f?.label || e.meta.field
+          }))
 
           err.get().forEach(e => {
             e.meta.id = item.id
@@ -1947,7 +1950,10 @@ export default {
           const err = v.run(item.r, ...fields)
 
           if (!err.valid()) {
-            const fieldNames = new Set(err.set.map(e => e.meta.field))
+            const fieldNames = new Set(err.set.map(e => {
+              const f = this.recordListModule.fields.find(f => f.name === e.meta.field)
+              return f?.label || e.meta.field
+            }))
 
             err.get().forEach(e => {
               e.meta.id = item.id
@@ -3044,8 +3050,10 @@ th {
 
 tr:hover td.actions {
   opacity: 1;
-  z-index: 1;
-  background-color: var(--light);
+
+  &:not(.actions-visible) {
+    background-color: var(--light);
+  }
 }
 
 .inline-actions {
@@ -3086,11 +3094,10 @@ tr:hover .inline-actions {
     transition: opacity 0.25s;
     width: 1%;
     font-family: var(--font-regular) !important;
+    z-index: 3;
 
     &.actions-visible {
       opacity: 1;
-      z-index: 1;
-      background-color: var(--white);
     }
   }
 
