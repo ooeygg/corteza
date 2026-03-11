@@ -109,6 +109,10 @@ func mkIteratorProvider(ctx context.Context, ac recordValueAccessController, s s
 		}
 
 		relModID := f.Options.UInt64("moduleID")
+		if relModID == 0 {
+			continue
+		}
+
 		var relMod *types.Module
 		relMod, err = s.LookupComposeModuleByID(ctx, relModID)
 		if err != nil {
