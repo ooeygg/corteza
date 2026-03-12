@@ -353,15 +353,20 @@ export default {
   }
 
   .comment-toolbox {
-    position: absolute;
+    position: sticky;
     top: 0;
-    right: 0;
+    align-self: flex-start;
+    margin-left: auto;
     opacity: 0;
     transition: opacity 0.2s ease;
     z-index: 1;
+    flex-shrink: 0;
+    order: 3;
   }
 
   .comment-card {
+    overflow: visible;
+
     .comment-card-body {
       padding: 0.2rem 0.25rem;
     }
