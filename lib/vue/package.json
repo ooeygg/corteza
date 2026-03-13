@@ -42,6 +42,7 @@
     "@fortawesome/vue-fontawesome": "^2.0.10",
     "@panter/vue-i18next": "^0.15.0",
     "@popperjs/core": "^2.11.8",
+    "@tiptap/extension-emoji": "^3.4.2",
     "@tiptap/extension-mention": "^3.4.2",
     "@tiptap/extension-placeholder": "^3.4.2",
     "@tiptap/extension-table": "^3.4.2",
