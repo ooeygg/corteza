@@ -146,6 +146,11 @@ export default {
       type: Boolean,
       default: false,
     },
+
+    storageKey: {
+      type: String,
+      default: 'sidebar-expanded',
+    },
   },
 
   data () {
@@ -203,16 +208,20 @@ export default {
       if (this.disabledRoutes.includes(this.$route.name)) {
         this.isExpanded = false
       } else if (!this.isMobile && initial) {
-        this.isExpanded = true
+        const stored = localStorage.getItem(this.storageKey)
+        // Default to closed if no stored value
+        this.isExpanded = stored ? stored === 'true' : true
       }
     },
 
     openSidebar () {
       this.isExpanded = true
+      localStorage.setItem(this.storageKey, 'true')
     },
 
     closeSidebar () {
       this.isExpanded = false
+      localStorage.setItem(this.storageKey, 'false')
     },
   },
 }
