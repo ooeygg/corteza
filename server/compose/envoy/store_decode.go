@@ -11,6 +11,7 @@ import (
 	"github.com/cortezaproject/corteza/server/pkg/envoyx"
 	"github.com/cortezaproject/corteza/server/pkg/filter"
 	"github.com/cortezaproject/corteza/server/pkg/id"
+	"github.com/cortezaproject/corteza/server/pkg/rbac"
 	"github.com/cortezaproject/corteza/server/store"
 	"github.com/spf13/cast"
 )
@@ -266,6 +267,9 @@ func (d StoreDecoder) decodeRecordDatasource(ctx context.Context, s store.Storer
 
 	// Get access controller to enforce field-level read permissions
 	ac := service.AccessControl(s)
+	if rbac.Global() == nil {
+		ac = nil
+	}
 
 	rds.Provider, err = mkIteratorProvider(ctx, ac, s, dl, iter, module, cast.ToBool(p.Params["resolveRefs"]))
 	if err != nil {

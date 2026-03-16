@@ -88,7 +88,7 @@ func mkIteratorProvider(ctx context.Context, ac recordValueAccessController, s s
 
 	// Pre-compute readable fields based on access control permissions
 	// This avoids checking permissions on every record iteration
-	if ac != nil {
+	if !reflect2.IsNil(ac) {
 		out.readableFields = make(map[string]bool)
 		for _, f := range mod.Fields {
 			// Ensure NamespaceID is set on the field (it may not be loaded from store)
