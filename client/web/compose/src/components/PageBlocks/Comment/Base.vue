@@ -589,7 +589,10 @@ export default {
 
         this.autoFetching = true
 
-        this.loadNewComments().finally(() => {
+        Promise.all([
+          this.loadNewComments(),
+          this.loadUpdatedComments(),
+        ]).finally(() => {
           this.autoFetching = false
         })
       }, 5000)
@@ -648,6 +651,65 @@ export default {
             this.scrollToLatest()
           })
         }
+      })
+    },
+
+    loadUpdatedComments () {
+      if (!this.reactionsField) return Promise.resolve()
+
+      // Collect all record IDs currently displayed
+      const recordIDs = []
+      this.comments.forEach(dateGroup => {
+        (dateGroup.messages || []).forEach(messageGroup => {
+          (messageGroup.comments || []).forEach(comment => {
+            recordIDs.push(comment.recordID)
+          })
+        })
+      })
+
+      if (!recordIDs.length) return Promise.resolve()
+
+      // Re-fetch these specific records by ID
+      const idFilter = recordIDs.map(id => `recordID = '${id}'`).join(' OR ')
+      const filter = `(${idFilter})`
+
+      return this.fetchCommentRecords(this.roModule, filter, false).then(updatedGroups => {
+        this.updateExistingComments(updatedGroups)
+      })
+    },
+
+    updateExistingComments (updatedGroups) {
+      if (!updatedGroups || !updatedGroups.length) return
+
+      const reactionsFieldName = this.reactionsField.name
+
+      // Collect all updated comments into a map for fast lookup
+      const updatedMap = {}
+      updatedGroups.forEach(dateGroup => {
+        (dateGroup.messages || []).forEach(messageGroup => {
+          (messageGroup.comments || []).forEach(comment => {
+            updatedMap[comment.recordID] = comment
+          })
+        })
+      })
+
+      // Walk through existing comments and replace only those whose reactions changed
+      this.comments.forEach(dateGroup => {
+        dateGroup.messages.forEach(messageGroup => {
+          messageGroup.comments.forEach((comment, index) => {
+            const updated = updatedMap[comment.recordID]
+            if (!updated) return
+
+            const oldReactions = comment.values[reactionsFieldName]
+            const newReactions = updated.values[reactionsFieldName]
+            if (oldReactions === newReactions) return
+
+            // Preserve author and reply that were already resolved
+            updated.author = updated.author || comment.author
+            updated.reply = updated.reply || comment.reply
+            messageGroup.comments.splice(index, 1, updated)
+          })
+        })
       })
     },
 
