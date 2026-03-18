@@ -91,7 +91,7 @@
       @item-updated="onBlockUpdated"
     >
       <template
-        slot-scope="{ index, block, resizing }"
+        slot-scope="{ blockIndex, block, resizing }"
       >
         <div
           :data-test-id="`block-${block.kind}`"
@@ -118,7 +118,7 @@
                 data-test-id="button-edit"
                 variant="outline-light"
                 class="border-0"
-                @click="editBlock(index)"
+                @click="editBlock(blockIndex)"
               >
                 <font-awesome-icon
                   :icon="['far', 'edit']"
@@ -129,7 +129,7 @@
                 v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.clone.block'), boundary: 'body' }"
                 variant="outline-light"
                 class="border-0"
-                @click="cloneBlock(index)"
+                @click="cloneBlock(blockIndex)"
               >
                 <font-awesome-icon
                   :icon="['far', 'clone']"
@@ -140,7 +140,7 @@
                 v-b-tooltip.noninteractive.hover="{ title: $t('tooltip.copy.block'), boundary: 'body' }"
                 variant="outline-light"
                 class="border-0"
-                @click="copyBlock(index)"
+                @click="copyBlock(blockIndex)"
               >
                 <font-awesome-icon
                   :icon="['far', 'copy']"
@@ -154,7 +154,7 @@
               link
               size="md"
               class="ml-1"
-              @confirmed="deleteBlock(index)"
+              @confirmed="deleteBlock(blockIndex)"
             />
           </div>
 
@@ -165,7 +165,7 @@
             }"
             :page="page"
             :blocks="usedBlocks"
-            :block-index="index"
+            :block-index="blockIndex"
             :block="block"
             :module="module"
             :record="record"
