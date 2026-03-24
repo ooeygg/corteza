@@ -231,6 +231,17 @@ type (
 					Mimetypes []string
 				}
 			}
+
+			// Namespace related settings
+			Namespace struct {
+				Attachments struct {
+					// What is max size (in MB, so: MaxSize x 2^20)
+					MaxSize uint `kv:"max-size"`
+
+					// List of mime-types we support,
+					Mimetypes []string
+				}
+			}
 		} `kv:"compose" json:"compose"`
 
 		// Federation settings
