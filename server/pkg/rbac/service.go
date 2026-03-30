@@ -34,6 +34,7 @@ type (
 		store rbacRulesStore
 
 		userResolver UserResolver
+		userCache    userCache
 	}
 
 	// RuleFilter is a dummy struct to satisfy store codegen
@@ -79,7 +80,8 @@ func NewService(logger *zap.Logger, s rbacRulesStore) (svc *service) {
 		l: &sync.RWMutex{},
 		f: make(chan bool),
 
-		store: s,
+		store:     s,
+		userCache: newUserCache(),
 	}
 
 	if logger != nil {
@@ -105,6 +107,32 @@ func (svc *service) SetUserResolver(fn UserResolver) {
 	svc.userResolver = fn
 }
 
+// InvalidateUser removes a single user entry from the resolver cache.
+func (svc *service) InvalidateUser(userID uint64) {
+	svc.userCache.delete(userID)
+}
+
+// InvalidateAllUsers clears the entire user resolver cache.
+func (svc *service) InvalidateAllUsers() {
+	svc.userCache.purge()
+}
+
+// cachedUserResolver wraps userResolver with the userPropertyCache.
+// Returns nil when no resolver is configured.
+func (svc *service) cachedUserResolver() UserResolver {
+	if svc.userResolver == nil {
+		return nil
+	}
+	return func(userID uint64) map[string]interface{} {
+		if v, ok := svc.userCache.load(userID); ok {
+			return v
+		}
+		result := svc.userResolver(userID)
+		svc.userCache.store(userID, result)
+		return result
+	}
+}
+
 // Can function performs permission check for roles in context
 //
 // First extracts roles from context, then
@@ -124,7 +152,7 @@ func (svc *service) Check(ses Session, op string, res Resource) (userAccess Acce
 		return Inherit
 	}
 
-	sesRoles := getSessionRoles(ses, res, svc.roles, svc.userResolver)
+	sesRoles := getSessionRoles(ses, res, svc.roles, svc.cachedUserResolver())
 
 	// @todo probably move this somewhere
 	if member(sesRoles, BypassRole) {
@@ -264,7 +292,7 @@ func (svc *service) Trace(ses Session, op string, res Resource) *Trace {
 	}
 
 	var (
-		fRoles = getSessionRoles(ses, res, svc.roles, svc.userResolver)
+		fRoles = getSessionRoles(ses, res, svc.roles, svc.cachedUserResolver())
 	)
 
 	_ = check(svc.indexed, fRoles, op, res.RbacResource(), t)
