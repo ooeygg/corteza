@@ -606,6 +606,9 @@ recordList:
     searchableFields: Searchable fields
     searchableFieldsFootnote: If no fields are selected, the search will be performed on all available visible fields
     configureSearchableFields: Select fields that will be used for search
+    searchSubmitMode: Search submit
+    searchOnSubmit: On submit (Enter or button click)
+    searchOnType: After typing
     openInSameTab: Open record in the same tab
     openInNewTab: Open record in a new tab
     openInModal: Open record in a modal

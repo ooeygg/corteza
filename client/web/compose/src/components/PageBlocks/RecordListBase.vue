@@ -119,7 +119,9 @@
             <c-input-search
               :value="query"
               :placeholder="$t('general.label.search')"
-              submittable
+              :submittable="searchSubmittable"
+              :debounce="searchSubmittable ? 0 : 300"
+              @input="onSearchInput"
               @search="handleSearch"
             />
           </div>
@@ -1197,6 +1199,10 @@ export default {
       return this.showPagination || this.options.customSummaries
     },
 
+    searchSubmittable () {
+      return (this.options.searchSubmitMode || 'submit') !== 'typing'
+    },
+
     perPageOptions () {
       const defaultText = this.options.perPage === 0 ? this.$t('general:label.all') : this.options.perPage.toString()
       return [
@@ -1569,6 +1575,11 @@ export default {
     handleSearch (searchQuery) {
       this.query = searchQuery ? searchQuery.trim() : null
       this.refresh(true)
+    },
+
+    onSearchInput (searchQuery) {
+      if (this.searchSubmittable) return
+      this.handleSearch(searchQuery)
     },
 
     onSaveFilterPreset (filter = []) {
