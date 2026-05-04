@@ -2186,7 +2186,7 @@ export default {
           multiValueDelimiter: e.multiValueDelimiter,
           filter: this.selectedAllRecords ? this.bulkQuery : filter,
           jwt: this.$auth.accessToken,
-          timezone: timezone ? timezone.tzCode : undefined,
+          timezone: timezone ? encodeURIComponent(timezone.tzCode) : undefined,
           resolveRefs,
         },
       })
@@ -2478,11 +2478,12 @@ export default {
             this.processing = false
           })
         }).catch((e) => {
-          if (!axios.isCancel(e)) {
-            this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
-          } else {
+          if (axios.isCancel(e)) {
             this.cancelled = true
+            return
           }
+
+          this.toastErrorHandler(this.$t('notification:record.listLoadFailed'))(e)
           this.processing = false
         }).finally(() => {
           this.cancelled = false
