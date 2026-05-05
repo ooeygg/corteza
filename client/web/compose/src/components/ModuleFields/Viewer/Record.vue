@@ -31,7 +31,7 @@
 
       <a
         v-else-if="['modal', 'newTab'].includes(extraOptions.recordSelectorDisplayOption)"
-        href="#"
+        :href="resolveHref(v.to)"
         :class="{ 'text-decoration-none default-cursor': !v.to}"
         @click="(e) => onRecordSelectorClick(e, v.to)"
       >
@@ -196,6 +196,13 @@ export default {
       }
     },
 
+    resolveHref (route) {
+      if (!route) {
+        return '#'
+      }
+      return this.$router.resolve(route).href
+    },
+
     formatRecordValues (recordIDs) {
       recordIDs = Array.isArray(recordIDs) ? recordIDs : [recordIDs].filter(v => v) || []
       const { namespaceID = NoID } = this.namespace
@@ -225,6 +232,12 @@ export default {
     },
 
     onRecordSelectorClick (e, route) {
+      // Let the browser handle ctrl/cmd/shift/middle-click natively so users
+      // can open the record page in a new tab via standard browser conventions.
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) {
+        return
+      }
+
       e.preventDefault()
 
       if (!route) {
