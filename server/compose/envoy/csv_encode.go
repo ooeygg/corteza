@@ -139,6 +139,13 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 		return out
 	}
 
+	// Pre-build resolved field set from datasource so header is correct even
+	// when the first row has no value for a resolved field.
+	resolvedFieldSet := make(map[string]bool)
+	for _, f := range rds.ResolvedFields() {
+		resolvedFieldSet[f] = true
+	}
+
 	row := make([]string, 0, 4)
 	var (
 		more     bool
@@ -162,7 +169,7 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 
 			// Splice in resolved ref values
 			for i, h := range header {
-				if _, ok := cache[fmt.Sprintf("%s value", h)]; ok {
+				if resolvedFieldSet[h] {
 					header = append(header, "")
 					copy(header[i+1:], header[i:])
 					header[i] = fmt.Sprintf("%s value", h)

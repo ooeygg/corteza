@@ -132,6 +132,32 @@ func mkIteratorProvider(ctx context.Context, ac recordValueAccessController, s s
 	return
 }
 
+// ResolvedFields returns field names that will have a companion "X value" column when resolveRefs is enabled.
+func (ip *iteratorProvider) ResolvedFields() []string {
+	if !ip.resolveRefs {
+		return nil
+	}
+
+	out := make([]string, 0, len(ip.userFields)+len(ip.relMods))
+	for f := range ip.userFields {
+		out = append(out, f)
+	}
+
+	for f := range ip.relMods {
+		out = append(out, f)
+	}
+
+	return out
+}
+
+// ResolvedFields returns field names that will have a companion "X value" column.
+func (rd *RecordDatasource) ResolvedFields() []string {
+	if ip, ok := rd.Provider.(*iteratorProvider); ok {
+		return ip.ResolvedFields()
+	}
+	return nil
+}
+
 func (rd *RecordDatasource) SetProvider(s envoyx.Provider) bool {
 	if rd.Mapping.SourceIdent != s.Ident() {
 		return false
