@@ -492,8 +492,10 @@ func (ip *iteratorProvider) resolveUsers(ctx context.Context, s store.Storer) (e
 	}
 
 	uu, _, err := store.SearchUsers(ctx, s, systemTypes.UserFilter{
-		UserID: ids,
-		Paging: filter.Paging{Limit: 0},
+		UserID:    ids,
+		Paging:    filter.Paging{Limit: 0},
+		Deleted:   filter.StateInclusive,
+		Suspended: filter.StateInclusive,
 	})
 	if err != nil {
 		return
