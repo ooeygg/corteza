@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/cortezaproject/corteza/server/pkg/envoyx"
 	"github.com/cortezaproject/corteza/server/pkg/envoyx/datasource"
@@ -50,6 +51,12 @@ func (e CsvEncoder) encodeRecordDatasources(ctx context.Context, writer *csv.Wri
 func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writer, p envoyx.EncodeParams, node *envoyx.Node, tt envoyx.Traverser) (_ any, err error) {
 	rds := node.Datasource.(*RecordDatasource)
 	resolved := map[string]string{}
+
+	var loc *time.Location
+	loc, err = resolveTimezone(p)
+	if err != nil {
+		return
+	}
 
 	header := make([]string, 0, 4)
 
@@ -101,12 +108,22 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 
 		// Encode as mf if the OG field is multi value OR we're on the resolved record column
 		src, ok := resolved[h]
+		isDt := rds.datetimeFields[h] || (ok && rds.datetimeFields[src])
 		if !rds.multivalues[h] && !(ok && rds.multivalues[src]) {
-			return v.Values[0]
+			vv := v.Values[0]
+			if isDt {
+				vv = formatInTimezone(vv, loc)
+			}
+
+			return vv
 		}
 
 		auxv := make([]string, 0, len(v.Values))
 		for _, vv := range v.Values {
+			if isDt {
+				vv = formatInTimezone(vv, loc)
+			}
+
 			if strings.Contains(vv, mvDelimiter) {
 				auxv = append(auxv, fmt.Sprintf("\"%s\"", vv))
 			} else {

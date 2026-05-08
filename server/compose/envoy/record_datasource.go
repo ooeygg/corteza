@@ -25,7 +25,8 @@ type (
 		Mapping  envoyx.DatasourceMapping
 		Provider envoyx.Provider
 
-		multivalues map[string]bool
+		multivalues    map[string]bool
+		datetimeFields map[string]bool
 
 		CheckExisting func(ctx context.Context, ref ...[]string) ([]uint64, error)
 

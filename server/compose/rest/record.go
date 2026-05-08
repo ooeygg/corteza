@@ -825,6 +825,7 @@ func (ctrl *Record) Export(ctx context.Context, r *request.RecordExport) (interf
 				"writer":              w,
 				"multiValueDelimiter": r.MultiValueDelimiter,
 				"wrapMultiValue":      r.WrapMultiValue,
+				"timezone":            r.Timezone,
 			},
 			FieldMapping: mapping,
 		}, gg)
