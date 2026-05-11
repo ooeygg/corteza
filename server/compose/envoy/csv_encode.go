@@ -60,16 +60,12 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 
 	header := make([]string, 0, 4)
 
-	hasID := false
 	for _, m := range p.FieldMapping {
-		header = append(header, m.Field)
-
-		hasID = hasID || strings.ToLower(m.Field) == "id"
+		if strings.ToLower(m.Field) != "id" {
+			header = append(header, m.Field)
+		}
 	}
-
-	if !hasID {
-		header = append([]string{"ID"}, header...)
-	}
+	header = append([]string{"ID"}, header...)
 
 	mvDelimiter := ";"
 	wrapBrackets := false
@@ -167,16 +163,17 @@ func (e CsvEncoder) encodeRecordDatasource(ctx context.Context, writer *csv.Writ
 		if !hWritten {
 			hWritten = true
 
-			// Splice in resolved ref values
-			for i, h := range header {
+			// Splice in "X ID" columns after each resolved field
+			newHeader := make([]string, 0, len(header)+len(resolvedFieldSet))
+			for _, h := range header {
+				newHeader = append(newHeader, h)
 				if resolvedFieldSet[h] {
-					header = append(header, "")
-					copy(header[i+1:], header[i:])
-					header[i] = fmt.Sprintf("%s value", h)
-
-					resolved[header[i]] = h
+					idCol := fmt.Sprintf("%s ID", h)
+					newHeader = append(newHeader, idCol)
+					resolved[idCol] = h
 				}
 			}
+			header = newHeader
 
 			err = writer.Write(header)
 			if err != nil {

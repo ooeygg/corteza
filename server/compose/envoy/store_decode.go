@@ -278,7 +278,7 @@ func (d StoreDecoder) decodeRecordDatasource(ctx context.Context, s store.Storer
 		ac = nil
 	}
 
-	rds.Provider, err = mkIteratorProvider(ctx, ac, s, dl, iter, module, cast.ToBool(p.Params["resolveRefs"]))
+	rds.Provider, err = mkIteratorProvider(ctx, ac, s, dl, iter, module, cast.ToBool(p.Params["resolveRefs"]), cast.ToBool(p.Params["includeRefID"]))
 	if err != nil {
 		return
 	}

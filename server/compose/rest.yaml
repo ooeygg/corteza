@@ -1142,6 +1142,9 @@ endpoints:
       - name: resolveRefs
         type: bool
         required: false
+      - name: includeRefID
+        type: bool
+        required: false
   - name: exec
     path: "/exec/{procedure}"
     method: POST

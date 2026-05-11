@@ -161,14 +161,13 @@
         </b-form-group>
 
         <b-form-group
-          :description="$t('recordList.export.resolveRefsNote')"
           label-class="text-primary"
         >
           <b-form-checkbox
-            v-model="resolveRefs"
+            v-model="includeRefID"
             class="mb-2"
           >
-            {{ $t('recordList.export.resolveRefs') }}
+            {{ $t('recordList.export.includeRefID') }}
           </b-form-checkbox>
         </b-form-group>
       </template>
@@ -302,7 +301,7 @@ export default {
       showExportModal: false,
 
       fields: [],
-      resolveRefs: false,
+      includeRefID: false,
       forTimezone: false,
       exportTimezone: undefined,
       exportConfig: {
@@ -682,7 +681,8 @@ export default {
         filterRaw: this.exportConfig,
         multiValueDelimiter: encodeURIComponent(this.exportConfig.multiValueDelimiter),
         timezone: this.forTimezone ? this.exportTimezone : undefined,
-        resolveRefs: encodeURIComponent(this.resolveRefs),
+        resolveRefs: encodeURIComponent(true),
+        includeRefID: encodeURIComponent(this.includeRefID),
       })
     },
 

@@ -761,7 +761,8 @@ func (ctrl *Record) Export(ctx context.Context, r *request.RecordExport) (interf
 			Params: map[string]any{
 				"storer":      service.DefaultStore,
 				"dal":         dal.Service(),
-				"resolveRefs": r.GetResolveRefs(),
+				"resolveRefs":  r.GetResolveRefs(),
+				"includeRefID": r.GetIncludeRefID(),
 			},
 			Filter: map[string]envoyx.ResourceFilter{
 				composeEnvoy.ComposeRecordDatasourceAuxType: {

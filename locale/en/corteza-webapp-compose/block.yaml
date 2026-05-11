@@ -421,8 +421,7 @@ recordList:
     selection: Selected records
     specifyTimezone: Export to timezone
     timezonePlaceholder: Select timezone
-    resolveRefs: Include resolved values
-    resolveRefsNote: When enabled, Record and User fields are exported alongside an extra column with their resolved label (record label or user handle/email/name) in addition to the underlying identifier.
+    includeRefID: Include reference ID in a separate column
     datePresetUndefined: Unknown date preset
   federated: Federated
   fields: Module fields

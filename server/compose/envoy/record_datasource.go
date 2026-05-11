@@ -46,9 +46,10 @@ type (
 
 		// Items related to ref resolution
 		// @todo can be removed when reworked
-		resolveRefs bool
-		relMods     map[string]refModWrap
-		dal         dal.FullService
+		resolveRefs  bool
+		includeRefID bool
+		relMods      map[string]refModWrap
+		dal          dal.FullService
 
 		// Access control for field-level permissions
 		ac             recordValueAccessController
@@ -82,11 +83,12 @@ const (
 	bufferPullChunkSize = int(100)
 )
 
-func mkIteratorProvider(ctx context.Context, ac recordValueAccessController, s store.Storer, dl dal.FullService, iter dal.Iterator, mod *types.Module, resolveRefs bool) (out *iteratorProvider, err error) {
+func mkIteratorProvider(ctx context.Context, ac recordValueAccessController, s store.Storer, dl dal.FullService, iter dal.Iterator, mod *types.Module, resolveRefs bool, includeRefID bool) (out *iteratorProvider, err error) {
 	out = &iteratorProvider{
-		iter:        iter,
-		dal:         dl,
-		resolveRefs: resolveRefs,
+		iter:         iter,
+		dal:          dl,
+		resolveRefs:  resolveRefs,
+		includeRefID: includeRefID,
 
 		ac:  ac,
 		mod: mod,
@@ -132,9 +134,9 @@ func mkIteratorProvider(ctx context.Context, ac recordValueAccessController, s s
 	return
 }
 
-// ResolvedFields returns field names that will have a companion "X value" column when resolveRefs is enabled.
+// ResolvedFields returns field names that will have a companion "X ID" column when includeRefID is enabled.
 func (ip *iteratorProvider) ResolvedFields() []string {
-	if !ip.resolveRefs {
+	if !ip.resolveRefs || !ip.includeRefID {
 		return nil
 	}
 
@@ -425,17 +427,28 @@ func (ip *iteratorProvider) resolveReferences(ctx context.Context, ds dal.FullSe
 				}
 			}
 
-			for i, rec := range relRecords {
+			// Build a map from recordID to resolved label for ordered assignment
+			labelByID := make(map[string]string, len(relRecords))
+			for _, rec := range relRecords {
 				if rec.Values == nil {
 					continue
 				}
-
 				v := rec.Values.Get(resLab, 0)
 				if v == nil {
 					continue
 				}
+				labelByID[strconv.FormatUint(rec.ID, 10)] = v.Value
+			}
 
-				cacheRecord.SetValue(fmt.Sprintf("%s value", refField), uint(i), v.Value)
+			for j, origID := range value.Values {
+				label, ok := labelByID[origID]
+				if !ok {
+					continue
+				}
+				if ip.includeRefID {
+					cacheRecord.SetValue(fmt.Sprintf("%s ID", refField), uint(j), origID)
+				}
+				cacheRecord.SetValue(refField, uint(j), label)
 			}
 
 			ip.rows[i] = cacheRecord
@@ -544,8 +557,15 @@ func (ip *iteratorProvider) resolveUsers(ctx context.Context, s store.Storer) (e
 				continue
 			}
 			for j, val := range v.Values {
+				if val == "0" || val == "" {
+					row.SetValue(fieldName, uint(j), "")
+					continue
+				}
 				if label, ok := labels[val]; ok {
-					row.SetValue(fmt.Sprintf("%s value", fieldName), uint(j), label)
+					if ip.includeRefID {
+						row.SetValue(fmt.Sprintf("%s ID", fieldName), uint(j), val)
+					}
+					row.SetValue(fieldName, uint(j), label)
 				}
 			}
 		}
