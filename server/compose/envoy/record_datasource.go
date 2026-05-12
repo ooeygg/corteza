@@ -575,14 +575,14 @@ func (ip *iteratorProvider) resolveUsers(ctx context.Context, s store.Storer) (e
 }
 
 func userLabel(u *systemTypes.User) string {
-	if u.Handle != "" {
-		return u.Handle
+	if u.Name != "" {
+		return u.Name
 	}
 	if u.Email != "" {
 		return u.Email
 	}
-	if u.Name != "" {
-		return u.Name
+	if u.Handle != "" {
+		return u.Handle
 	}
 	return strconv.FormatUint(u.ID, 10)
 }
