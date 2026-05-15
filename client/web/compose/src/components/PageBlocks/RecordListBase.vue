@@ -2153,47 +2153,57 @@ export default {
       this.$root.$emit('rightPanel.toggle', true)
     },
 
-    onExport (e) {
+    async onExport (e) {
       this.processing = true
 
-      const { namespaceID, moduleID } = this.filter || {}
-      const { filter, filterRaw, timezone, includeRefID } = e
-      e = {
-        ...e,
-        namespaceID,
-        moduleID,
-        filename: `${this.namespace.slug || namespaceID} - ${this.recordListModule.name}`,
-      }
+      try {
+        const { namespaceID, moduleID } = this.filter || {}
+        const { filter, filterRaw, timezone, includeRefID } = e
 
-      if (filterRaw.rangeType === 'range') {
-        e.filename += ` - ${filterRaw.date.start} - ${filterRaw.date.end}`
-      } else {
-        e.filename += ` - ${filterRaw.rangeType}`
-      }
+        let filename = `${this.namespace.slug || namespaceID} - ${this.recordListModule.name}`
+        if (filterRaw.rangeType === 'range') {
+          filename += ` - ${filterRaw.date.start} - ${filterRaw.date.end}`
+        } else {
+          filename += ` - ${filterRaw.rangeType}`
+        }
+        if (timezone) {
+          filename += ` - ${timezone.label}`
+        }
+        filename = encodeURIComponent(filename.replace(/\./g, '-'))
 
-      if (timezone) {
-        e.filename += ` - ${timezone.label}`
-      }
+        // Exporter emits URI-encoded values for the legacy GET flow; decode
+        // them so we can send raw values in the POST body.
+        const decode = v => (typeof v === 'string' ? decodeURIComponent(v) : v)
 
-      // Make sure the generated filename won't break the URL
-      e.filename = encodeURIComponent(e.filename.replace(/\./g, '-'))
-
-      const exportUrl = url.Make({
-        url: `${this.$ComposeAPI.baseURL}${this.$ComposeAPI.recordExportEndpoint(e)}`,
-        query: {
-          fields: e.fields,
-          // url.Make already URL encodes the the values, so the filter shouldn't be encoded
-          multiValueDelimiter: e.multiValueDelimiter,
-          filter: this.selectedAllRecords ? this.bulkQuery : filter,
-          jwt: this.$auth.accessToken,
-          timezone: timezone ? encodeURIComponent(timezone.tzCode) : undefined,
+        const { sessionID } = await this.$ComposeAPI.recordExportInit({
+          namespaceID,
+          moduleID,
+          filename,
+          ext: e.ext,
+          filter: this.selectedAllRecords ? this.bulkQuery : decode(filter),
+          fields: decode(e.fields).split(','),
+          timezone: timezone ? timezone.tzCode : undefined,
+          multiValueDelimiter: decode(e.multiValueDelimiter),
+          wrapMultiValue: decode(e.wrapMultiValue),
           resolveRefs: true,
-          includeRefID,
-        },
-      })
+          includeRefID: decode(includeRefID),
+        })
 
-      window.open(exportUrl)
-      this.processing = false
+        const downloadUrl = url.Make({
+          url: `${this.$ComposeAPI.baseURL}${this.$ComposeAPI.recordExportPullEndpoint({
+            namespaceID, moduleID, sessionID, filename, ext: e.ext,
+          })}`,
+          query: {
+            jwt: this.$auth.accessToken,
+          },
+        })
+
+        window.open(downloadUrl)
+      } catch (err) {
+        this.toastErrorHandler(this.$t('notification:record.exportFailed'))(err)
+      } finally {
+        this.processing = false
+      }
     },
 
     handleRowClick ({ r: { recordID } }) {
