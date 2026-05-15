@@ -2186,7 +2186,7 @@ export default {
           multiValueDelimiter: decode(e.multiValueDelimiter),
           wrapMultiValue: decode(e.wrapMultiValue),
           resolveRefs: true,
-          includeRefID: decode(includeRefID),
+          includeRefID: decode(includeRefID) === 'true',
         })
 
         const downloadUrl = url.Make({
