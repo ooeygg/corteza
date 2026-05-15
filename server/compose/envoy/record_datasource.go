@@ -11,11 +11,14 @@ import (
 	"github.com/cortezaproject/corteza/server/pkg/dal"
 	"github.com/cortezaproject/corteza/server/pkg/envoyx"
 	"github.com/cortezaproject/corteza/server/pkg/envoyx/datasource"
+	"github.com/cortezaproject/corteza/server/pkg/errors"
 	"github.com/cortezaproject/corteza/server/pkg/filter"
+	"github.com/cortezaproject/corteza/server/pkg/logger"
 	"github.com/cortezaproject/corteza/server/store"
 	systemTypes "github.com/cortezaproject/corteza/server/system/types"
 	"github.com/modern-go/reflect2"
 	"github.com/spf13/cast"
+	"go.uber.org/zap"
 )
 
 type (
@@ -481,6 +484,17 @@ func mkRecordRefWrap(ctx context.Context, s store.Storer, f *types.ModuleField) 
 	var relMod *types.Module
 	relMod, err = s.LookupComposeModuleByID(ctx, relModID)
 	if err != nil {
+		// Referenced module may have been deleted or made inaccessible since the
+		// field was configured. Skip ref resolution for this field instead of
+		// failing the entire export — the column is still emitted, just unresolved.
+		if errors.IsNotFound(err) {
+			logger.Default().Warn(
+				"skipping record ref resolution: referenced module not found",
+				zap.String("field", f.Name),
+				zap.Uint64("moduleID", relModID),
+			)
+			err = nil
+		}
 		return
 	}
 
@@ -497,11 +511,41 @@ func mkRecordRefWrap(ctx context.Context, s store.Storer, f *types.ModuleField) 
 	}
 
 	if f.Options.String("recordLabelField") != "" {
-		nestedRef := wrap.modLvl1.Fields.FindByName(f.Options.String("labelField"))
+		// Two-level label resolution: the labelField on the related module must
+		// itself be a Record field pointing to another module. If that chain is
+		// broken (labelField renamed/removed, target module missing), skip the
+		// nested resolution instead of aborting the export.
+		labelFieldName := f.Options.String("labelField")
+		nestedRef := wrap.modLvl1.Fields.FindByName(labelFieldName)
+		if nestedRef == nil {
+			logger.Default().Warn(
+				"skipping nested record ref resolution: labelField not found on related module",
+				zap.String("field", f.Name),
+				zap.String("labelField", labelFieldName),
+				zap.Uint64("relatedModuleID", relMod.ID),
+			)
+			return
+		}
 		nestedModID := nestedRef.Options.UInt64("moduleID")
+		if nestedModID == 0 {
+			logger.Default().Warn(
+				"skipping nested record ref resolution: labelField has no moduleID option",
+				zap.String("field", f.Name),
+				zap.String("labelField", labelFieldName),
+			)
+			return
+		}
 
 		wrap.modLvl2, err = s.LookupComposeModuleByID(ctx, nestedModID)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				logger.Default().Warn(
+					"skipping nested record ref resolution: nested module not found",
+					zap.String("field", f.Name),
+					zap.Uint64("nestedModuleID", nestedModID),
+				)
+				err = nil
+			}
 			return
 		}
 		wrap.labelLvl2 = f.Options.String("recordLabelField")
