@@ -348,6 +348,10 @@ export default {
   color: white !important;
 }
 
+::v-deep .namespace-selector .vs__deselect {
+  fill: white !important;
+}
+
 /* Style module select tags (extra-light with dark text) */
 ::v-deep .module-selector .vs__selected {
   background-color: var(--extra-light) !important;
