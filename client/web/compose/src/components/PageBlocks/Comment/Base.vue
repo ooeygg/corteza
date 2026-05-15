@@ -763,6 +763,7 @@ export default {
       return {
         name,
         initials,
+        user,
         isCurrentUser: Boolean(this.$auth.user && this.$auth.user.userID === userID),
       }
     },
