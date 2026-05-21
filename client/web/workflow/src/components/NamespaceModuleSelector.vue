@@ -165,7 +165,7 @@ export default {
               namespacePromises.push(
                 this.$ComposeAPI.namespaceRead({ namespaceID })
                   .then(n => [n])
-                  .catch(() => []),
+                  .catch(() => [{ namespaceID }]),
               )
             }
           })
@@ -216,7 +216,7 @@ export default {
             missingPromises.push(
               this.$ComposeAPI.moduleRead({ namespaceID, moduleID })
                 .then(m => [m])
-                .catch(() => []),
+                .catch(() => [{ namespaceID, moduleID }]),
             )
           })
         }
@@ -301,12 +301,12 @@ export default {
       })
     },
 
-    getNamespaceOptionLabel ({ name, handle } = {}) {
-      return name || handle || 'Unnamed Namespace'
+    getNamespaceOptionLabel ({ name, slug, namespaceID } = {}) {
+      return name || slug || namespaceID
     },
 
-    getModuleOptionLabel (module) {
-      return module.name || module.handle || 'Unnamed Module'
+    getModuleOptionLabel ({ name, handle, moduleID } = {}) {
+      return name || handle || moduleID
     },
 
     getModuleLabel (namespaceLabel) {
