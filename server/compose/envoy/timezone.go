@@ -1,6 +1,7 @@
 package envoy
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cortezaproject/corteza/server/pkg/envoyx"
@@ -8,8 +9,9 @@ import (
 )
 
 // resolveTimezone reads the "timezone" param and returns the loaded location.
-// Returns nil location when no timezone is set or when the zone can't be
-// resolved — values are passed through unchanged instead of failing the export.
+// Returns a nil location when no timezone is set. An unresolvable timezone is
+// reported as an error so the export fails loudly instead of silently skipping
+// the conversion.
 func resolveTimezone(p envoyx.EncodeParams) (*time.Location, error) {
 	tz := cast.ToString(p.Params["timezone"])
 	if tz == "" {
@@ -17,7 +19,7 @@ func resolveTimezone(p envoyx.EncodeParams) (*time.Location, error) {
 	}
 	loc, err := time.LoadLocation(tz)
 	if err != nil {
-		return nil, nil
+		return nil, fmt.Errorf("invalid export timezone %q: %w", tz, err)
 	}
 	return loc, nil
 }
