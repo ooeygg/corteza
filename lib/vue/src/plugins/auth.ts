@@ -350,9 +350,27 @@ export class Auth {
     this.log.info('authorization code received', code)
     const rsp = await this.exchangeCode(code)
 
-    this.log.info('redirecting back to final destination', finalLocation)
+    // Defensively strip the OAuth `code` from the URL we're about to navigate
+    // to — it's a one-shot secret and must not be exposed in the address bar.
+    const cleanFinal = new URL(finalLocation)
+    cleanFinal.searchParams.delete('code')
+    const cleanFinalStr = cleanFinal.toString()
+
+    this.log.info('redirecting back to final destination', cleanFinalStr)
     this.cleanFlags()
-    this.location.assign(finalLocation)
+
+    // Synchronously rewrite the address bar to the clean destination before
+    // navigating. location.assign() only schedules the navigation, so any code
+    // that runs after handle() resolves (e.g. the app.js .then() tail) would
+    // otherwise still see the callback URL with `?code=…` and could race the
+    // pending assign with its own location.replace(), clobbering the redirect
+    // — this is what made record links opened in a new tab end up on
+    // /compose/namespaces.
+    if (typeof window !== 'undefined' && window.history && typeof window.history.replaceState === 'function') {
+      window.history.replaceState(null, '', cleanFinalStr)
+    }
+
+    this.location.assign(cleanFinalStr)
     return rsp
   }
 
