@@ -502,6 +502,7 @@ recordList:
     onErrorSkip: Skip record
     pickModuleField: Pick a module field
     importing: Importing records
+    startFailed: Failed to start import
     success: Import successful
     to: Import to {{modulename}}
     uploadFile: Upload the file you want to import (.csv or JSON format)
