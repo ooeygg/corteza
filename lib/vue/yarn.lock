@@ -792,7 +792,7 @@
     "@babel/helper-string-parser" "^7.25.9"
     "@babel/helper-validator-identifier" "^7.25.9"
 
-"@cortezaproject/corteza-js@^2024.9.9":
+"@cortezaproject/corteza-js@^2024.9.9-hotfix.1":
   version "2024.9.9"
   resolved "https://registry.yarnpkg.com/@cortezaproject/corteza-js/-/corteza-js-2024.9.9.tgz#c4365d54fd6c386f80b3db42c7b6339b19e4c8d5"
   integrity sha512-BPThtLKSE8PPQDpqWcFWXOhdBo147skZioX/o3xLaIQGZ/K+SBSgMwtfKxfneJyaZ4gDn6nGcA8GJZiaY/YtuQ==
