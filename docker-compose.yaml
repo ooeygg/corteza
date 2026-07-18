@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE is required}
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: corteza
+      POSTGRES_USER: corteza
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+
+    volumes:
+      - corteza-postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corteza -d corteza"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+    networks:
+      - corteza-internal
+
+  corteza:
+    image: ${CORTEZA_IMAGE:?CORTEZA_IMAGE is required}
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      DB_DSN: "postgres://corteza:${POSTGRES_PASSWORD}@postgres:5432/corteza?sslmode=disable"
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET is required}
+
+      DOMAIN: ${CORTEZA_DOMAIN:-corteza.vibimine.com}
+      DOMAIN_WEBAPP: ${CORTEZA_DOMAIN:-corteza.vibimine.com}
+
+      HTTP_ADDR: ":80"
+      HTTP_API_ENABLED: "true"
+      HTTP_WEBAPP_ENABLED: "true"
+      HTTP_ENABLE_HEALTHCHECK_ROUTE: "true"
+      HTTP_ENABLE_VERSION_ROUTE: "true"
+
+      HTTP_SSL_TERMINATED: "false"
+      AUTH_SESSION_COOKIE_SECURE: "false"
+
+      STORAGE_PATH: "/data"
+      CORREDOR_ENABLED: "false"
+
+    expose:
+      - "80"
+
+    volumes:
+      - corteza-application-data:/data
+
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://127.0.0.1:80/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    networks:
+      - corteza-internal
+
+volumes:
+  corteza-postgres-data:
+  corteza-application-data:
+
+networks:
+  corteza-internal:

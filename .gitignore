@@ -10,3 +10,12 @@
 .run
 node_modules
 ignore
+
+# Local deployment configuration and backups
+.env
+.env.*
+!.env.example
+
+*.dump
+*.sql
+backups/
