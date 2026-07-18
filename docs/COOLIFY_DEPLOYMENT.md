@@ -14,6 +14,10 @@ The deployment uses these exact production tags:
 - `cortezaproject/corteza:2024.9.9-hotfix.1`
 - `postgres:15.18-bookworm`
 
+These image names are pinned directly in `docker-compose.yaml`. They are not
+Coolify environment variables, which avoids Coolify build-time Compose
+interpolation failures.
+
 Resolved registry digests at the time this deployment was prepared:
 
 - Corteza: `sha256:fe0dc9d21ebd2da5888d5ab26fb374a77e847610c95a5da2bfbdd31d374ae1e1`
@@ -30,8 +34,6 @@ Configure the application as follows:
 
 Set these Coolify environment variables:
 
-- `CORTEZA_IMAGE=cortezaproject/corteza:2024.9.9-hotfix.1`
-- `POSTGRES_IMAGE=postgres:15.18-bookworm`
 - `CORTEZA_DOMAIN=corteza.vibimine.com`
 - `POSTGRES_PASSWORD=<generated secret>`
 - `AUTH_JWT_SECRET=<generated secret>`
@@ -48,7 +50,7 @@ Coolify should discover the `postgres` and `corteza` services. Assign a domain
 only to `corteza`:
 
 ```text
-http://corteza.vibimine.com:80
+http://corteza.vibimine.com
 ```
 
 For `postgres`, leave both **Domain** and **Host port mappings** empty. Remove
@@ -59,7 +61,9 @@ rzdsuosidzrzmy67gr4aotd2.47.195.94.247.sslip.io
 ```
 
 Remove any proxy route to container port 3000. Corteza listens on internal port
-80. Do not add a host port mapping to either service.
+80. Do not add a host port mapping to either service. Let Coolify manage the
+deployment network automatically; do not add a custom Compose network for this
+stack.
 
 ## LAN-only DNS and routing
 
